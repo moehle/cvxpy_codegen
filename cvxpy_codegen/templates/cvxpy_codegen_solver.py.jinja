@@ -1,0 +1,30 @@
+import _cvxpy_codegen_solver as _intf
+import numpy
+
+def cg_solve({%- for p in named_params -%}
+              {{ p.name }},
+              {%- endfor %}):
+
+    {% for p in named_params %}
+    {{ p.name }} = numpy.ascontiguousarray(numpy.asmatrix({{ p.name }}), dtype=float)
+    if {{p.name}}.shape != {{p.size}}:
+        raise TypeError("Parameter {{p.name}} should have shape {{p.size}}, but has shape %s" % str({{p.name}}.shape))
+    {% endfor %}
+
+    vars_dict, stats_dict = _intf.solve({% for p in named_params -%}
+                                        {{ p.name }},
+                                        {%- endfor %})
+
+    # TODO magic numbers
+    s = stats_dict['status']
+    if s == 0:
+        s = 'optimal'
+    if s == 1:
+        s = 'infeasible'
+    if s == 2:
+        s = 'unbounded'
+    if s == 3:
+        s = 'solver error'
+    stats_dict['status'] = s
+
+    return vars_dict, stats_dict

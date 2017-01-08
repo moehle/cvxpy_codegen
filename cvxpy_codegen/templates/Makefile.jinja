@@ -1,0 +1,34 @@
+OPTS = -Wall
+CC = gcc
+LDFLAGS = -Lecos
+CFLAGS = -Wall -g -lm
+INCLUDE = -Iecos/include  -Iecos/external/SuiteSparse_config
+
+test_solver: solver_intf.o codegen.o linop.o param.o test_solver.o ecos/libecos.a
+	$(CC) $(LDFLAGS) $(CFLAGS) solver_intf.o codegen.o linop.o param.o test_solver.o -lecos -o $@
+
+solver_intf.o: solver_intf.c
+	$(CC) $(CFLAGS) $(INCLUDE) -c $<
+
+codegen.o: codegen.c codegen.h
+	$(CC) $(CFLAGS) $(INCLUDE) -c $<
+
+linop.o: linop.c codegen.h
+	$(CC) $(CFLAGS) $(INCLUDE) -c $<
+
+param.o: param.c codegen.h
+	$(CC) $(CFLAGS) $(INCLUDE) -c $<
+
+test_solver.o: test_solver.c codegen.h
+	$(CC) $(CFLAGS) $(INCLUDE) -c $<
+
+ecos/libecos.a:
+	cd ecos && make libecos.a
+
+.PHONY: clean
+clean:
+	cd ecos && make clean
+	rm -rf *.o test_solver
+
+.PHONY: re
+re: clean test_solver

@@ -1,0 +1,74 @@
+/*
+ *  Copyright 2017 Nicholas Moehle
+ *  
+ *  This file is part of CVXPY-CODEGEN.
+ *  
+ *  CVXPY-CODEGEN is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *  
+ *  CVXPY-CODEGEN is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License
+ *  along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+{% import "utils/utils.c.jinja" as u with context %}
+
+
+{% macro index_declare() %}
+void indexatom(long m,
+           long start0, long stop0, long step0,
+           long start1, long stop1, long step1,
+           long *Ap, long *Aj, double *Ax,
+           long *Zp, long *Zj, double *Zx);
+{% endmacro %}
+
+
+{% macro index_define() %}
+void indexatom(long m,
+           long start0, long stop0, long step0,
+           long start1, long stop1, long step1,
+           long *Ap, long *Aj, double *Ax,
+           long *Zp, long *Zj, double *Zx){
+  long i, j, i_new=0, i_new_pp, j_new, p, p2;
+
+  Zp[0] = 0l;
+  for (i=start0; i<stop0; i+=step0){
+    p2 = Ap[i+1];
+    i_new_pp = i_new + 1l;
+    Zp[i_new_pp] = Zp[i_new];
+    for (p=Ap[i]; p<p2; p++){
+      j = Aj[p];
+      if (j>=start1 && j<stop1 && (j-start1) % step1 == 0){
+        j_new = (j-start1) / step1;
+        Zj[Zp[i_new_pp]] = j_new;
+        Zx[Zp[i_new_pp]] = Ax[p];
+        Zp[i_new_pp]++;
+      }
+    }
+    i_new++;
+  }
+}
+{% endmacro %}
+
+
+{% macro index_eval(expr) %}
+indexatom({{ expr.args[0].size[0] }}l,
+{{- expr.data['start0'] }}l,
+{{- expr.data['stop0'] }}l,
+{{- expr.data['step0'] }}l,
+{{- expr.data['start1'] }}l,
+{{- expr.data['stop1'] }}l,
+{{- expr.data['step1'] }}l,
+{{- u.rowptr(expr.args[0]) }},
+{{- u.colidx(expr.args[0]) }},
+{{- u.nzval(expr.args[0])  }},
+{{- u.rowptr(expr) }},
+{{- u.colidx(expr) }},
+{{- u.nzval(expr)  }});
+{% endmacro %}

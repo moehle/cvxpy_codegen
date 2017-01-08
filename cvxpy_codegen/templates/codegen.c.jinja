@@ -1,0 +1,88 @@
+/*
+ *  Copyright 2017 Nicholas Moehle
+ *  
+ *  This file is part of CVXPY-CODEGEN.
+ *  
+ *  CVXPY-CODEGEN is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *  
+ *  CVXPY-CODEGEN is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License
+ *  along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+{% import "atoms/atoms.c.jinja" as atoms with context %}
+{% import "utils/utils.c.jinja" as u with context %}
+{% import 'solvers/'+solver_name+"_intf.c.jinja" as solver with context %}
+#include "codegen.h"
+#include <stdio.h>
+
+
+/* Functions defined in solver interface. */
+void solver_solve(Work *work);
+
+
+/* Function declarations */
+void recover_vars(Work *work, Vars *vars);
+{% if expressions %}
+void fill_param_tree(Params *params, Work *work);
+{% endif %}
+void fill_matrices(Params *params, Work *work);
+void linop_init(Work *work);
+void solver_init(Work *work);
+
+
+/* Initialization function. */
+void cg_init(Work *work){
+    linop_init(work);
+    solver_init(work);
+}
+
+
+/* Main solve function */
+int cg_solve(Params *params, Work *work, Vars *vars){
+
+    printf("TP-2\n");
+
+    {% if expressions %}
+    /* Get values for the internal params */
+    fill_param_tree(params, work);
+
+    {% endif %}
+    /* Fill the data matrices using the parameters */
+    fill_matrices(params, work);
+
+    printf("TP0\n");
+
+    /* Call the solver to solve the problem */
+    solver_solve(work);
+
+    printf("TP1\n");
+
+    /* Get the user-defined variable values */
+    recover_vars(work, vars);
+
+    printf("TP2\n");
+
+    return(work->status);
+}
+
+
+void recover_vars(Work *work, Vars *vars){
+    {% if named_vars %}
+    int i, j;
+    {% endif %}
+    {% for var in named_vars %}
+    for(i=0; i<{{ var.size[0] }}; i++){
+        for(j=0; j<{{ var.size[1] }}; j++){
+            vars->{{ var.name() }}[i][j] = *(work->primal_var + {{ sym_data.var_offsets[var.id] }} + i + {{var.size[0]}}*j);
+        }
+    }
+    {% endfor %}
+}

@@ -1,0 +1,9 @@
+Each Python file returns an ExprData object,
+whose init function has the following signature:
+
+__init__(self, expr,
+         sparsity=None,
+         inplace=False,
+         macro_name=None,
+         work_int=0,
+         work_float=0)

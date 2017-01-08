@@ -1,0 +1,52 @@
+/*
+ *  Copyright 2017 Nicholas Moehle
+ *  
+ *  This file is part of CVXPY-CODEGEN.
+ *  
+ *  CVXPY-CODEGEN is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *  
+ *  CVXPY-CODEGEN is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License
+ *  along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+{% import "utils/utils.c.jinja" as u with context %}
+
+
+{% macro max_entries_declare() -%}
+void max_entries(long nnz, double *Ax, long *Zp, long *Zj, double *Zx);
+{%- endmacro %}
+
+
+{% macro max_entries_define() %}
+void max_entries(long nnz, double *Ax, long *Zp, long *Zj, double *Zx){
+  long i;
+  double x, max = Ax[0];
+  for(i=0; i<nnz; i++){
+    x = Ax[i];
+    if(x > max){
+      max = x;
+    }
+  }
+  Zp[0] = 0;
+  Zp[1] = 1;
+  Zj[0] = 0;
+  Zx[0] = max;
+}
+{% endmacro %}
+
+
+{% macro max_entries_eval(expr) %}
+max_entries({{ expr.args[0].sparsity.nnz }}l, 
+{{-  u.nzval( expr.args[0]) }},
+{{- u.rowptr( expr) }},
+{{- u.colidx( expr) }},
+{{-  u.nzval( expr) }});
+{% endmacro %}

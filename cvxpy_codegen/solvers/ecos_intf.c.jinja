@@ -1,0 +1,122 @@
+/*
+ *  Copyright 2017 Nicholas Moehle
+ *  
+ *  This file is part of CVXPY-CODEGEN.
+ *  
+ *  CVXPY-CODEGEN is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *  
+ *  CVXPY-CODEGEN is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License
+ *  along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+{% import "utils/utils.c.jinja" as u with context %}
+#include "codegen.h"
+#include "ecos.h"
+#include <stdio.h> // TODO
+#include <math.h>
+
+
+{% macro solver_workspace() -%}
+    pwork *solver_work;
+{%- endmacro %}
+
+
+static long soc_sizes{{ u.print_vec(soc_dims) }};
+
+
+/* Initialize ECOS. */
+void solver_init(Work *work){
+
+    /* Zero out the floating point values to avoid numerical difficulties. */
+    long i;
+    // TODO economize here?
+    for (i=0; i<{{  eq_nnz  }}; i++)  work->eq_nzval[i]   = 0;
+    for (i=0; i<{{ leq_nnz  }}; i++)  work->leq_nzval[i]  = 0;
+    for (i=0; i<{{  eq_dim  }}; i++)  work->eq_offset[i]  = 0;
+    for (i=0; i<{{ leq_dim  }}; i++)  work->leq_offset[i] = 0;
+    for (i=0; i<{{ x_length }}; i++)  work->obj_vec[i]    = 0;
+
+    work->solver_work = ECOS_setup({{ x_length }}, {{ cone_dim }}, {{ eq_dim }},
+                                   {{ leq_dim }}, {{ len(soc_dims) }}, soc_sizes, {{ exp_cones }}, 
+                                   work->leq_nzval, work->leq_colptr, work->leq_rowidx,
+                                   work->eq_nzval, work->eq_colptr, work->eq_rowidx,
+                                   work->obj_coeff, work->leq_offset,
+                                   work->eq_offset);
+}
+
+
+/* Solve the problem using ECOS. */
+void solver_solve(Work *work){
+
+    printf("TP1.0\n");
+
+    idxint solver_flag;
+
+    printf("TP1.1\n");
+
+    ECOS_updateData(work->solver_work, work->leq_nzval, work->eq_nzval,
+                     work->obj_coeff, work->leq_offset, work->eq_offset);
+
+    printf("TP1.2\n");
+
+    solver_flag = ECOS_solve(work->solver_work);
+
+    printf("TP1.3\n");
+
+    work->primal_var = work->solver_work->x;
+    work->dual_eq_var = work->solver_work->y;
+    work->dual_ineq_var = work->solver_work->z;
+
+    switch(solver_flag){
+
+        case ECOS_OPTIMAL:
+        case ECOS_OPTIMAL + ECOS_INACC_OFFSET:
+            work->status = CG_OPTIMAL;
+            work->optval = work->solver_work->info->pcost;
+            break;
+
+        case ECOS_PINF:
+        case ECOS_PINF + ECOS_INACC_OFFSET:
+            work->status = CG_INFEASIBLE;
+            work->optval = INFINITY;
+            break;
+            
+        case ECOS_DINF:
+        case ECOS_DINF + ECOS_INACC_OFFSET:
+            work->status = CG_UNBOUNDED;
+            work->optval = -INFINITY;
+            break;
+
+        case ECOS_MAXIT:
+        case ECOS_NUMERICS:
+        case ECOS_OUTCONE:
+        case ECOS_SIGINT:
+        case ECOS_FATAL:
+            work->status = CG_SOLVER_ERR;
+            work->optval = NAN;
+            break;
+
+    }
+
+
+    printf("TP1.4\n");
+} 
+
+
+/* Clean up ECOS memory. */
+void cg_cleanup(Work *work){
+    ECOS_cleanup(work->solver_work, 0);
+}
+
+
+{% macro makefile_target() -%}
+     libecos.a
+{%- endmacro %} 

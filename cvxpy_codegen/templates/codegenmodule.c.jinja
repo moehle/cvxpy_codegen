@@ -1,0 +1,165 @@
+/*
+ *  Copyright 2017 Nicholas Moehle
+ *  
+ *  This file is part of CVXPY-CODEGEN.
+ *  
+ *  CVXPY-CODEGEN is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *  
+ *  CVXPY-CODEGEN is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License
+ *  along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include <Python.h>
+#include <stdio.h>
+#include "amd.h"
+#include "codegen.h"
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#include "numpy/arrayobject.h"
+
+
+static PyObject *solve_wrapper(PyObject *self, PyObject *args){
+
+  /* Input, output, and solver workspaces. */
+  Params params;
+  Work work;
+  Vars vars;
+
+  /* Space for unpacked, user-supplied parameter values. */
+  {% for p in named_params %}
+  PyArrayObject *{{ p.name }};
+  {% endfor %}
+
+  /* Dictionary labels for Stats structure. */
+  char status_str[] = "status";
+  char objective_str[] = "objective";
+
+  /* Space for variables to be returned. */
+  {% if named_vars %}
+  int nd;
+  npy_intp size[2];
+  {% endif  %}
+  {% for v in named_vars %}
+  PyArrayObject *{{ v.name() }};
+  {% endfor %}
+  PyObject *var_dict;
+
+  /* Parse the supplied parameter values. */
+  char parse_str[] = "
+  {%- for p in named_params -%}
+  O
+  {%- endfor -%}
+  ";
+  if (!PyArg_ParseTuple(args, parse_str
+      {%- for p in named_params -%}
+      , &{{ p.name -}}
+      {%- endfor -%}
+      )){
+    return NULL;
+  }
+
+  /* Copy parameter values into the parameter structure. */
+  {% for p in named_params %}
+  memcpy(params.{{ p.name }}, {{ p.name }}->data, {{ p.size[0]*p.size[1] }}*sizeof(double));
+  {% endfor %}
+
+  /* Setup, solve, and clean up. */
+  cg_init(&work);
+  cg_solve(&params, &work, &vars);
+  printf("TP50\n");
+  cg_cleanup(&work);
+  printf("TP51\n");
+
+  /* Convert the variables from the structure into Numpy arrays. */
+  {% for v in named_vars %}
+  nd = 2;
+  {% for i, sz in enumerate(v.size) %}
+  size[{{i}}] = {{sz}};
+  {% endfor %}
+  {{ v.name() }} = PyArray_SimpleNew(nd, size, NPY_DOUBLE);
+  memcpy({{ v.name() }}->data, vars.{{ v.name() }}[0], {{ v.size[0]*v.size[1] }}*sizeof(double));
+  {% endfor %}
+  printf("TP52\n");
+
+
+  {#
+  ///* Build a dictionary mapping the variable name to its Numpy array. */
+  //{% if len(named_vars) > 0 %}
+  //char dict_string[] = "{
+  //{%- for i in range(len(named_vars)-1) -%}
+  //s:O,
+  //{%- endfor -%}
+  //s:O}";
+  //var_dict = Py_BuildValue(dict_string,
+  //{% for v in named_vars[:-1] %}
+  //"{{ v.name() }}", {{ v.name() }},
+  //{% endfor %}
+  //"{{ named_vars[-1].name() }}", {{ named_vars[-1].name() }});
+  //printf("TP53\n");
+  #}
+
+
+  /* Build a dictionary mapping the variable name to its Numpy array. */
+  char dict_string[] = "({
+  {%- if len(named_vars) > 0 -%}
+  {%- for i in range(len(named_vars)-1) -%}
+  s:O,
+  {%- endfor -%}
+  s:O
+  {%- endif -%}
+  },{s:i,s:d})";
+  var_dict = Py_BuildValue(dict_string,
+  {% for v in named_vars %}
+  "{{ v.name() }}", {{ v.name() }},
+  {% endfor %}
+  status_str, work.status, objective_str, work.optval);
+  printf("TP53\n");
+
+
+  /* Release reference to the Numpy arrays. */
+  {% for v in named_vars %}
+  Py_DECREF({{ v.name() }});
+  {% endfor %}
+  printf("TP54\n");
+
+
+  return var_dict;
+
+  // TODO: get statistics for the solution.
+
+}
+
+
+static PyMethodDef CvxpyCodegenSolverMethods[] = {
+  { "solve", solve_wrapper, METH_VARARGS, "Solves the specified optimization problem." },
+  { NULL, NULL, 0, NULL }
+};
+
+
+/* CODE FOR PYTHON 2.7 */
+// TODO
+
+
+/* CODE FOR PYTHON 3.5 */
+
+static struct PyModuleDef CvxpyCodegenSolverModule = {
+  PyModuleDef_HEAD_INIT,
+  "_cvxpy_codegen_solver",   /* name of module */
+  NULL, /* module documentation, may be NULL */
+  -1,       /* size of per-interpreter state of the module,
+               or -1 if the module keeps state in global variables. */
+  CvxpyCodegenSolverMethods
+};
+
+PyMODINIT_FUNC PyInit__cvxpy_codegen_solver(void)
+{
+  import_array();
+  return PyModule_Create(&CvxpyCodegenSolverModule);
+}

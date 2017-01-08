@@ -1,0 +1,130 @@
+{% import "utils/utils.c.jinja" as u with context %}
+{% from 'solvers/'+solver_name+"_intf.c.jinja" import solver_workspace with context %}
+#ifndef CVXPY_CODEGEN
+#define CVXPY_CODEGEN
+
+#include "{{ solver_name }}.h" // TODO needed?
+
+
+/* Exit codes: */
+#define CG_OPTIMAL     (0)
+#define CG_INFEASIBLE  (1)
+#define CG_UNBOUNDED   (2)
+#define CG_SOLVER_ERR  (3)
+
+
+typedef struct params_struct{
+    {% for p in named_params %}
+    double {{ p.name }}[{{ p.size[0] }}][{{ p.size[1] }}];
+    {% endfor %}
+} Params;
+
+
+typedef struct vars_struct{
+    {% for var in named_vars %}
+    double {{ var.name() }}[{{ var.size[0] }}][{{ var.size[1] }}];
+    {% endfor %}
+} Vars;
+
+
+typedef struct work_struct{
+
+    /* Results. */
+    double *primal_var;
+    double *dual_eq_var;
+    double *dual_ineq_var;
+    double optval;
+    int status;  /* Also returned by cg_solve. */
+
+
+    /* Variables used by the solver. */
+    {{ solver_workspace() }}
+
+
+    /* Matrix sparsity patterns. */
+    long *leq_colptr;
+    long *leq_rowidx;
+    long *eq_colptr;
+    long *eq_rowidx;
+
+
+    /* Problem coefficients. */
+    double obj_nzval[{{ obj_coeff.nnz }}];
+    double obj_offset;
+    double obj_vec[{{ x_length }}];
+    double obj_coeff[{{ x_length }}];
+    double eq_nzval[{{ eq_coeff.nnz }}];
+    double eq_offset[{{ eq_dim }}];
+    double leq_nzval[{{ leq_coeff.nnz }}];
+    double leq_offset[{{ cone_dim }}];
+    long solver_flag;
+
+
+    /* Storage for the parameters. */
+    {% for p in named_params %}
+    long    {{ p.name }}_rowptr[{{ p.size[0]+1 }}];
+    long    {{ p.name }}_colidx[{{ p.sparsity.nnz }}];
+    double *{{ p.name }}_nzval;
+
+    {% endfor %}
+    {% if expressions %}
+    /* Storage for intermediate results from expression evaluation. */
+    {% for expr in expressions %}
+    {% if not expr.inplace or expr.make_copy %}
+    long   {{ expr.name }}_rowptr[{{ expr.size[0]+1 }}];
+    long   {{ expr.name }}_colidx[{{ expr.sparsity.nnz }}];
+    double {{ expr.name }}_nzval[{{ expr.sparsity.nnz }}];
+
+    {% endif %}
+    {% endfor %}
+
+    /* Storage for the callback parameters. */
+    {% for cbp in callback_params %}
+    long   {{cbp.cbp_name}}_colptr[{{ cbp.size[1]+1 }}];
+    long   {{cbp.cbp_name}}_rowidx[{{ cbp.sparsity.nnz }}];
+    double {{cbp.cbp_name}}_nzval[{{ cbp.sparsity.nnz }}];
+    {% endfor %}
+    {% endif %}
+
+    /* Storage for integer and double workspaces. */
+    long work_int[{{ work_int }}];
+    double work_double[{{ work_float }}];
+} Work;
+
+
+/* Initializes the workspace.  The pointer 'work' must point
+ * to a (possibly uninitialized) block of memory with enough
+ * space to hold a 'Work' structure.
+ * Depending on the solver used, this function may require
+ * dynamic memory allocation.
+ */
+void cg_init(Work *work);
+
+
+/* Solves the problem.
+ * Requires no dynamic memory allocation (and performs no cleanup.)
+ * Returns an integer exit code, with values defined at the
+ * beginning of this header file.
+ *
+ * INPUTS:
+ * work     - Pointer to a Work workspace that has been initialized
+ *            using the using the 'cg_init' function above.
+ * params   - Pointer to a Params structure with values initialized 
+ *            by the user.
+ *
+ * OUTPUTS:
+ * vars     - Pointer to a Vars structure.  The values in this struct
+ *            are uninitialized on input.  On output, they contain
+ *            the problem solution.
+ */
+int cg_solve(Params *params, Work *work, Vars *vars);
+
+
+/* Deallocates all memory allocated in 'cg_init'.
+ * If, for a given solver, 'cg_init' does not require
+ * dynamic memory allocation, this function does nothing.
+ */
+void cg_cleanup(Work *work);
+
+
+#endif

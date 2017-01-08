@@ -1,0 +1,139 @@
+{#
+{% macro name(expr) %}
+{%- if expr.inplace and not expr.make_copy -%}
+    {{- name(expr.args[0]) -}}
+{%- else -%}
+    {{- expr.name -}}
+{%- endif -%}
+{%- endmacro %}
+#}
+
+
+{#
+{% macro rowptr(expr) %}
+{{- get_namespace(expr) }}{{ name(expr) }}_rowptr
+{%- endmacro %}
+
+
+{% macro colidx(expr) %}
+{{- get_namespace(expr) }}{{ name(expr) }}_colidx
+{%- endmacro %}
+
+
+{% macro nzval(expr) %}
+{{- get_namespace(expr) -}}{{ name(expr) }}_nzval
+{%- endmacro %}
+#}
+
+
+{% macro rowptr(expr) %}
+{{- get_namespace(expr.storage) -}}{{ expr.storage.name }}_rowptr
+{%- endmacro %}
+
+
+{% macro colidx(expr) %}
+{{- get_namespace(expr.storage) -}}{{ expr.storage.name }}_colidx
+{%- endmacro %}
+
+
+{% macro nzval(expr) %}
+{{- get_namespace(expr.storage) -}}{{ expr.storage.name }}_nzval
+{%- endmacro %}
+
+
+{%- macro get_namespace(expr) -%}
+{%- if   expr.type == 'const' -%}
+{%- elif expr.type == 'var' -%}
+     vars->
+{%- else -%}
+     work->
+{%- endif -%}
+{%- endmacro -%}
+
+
+
+{% macro getsize(expr) -%}
+  [{{- expr.size[0] }}][{{ expr.size[1] -}}]
+{%- endmacro %}
+
+
+
+{% macro copy_declare() %}
+void copy(long n, long *Ap, long *Aj, double *Ax, long *Zp, long *Zj, double *Zx);
+{% endmacro %}
+
+
+{% macro copy_define() %}
+void copy(long n, long *Ap, long *Aj, double *Ax, long *Zp, long *Zj, double *Zx){
+  long i, p, p2;
+  for(i=0; i<n; i++){
+    Zp[i] = Ap[i];
+    p2 = Ap[i+1];
+    for(p=Ap[i]; p<p2; p++){
+      Zj[p] = Aj[p];
+      Zx[p] = Ax[p];
+    }
+  }
+  Zp[n] = Ap[n];
+}
+{% endmacro %}
+
+
+{% macro copy_eval(expr) %}
+copy({{ expr.size[0] }},
+     {{- rowptr(expr.args[0]) }},
+     {{- colidx(expr.args[0]) }},
+     {{-  nzval(expr.args[0]) }},
+     {{- rowptr(expr) }},
+     {{- colidx(expr) }},
+     {{-  nzval(expr) }});
+{% endmacro %}
+
+
+
+
+{# gets a pointer to a pointer to the doubles #}
+{% macro ptr( expr ) %}
+{% if expr.size[0]==1 and expr.size[1]==1 %}
+&&
+{% elif expr.size[0]==1 or expr.size[1]==1 %}
+&
+{% endif %}
+{% endmacro %}
+
+
+
+{# TODO
+{% if prefix %}
+    {% if expr.size[0]==1 and expr.size[1]==1 -%}
+&&
+    {%- elif expr.size[0]==1 or expr.size[1]==1 -%}
+&
+    {%- endif %}
+{% endif %}
+#}
+
+  {#
+    {% if expr.size[0]==1 and expr.size[1]==1 %}
+    {% elif expr.size[0]==1 %}
+[{{- expr.size[1] -}}]
+    {% elif expr.size[1]==1 %}
+[{{- expr.size[0] -}}]
+    {% else %}
+  #}
+
+  {#
+    {% endif %}
+  #}
+
+
+{% macro print_vec(vec) %}
+[{{ len(vec) }}] = {
+{%- for x in vec[:-1] -%}
+ {{- x -}}, 
+{%- endfor -%}
+{{- vec[-1] }}}
+{%- endmacro -%}
+
+
+

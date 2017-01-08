@@ -1,0 +1,52 @@
+/*
+ *  Copyright 2017 Nicholas Moehle
+ *  
+ *  This file is part of CVXPY-CODEGEN.
+ *  
+ *  CVXPY-CODEGEN is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *  
+ *  CVXPY-CODEGEN is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License
+ *  along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+{% import "utils/utils.c.jinja" as u with context %}
+
+{% from "atoms/abs.c.jinja" import abs_declare, abs_define, abs_eval with context%}
+{% from "atoms/add.c.jinja" import add_declare, add_define, add_eval with context%}
+{% from "atoms/diag_mat.c.jinja" import diag_mat_declare, diag_mat_define, diag_mat_eval with context%}
+{% from "atoms/diag_vec.c.jinja" import diag_vec_declare, diag_vec_define, diag_vec_eval with context%}
+{% from "atoms/hstack.c.jinja" import hstack_declare, hstack_define, hstack_eval with context%}
+{% from "atoms/index.c.jinja" import index_declare, index_define, index_eval with context%}
+{% from "atoms/max_entries.c.jinja" import max_entries_declare, max_entries_define, max_entries_eval with context%}
+{% from "atoms/mul.c.jinja" import mul_declare, mul_define, mul_eval with context%}
+{% from "atoms/neg.c.jinja" import neg_declare, neg_define, neg_eval with context%}
+{% from "atoms/reshape.c.jinja" import reshape_declare, reshape_define, reshape_eval with context%}
+{% from "atoms/trace.c.jinja" import trace_declare, trace_define, trace_eval with context%}
+{% from "atoms/vstack.c.jinja" import vstack_declare, vstack_define, vstack_eval with context%}
+{# TODO make nicer ^^^ #}
+
+
+{% macro declare(macro_name) %}
+  {{- (macro_name+'_declare') | call_macro() -}}
+{% endmacro %}
+
+
+{% macro define(macro_name) %}
+  {{- (macro_name+'_define') | call_macro() -}}
+{% endmacro %}
+
+
+{% macro eval(expr) %}
+  {%- if expr.make_copy -%}
+  {{- u.copy_eval(expr) -}}
+  {%- endif -%}
+  {{- (expr.macro_name+'_eval') | call_macro(expr) -}}
+{% endmacro %}
