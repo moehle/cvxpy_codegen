@@ -1,4 +1,4 @@
-# cvxpy-codegen
+# CVXPY-CODEGEN
 
 **WARNING:** This tool is still in an early stage of development, and many bugs might still exist.  Consider it an early alpha, and don't use it for safety-critical applications (yet).
 
