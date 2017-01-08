@@ -1,0 +1,17 @@
+cg_build
+
+# PYTHON EXTENSIONS
+*.pyc
+build
+dist
+*.egg
+*.egg-info
+__pycache__
+
+# C EXTENSIONS
+*.o
+*.out
+*.a
+*.so
+
+

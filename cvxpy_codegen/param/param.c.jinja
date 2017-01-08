@@ -1,0 +1,95 @@
+{% import "utils/utils.c.jinja" as u with context %}
+{% import "atoms/atoms.c.jinja" as atoms with context %}
+#include "codegen.h"
+#include <stdio.h>
+
+
+
+{% if constants %}
+/* Stored constant values used to evaluate expressions of parameters */
+{% for c in constants %}
+long   {{ c.name }}_rowptr{{ u.print_vec(c.rowptr) }};
+long   {{ c.name }}_colidx{{ u.print_vec(c.colidx) }};
+double {{ c.name }}_nzval{{ u.print_vec(c.nzval) }};
+
+{% endfor %}
+{% endif %}
+
+{{ u.copy_declare() }} // TODO add logic to python for this
+void dense_structure(long m, long n, long *rowptr, long *colidx);
+{% for expr_name in unique_exprs %}
+  {{- atoms.declare(expr_name) }}
+{% endfor %}
+void transpose(long m, long n,
+               long *Ap, long *Ai, double *Ax,
+               long *Atp, long *Ati, double *Atx);
+
+
+void fill_param_tree(Params *params, Work *work){
+    {% for p in named_params %}
+    dense_structure({{p.size[0]}}, {{p.size[1]}}, {{u.rowptr(p)}}, {{u.colidx(p)}});
+    {{u.nzval(p)}} = &(params->{{ p.name }}[0][0]);
+
+    {% endfor %}
+
+    {% for expr in expressions %}
+    {{ atoms.eval(expr) -}}
+    {% endfor %}
+
+    printf("TP11\n");
+
+    {% for cbp in callback_params %}
+    transpose({{ cbp.size[1] }}, {{ cbp.size[0] }},
+              {{ u.rowptr(cbp) }}, {{ u.colidx(cbp) }}, {{ u.nzval(cbp) }},
+              work->{{cbp.cbp_name}}_colptr, work->{{cbp.cbp_name}}_rowidx, work->{{cbp.cbp_name}}_nzval);
+
+    printf("TP12\n");
+
+    {% endfor %}
+}
+
+
+/* These are all functions of the parameters */
+  {% for expr_name in unique_exprs %}
+    {{- atoms.define(expr_name) }}
+  {% endfor %}
+
+
+
+{{ u.copy_define() }} // TODO add logic to python for this
+void dense_structure(long m, long n, long *rowptr, long *colidx){
+    long i, j;  
+    for(i=0; i<m; i++){
+        rowptr[i] = i*n;
+        for(j=0; j<n; j++){
+            colidx[i * n + j] = j;
+        }
+        rowptr[m] = m*n;
+    }
+}
+
+
+void transpose(long m, long n,
+               long *Ap, long *Ai, double *Ax,
+               long *Atp, long *Ati, double *Atx){
+    long i, j, k, ind;
+
+
+    for (k=0; k<=m; k++)  Atp[k] = 0;
+    for (k=0; k<Ap[n]; k++) Atp[Ai[k]+1]++;
+    for (j=0; j<m; j++) Atp[j+1] += Atp[j];
+
+    for (j=0; j<n; j++){
+        for (k=Ap[j]; k<Ap[j+1]; k++){
+            i = Ai[k];
+            ind = Atp[i];
+            Ati[ind] = j;
+            Atx[ind] = Ax[k];
+            Atp[i]++;
+        }
+    }
+    for (j=m; j>0; j--){
+        Atp[j] = Atp[j-1];
+    }
+    Atp[0] = 0;
+}
