@@ -264,6 +264,29 @@ def zero_pad(mat, new_size, insert_idx):
     return SymMatrix(Ap, Ai, mat.Ax, new_size[0], new_size[1])
 
 
+
+def block_diag(mats):
+    Ap = [0]
+    Ai = []
+    Ax = []
+    m = sum([mat.m for mat in mats])
+    n = sum([mat.n for mat in mats])
+    j = 0
+    for mat in mats:
+        for jm in range(mat.n):
+            Ap += [Ap[-1]]
+            for p in range(mat.Ap[jm], mat.Ap[jm+1]):
+                Ap[j+1] += 1
+                Ai += [mat.Ai[p]]
+                Ax += [mat.Ax[p]]
+            j += 1
+    return SymMatrix(Ap, Ai, Ax, m, n)
+
+
+def zeros(m, n):
+    return SymMatrix([0 for i in range(n+1)], [], [], m, n)
+
+
 class SymMatrixIter():
     def __init__(self, A):
         self.A = A

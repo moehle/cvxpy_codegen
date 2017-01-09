@@ -21,6 +21,7 @@ from cvxpy.lin_ops.lin_utils import get_expr_params
 from cvxpy.expressions.constants.callback_param import CallbackParam
 from cvxpy.expressions.constants.parameter import Parameter
 from cvxpy.expressions.constants.constant import Constant
+from cvxpy.atoms.atom import Atom
 from cvxpy_codegen.atoms.atoms import get_atom_data
 from cvxpy_codegen.param.expr_data import ParamData, ConstData, CbParamData
 from cvxpy_codegen.utils.utils import FILE_SEP, call_macro, DEFAULT_TEMPLATE_VARS
@@ -56,7 +57,7 @@ class ParamHandler():
         self.expr_ids = []
         self.unique_exprs = []
 
-        self.template_vars = dict()
+        self.template_vars = DEFAULT_TEMPLATE_VARS
 
 
     def cbp2sparsity(self): # TODO make this not global
@@ -74,15 +75,15 @@ class ParamHandler():
         work_int = max([data.work_int for data in self.expressions] + [0])
         work_float = max([data.work_float for data in self.expressions] + [0])
 
-        template_vars = {'named_params': self.named_params,
-                         'constants': self.constants,
-                         'callback_params': self.callback_params,
-                         'expressions': self.expressions,
-                         'work_int': work_int,
-                         'work_float': work_float,
-                         'unique_exprs': self.unique_exprs}
+        self.template_vars.update({'named_params': self.named_params,
+                                   'constants': self.constants,
+                                   'callback_params': self.callback_params,
+                                   'expressions': self.expressions,
+                                   'work_int': work_int,
+                                   'work_float': work_float,
+                                   'unique_exprs': self.unique_exprs})
 
-        return template_vars
+        return self.template_vars
 
 
 
@@ -137,10 +138,6 @@ class ParamHandler():
         env.filters['call_macro'] = call_macro
         param_c = env.get_template('param/param.c.jinja')
 
-        template_vars = dict()
-        template_vars.update(self.template_vars)
-        template_vars.update(DEFAULT_TEMPLATE_VARS)
-
         f = open(target_dir + FILE_SEP + 'param.c', 'w')
-        f.write(param_c.render(template_vars))
+        f.write(param_c.render(self.template_vars))
         f.close()

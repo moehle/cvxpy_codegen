@@ -67,8 +67,11 @@ static PyObject *solve_wrapper(PyObject *self, PyObject *args){
 
   /* Copy parameter values into the parameter structure. */
   {% for p in named_params %}
-  memcpy(params.{{ p.name }}, {{ p.name }}->data, {{ p.size[0]*p.size[1] }}*sizeof(double));
+  // memcpy(params.{{ p.name }}, {{ p.name }}->data, {{ p.size[0]*p.size[1] }}*sizeof(double));
+  memcpy(params.{{ p.name }}, PyArray_DATA({{ p.name }}), {{ p.size[0]*p.size[1] }}*sizeof(double));
+  printf("{{p.name}}[0] = %f\n", params.{{p.name}}[0][0]);
   {% endfor %}
+
 
   /* Setup, solve, and clean up. */
   cg_init(&work);
@@ -83,8 +86,9 @@ static PyObject *solve_wrapper(PyObject *self, PyObject *args){
   {% for i, sz in enumerate(v.size) %}
   size[{{i}}] = {{sz}};
   {% endfor %}
-  {{ v.name() }} = PyArray_SimpleNew(nd, size, NPY_DOUBLE);
-  memcpy({{ v.name() }}->data, vars.{{ v.name() }}[0], {{ v.size[0]*v.size[1] }}*sizeof(double));
+  {{ v.name() }} = (PyArrayObject*) PyArray_SimpleNew(nd, size, NPY_DOUBLE);
+  // memcpy({{ v.name() }}->data, vars.{{ v.name() }}[0], {{ v.size[0]*v.size[1] }}*sizeof(double));
+  memcpy(PyArray_DATA({{ v.name() }}), vars.{{ v.name() }}[0], {{ v.size[0]*v.size[1] }}*sizeof(double));
   {% endfor %}
   printf("TP52\n");
 
@@ -123,8 +127,10 @@ static PyObject *solve_wrapper(PyObject *self, PyObject *args){
   printf("TP53\n");
 
 
+
   /* Release reference to the Numpy arrays. */
   {% for v in named_vars %}
+  // printf("{{v.name()}}[0] = %f\n", {{v.name()}}->data[0]);
   Py_DECREF({{ v.name() }});
   {% endfor %}
   printf("TP54\n");

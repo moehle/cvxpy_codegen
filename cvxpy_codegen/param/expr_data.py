@@ -52,7 +52,6 @@ class ParamData(ExprData):
         super(ParamData, self).__init__(expr)
         self.type = 'param'
         self.name = expr.name()
-        print('THIS')
         if expr.value is None:
             self.value = np.random.randn(*expr.size)
         else:
