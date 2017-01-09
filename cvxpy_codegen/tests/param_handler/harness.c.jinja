@@ -17,16 +17,38 @@
  *  along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 {% import "utils/utils.c.jinja" as u with context %}
+{% from 'param/param.c.jinja' import param_workspace with context %}
+
 #include "codegen.h"
 #include <stdio.h>
+
+
+void json_vector_long(long *x, long len){
+    long i;
+    printf("[");
+    for (i=0; i<len-1; i++){
+        printf("%ld,", x[i]);
+    }
+    printf("%ld]", x[len-1]);
+}
+
+void json_vector_double(double *x, long len){
+    long i;
+    printf("[");
+    for (i=0; i<len-1; i++){
+        printf("%9.9lf,", x[i]);
+    }
+    printf("%9.9lf]", x[len-1]);
+}
+
 
 
 int main(){
     
     Params params;
     Work work;
-    Vars vars;
 
     {% for p in named_params %}
       {%- if p.is_scalar -%}
@@ -48,18 +70,25 @@ int main(){
       {%- endif -%};
     {% endfor %}
 
-    cg_init(&work);
-    cg_solve(&params, &work, &vars);
-    cg_cleanup(&work); 
 
-    {% for var in named_vars %}
-      {% for i in range(var.size[0]) %}
-        {% for j in range(var.size[1]) %}
-    printf("{{ var.name() }}[{{ i }}][{{ j }}] = %f\n", vars.{{ var.name() }}[{{ i }}][{{ j }}]);
-        {% endfor %}
-      {% endfor %}
+    fill_param_tree(&params, &work);
+
+
+    printf("{");
+    {% for idx, cbp in enumerate(callback_params) %}
+    {% if idx > 0 %}
+    printf(",");
+    {% endif %}
+    printf("\"{{cbp.name}}\":{\"colptr\":");
+    json_vector_long(work.{{cbp.cbp_name}}_colptr, {{cbp.size[1]+1}});
+    printf(",\"rowidx\":");
+    json_vector_long(work.{{cbp.cbp_name}}_rowidx, {{cbp.sparsity.nnz}});
+    printf(",\"nzval\":");
+    json_vector_double(work.{{cbp.cbp_name}}_nzval, {{cbp.sparsity.nnz}});
+    printf("}");
+
     {% endfor %}
-
+    printf("}");
 
     return(0);
 }

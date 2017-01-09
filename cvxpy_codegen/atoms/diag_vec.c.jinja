@@ -36,7 +36,7 @@ void diag_vec(long m,
   for (i=0; i<=m; i++)  Zp[i] = Ap[i];
   for (i=0; i<m; i++){
     p2 = Ap[i+1];
-    for (p=0; p<p2; p++){
+    for (p=Ap[i]; p<p2; p++){
       Zj[p] = i;
       Zx[p] = Ax[p];
     }

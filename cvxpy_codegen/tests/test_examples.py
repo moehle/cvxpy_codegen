@@ -18,7 +18,7 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import unittest
-import cvxpy_codegen.tests.test_utils as tu
+import cvxpy_codegen.tests.utils as tu
 import cvxpy_codegen as cg
 import numpy as np
 
@@ -94,6 +94,7 @@ class TestMpc(tu.CodegenTestCase):
         self.assertAlmostEqualMatrices(self.x_opt, var_dict['x'])
     
 
+    # TODO FAILS, probably due to ECOS..
     #def test_mpc_exp1norm(self):
     #    test_name = '_test_mpc_exp1norm'
     #    self.mpc_setup(objective='exp1norm')

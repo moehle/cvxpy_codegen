@@ -18,7 +18,7 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import unittest
-import cvxpy_codegen.tests.test_utils as tu
+import cvxpy_codegen.tests.utils as tu
 import cvxpy_codegen as cg
 import numpy as np
 import cvxpy_codegen.linop_sym.sym_matrix as sym

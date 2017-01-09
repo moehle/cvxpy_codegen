@@ -18,26 +18,32 @@
  */
 
 {% import "utils/utils.c.jinja" as u with context %}
+{% from 'param/param.c.jinja' import param_workspace with context %}
 
 
-{% macro abs_declare() -%}
-void absatom(long nnz, double *Ax);
-{%- endmacro %}
+typedef struct params_struct{
+    {% for p in named_params %}
+    double {{ p.name -}}
+        {%- if p.is_scalar -%}
+        {%- elif p.is_column -%}
+            [{{ p.size[0] }}]
+        {%- elif p.is_row -%}
+            [{{ p.size[1] }}]
+        {%- else -%}
+            [{{ p.size[0] }}][{{ p.size[1] }}]
+        {%- endif -%};
+    {% endfor %}
 
 
-{% macro abs_define() %}
-void absatom(long nnz, double *Ax){
-  long p;
-  double x;
-  for(p=0; p<nnz; p++){
-    x = Ax[p];
-    Ax[p] = x>0 ? x : -x;
-  }
-}
-{% endmacro %}
+
+} Params;
 
 
-{% macro abs_eval(expr) %}
-absatom({{ expr.sparsity.nnz }}l,
-{{- u.nzval(expr) }});
-{% endmacro %}
+typedef struct work_struct{
+
+    {{ param_workspace() }}
+
+    /* Storage for integer and double workspaces. */
+    long work_int[{{ work_int }}];
+    double work_double[{{ work_float }}];
+} Work;

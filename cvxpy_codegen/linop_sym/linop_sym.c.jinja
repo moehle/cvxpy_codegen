@@ -42,9 +42,17 @@ long leq_rowidx{{ u.print_vec(leq_coeff.indices) }};
        ( {{ print_sym_expr(expr.args[0]) }} + {{ print_sym_expr(expr.args[1]) }} )
     {%- elif isinstance(expr, SymParam) -%}
        {%- if isinstance(expr.param, CallbackParam) -%}
-         work->{{ expr.param.name() }}_nzval[{{ expr.nz_idx}}]
+          work->{{ expr.param.name() }}_nzval[{{ expr.nz_idx}}]
        {%- else -%}
-         params->{{ expr.param.name() }}[{{ expr.idx[0] }}][{{expr.idx[1] }}]
+          {%- if expr.param.size == (1,1) -%}
+              params->{{ expr.param.name() }}
+          {%- elif expr.param.size[1] == 1 -%}
+              params->{{ expr.param.name() }}[{{ expr.idx[0] }}]
+          {%- elif expr.param.size[0] == 1 -%}
+              params->{{ expr.param.name() }}[{{ expr.idx[1] }}]
+          {%- else -%}
+              params->{{ expr.param.name() }}[{{ expr.idx[0] }}][{{expr.idx[1] }}]
+          {%- endif -%}
        {%- endif -%}
     {%- elif isinstance(expr, SymConst) -%}
        {{ expr.value }}

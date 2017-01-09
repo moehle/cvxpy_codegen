@@ -58,6 +58,9 @@ class ParamData(ExprData):
             self.value = expr.value
         self.var_ids = [CONST_ID]
         self.mem_name = self.name
+        self.is_scalar = True if self.size == (1,1) else False
+        self.is_column = True if self.size[1] == 1 else False
+        self.is_row    = True if self.size[0] == 1 else False # TODO add tests for these
         
     @property
     def storage(self):
@@ -117,8 +120,10 @@ class AtomData(ExprData):
         self.inplace = inplace
         self.work_int = work_int
         self.work_float = work_float
-        has_c = any([type(a)=='const' or type(a)=='param' for a in arg_data])
-        if inplace and has_c:
+        has_const_or_param = \
+                any([type(a)=='const' or type(a)=='param' for a in arg_data])
+        #if inplace and has_const_or_param: # This condition is too weak (ie, wrong)
+        if inplace: # TODO this condition is too strong (ie, conservative)
             self.make_copy = True
         else:
             self.make_copy = False

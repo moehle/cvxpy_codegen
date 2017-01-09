@@ -69,7 +69,7 @@ static PyObject *solve_wrapper(PyObject *self, PyObject *args){
   {% for p in named_params %}
   // memcpy(params.{{ p.name }}, {{ p.name }}->data, {{ p.size[0]*p.size[1] }}*sizeof(double));
   memcpy(params.{{ p.name }}, PyArray_DATA({{ p.name }}), {{ p.size[0]*p.size[1] }}*sizeof(double));
-  printf("{{p.name}}[0] = %f\n", params.{{p.name}}[0][0]);
+  // printf("{{p.name}}[0] = %f\n", params.{{p.name}}[0][0]);
   {% endfor %}
 
 

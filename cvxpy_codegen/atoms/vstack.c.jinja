@@ -39,7 +39,6 @@ void vstack(long mA, long mB,
   for (i=0; i<mA; i++){
     p2 = Ap[i+1];
     Zp[i+1] = p2;
-    printf("Zp[%ld] = %ld\n", i+1, Zp[i+1]);
     for (p=Ap[i]; p<p2; p++){
       Zj[count]   = Aj[p];
       Zx[count++] = Ax[p];
@@ -48,7 +47,6 @@ void vstack(long mA, long mB,
   for (i=0; i<mB; i++){
     p2 = Bp[i+1];
     Zp[mA+i+1] = nnz_A + p2;
-    printf("Zp[%ld] = %ld\n", mA+i+1, Zp[mA+i+1]);
     for (p=Bp[i]; p<p2; p++){
       Zj[count]   = Bj[p];
       Zx[count++] = Bx[p];
