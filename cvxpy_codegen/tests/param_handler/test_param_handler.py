@@ -104,7 +104,10 @@ class TestParamHandler(tu.CodegenTestCase):
         self._test_expr(self.param_mn * self.param_np)
         self._test_expr(self.param_mn * self.const_np)
         self._test_expr(self.param_mn * self.param_n1)
-        #self._test_expr(self.param_mn * self.param_11) # TODO FAILS: need scalar-matrix
+        self._test_expr(self.param_mn * self.param_11)
+        self._test_expr(self.param_11 * self.param_mn)
+        self._test_expr(self.const_mn * self.param_11)
+        self._test_expr(self.const_11 * self.param_mn)
 
     def test_neg(self):
         self._test_expr(-self.param_mn)

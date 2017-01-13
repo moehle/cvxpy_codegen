@@ -30,6 +30,12 @@ def getdata_index(expr, arg_data):
     stop1 = arg_data[0].sparsity.shape[1] if slices[1].stop==None else slices[1].stop
     step0 = 1 if slices[0].step==None else slices[0].step
     step1 = 1 if slices[1].step==None else slices[1].step
+
+    if start0 < 0 or stop0 >= arg_data[0].size[0]:
+        raise ValueError("First index out of bounds")
+    if stort1 < 0 or stop1 >= arg_data[0].size[0]:
+        raise ValueError("Second index out of bounds")
+
     data = {'start0' : start0,
             'stop0'  : stop0,
             'step0'  : step0,

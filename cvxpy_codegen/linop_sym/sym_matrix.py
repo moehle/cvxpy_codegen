@@ -252,8 +252,73 @@ def diag(A):
     return SymMatrix(Bp, Bi, Bx, m, m)
 
 
+def transpose(A):
+    Atp = [0] * (A.m+1)
+    Ati = [0] * A.nnz
+    Atx = [0] * A.nnz
 
-def kron(A, B):
+    for j in range(A.n):
+        for p in range(A.Ap[j], A.Ap[j+1]):
+            Atp[A.Ai[p]+1] += 1
+    for i in range(A.m):
+        Atp[i+1] += Atp[i]
+
+    for j in range(A.n):
+        for p in range(A.Ap[j], A.Ap[j+1]):
+            i = A.Ai[p]
+            Ati[Atp[i]] = j
+            Atx[Atp[i]] = A.Ax[p]
+            Atp[i] += 1
+    for i in range(A.m, 0, -1):
+        Atp[i] = Atp[i-1]
+    Atp[0] = 0
+
+    return SymMatrix(Atp, Ati, Atx, A.n, A.m)
+
+
+
+
+
+def kron(B, A):
+    n = A.n * B.n
+    m = A.m * B.m
+    nnz_Z = A.nnz * B.nnz
+
+    Zp = [0] * (n+1)
+    Zi = [0] * nnz_Z
+    Zx = [0] * nnz_Z
+    pZ = 0
+    # TODO could be more efficient..
+    for jB in range(B.n):
+        for pB in range(B.Ap[jB], B.Ap[jB+1]):
+            iB = B.Ai[pB]
+            for jA in range(A.n):
+                jZ = jA + A.n*jB
+                for pA in range(A.Ap[jA], A.Ap[jA+1]):
+                    Zp[jZ+1] += 1
+    for jZ in range(n):
+        Zp[jZ+1] += Zp[jZ]
+
+
+    for jB in range(B.n):
+        for pB in range(B.Ap[jB], B.Ap[jB+1]):
+            iB = B.Ai[pB]
+            for jA in range(A.n):
+                jZ = jA + A.n*jB
+                for pA in range(A.Ap[jA], A.Ap[jA+1]):
+                    iA = A.Ai[pA]
+                    iZ = iA + A.m*iB
+                    Zi[Zp[jZ]] = iZ
+                    Zx[Zp[jZ]] = A.Ax[pA] * B.Ax[pB]
+                    Zp[jZ] += 1
+    for jZ in range(n, 0, -1):
+        Zp[jZ] = Zp[jZ-1]
+    Zp[0] = 0
+
+    return SymMatrix(Zp, Zi, Zx, m, n)
+
+
+def eye(n):
     return NotImplemented
 
 
@@ -321,6 +386,9 @@ def block_diag(mats):
 
 def zeros(m, n):
     return SymMatrix([0 for i in range(n+1)], [], [], m, n)
+
+
+
 
 
 class SymMatrixIter():

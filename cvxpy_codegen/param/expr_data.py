@@ -110,7 +110,8 @@ class ConstData(ExprData):
 class AtomData(ExprData):
     def __init__(self, expr, arg_data, 
                  sparsity=None, inplace=False, macro_name=None,
-                 work_int=0, work_float=0, size=None, data=None):
+                 work_int=0, work_float=0, size=None, data=None,
+                 copy_arg=0):
         super(AtomData, self).__init__(expr, arg_data, sparsity=sparsity)
         self.type = 'expr'
         self.name = 'expr%d' % EXPR_COUNT.get_count()
@@ -118,6 +119,7 @@ class AtomData(ExprData):
            self.size = size
         self.macro_name = macro_name
         self.inplace = inplace
+        self.copy_arg = copy_arg # If self.make_copy is True, copy this argument.
         self.work_int = work_int
         self.work_float = work_float
         has_const_or_param = \
@@ -132,7 +134,7 @@ class AtomData(ExprData):
     @property
     def storage(self):
         if self.inplace and not self.make_copy:
-            return self.args[0].storage
+            return self.args[self.copy_arg].storage
         else:
             return self
 

@@ -87,60 +87,70 @@ class TestLinopHandler(tu.CodegenTestCase):
         self._test_expr(cg.sum_entries(self.var_mn + self.const_mn))
     
     def test_mul(self):
-        #self._test_expr(cg.sum_entries(self.var_mn * self.param_np)) # TODO FAILS
+        self._test_expr(cg.sum_entries(self.var_mn * self.param_np)) # TODO FAILS
         self._test_expr(cg.sum_entries(self.var_mn * self.const_np))
         self._test_expr(cg.sum_entries(self.param_mn * self.var_np))
         self._test_expr(cg.sum_entries(self.const_mn * self.var_np))
     
-    #def test_mul(self):
-    #    self._test_expr(cg.sum_entries(cg.mul_elemwise(self.param_mn, self.var_mn)))
-    #    self._test_expr(cg.sum_entries(cg.mul_elemwise(self.const_mn, self.var_mn)))
-    #
-    #def test_mul_elem(self):
-    #    self._test_expr(cg.sum_entries(self.const_np * self.var_11))
-    #    self._test_expr(cg.sum_entries(self.var_11 * self.const_np))
-    #    self._test_expr(cg.sum_entries(self.var_mn * self.const_11))
-    #    self._test_expr(cg.sum_entries(self.var_11 * self.param_np))
-    #    self._test_expr(cg.sum_entries(self.var_mn * self.param_11))
-    #
-    #def test_div_elem(self):
-    #    self._test_expr(cg.sum_entries(self.var_11 / self.const_11))
-    #    self._test_expr(cg.sum_entries(self.var_mn / self.const_11))
-    #    self._test_expr(cg.sum_entries(self.var_11 / self.param_11))
-    #    self._test_expr(cg.sum_entries(self.var_mn / self.param_11))
-    #
-    #def test_neg(self):
-    #    self._test_expr(cg.sum_entries(-self.var_mn))
-    #    self._test_expr(cg.sum_entries(self.param_mn - self.var_mn))
-    #    self._test_expr(cg.sum_entries(self.const_mn - self.var_mn))
-    #
-    #def test_index(self):
-    #    self._test_expr(cg.sum_entries(self.var_mn[2:13:2,2:8]))
-    #    self._test_expr(cg.sum_entries(self.var_n1[2:13:2]))
-    #
-    #def test_diff(self):
-    #    self._test_expr(cg.sum_entries(cg.diff(self.var_n1)))
-    #    self._test_expr(cg.sum_entries(cg.diff(self.var_mn)))
-    #
-    #def test_hstack(self):
-    #    self._test_expr(cg.sum_entries(
-    #            cg.hstack(self.var_n1, self.var_np, self.var_nn)))
-    #    self._test_expr(cg.sum_entries(
-    #            cg.hstack(self.var_n1, self.const_np, self.param_nn)))
-    #
-    #def test_vstack(self):
-    #    self._test_expr(cg.sum_entries(
-    #            cg.vstack(self.var_1n, self.var_mn, self.var_nn)))
-    #    self._test_expr(cg.sum_entries(
-    #            cg.vstack(self.var_1n, self.const_mn, self.param_nn)))
-    #
-    #def test_transpose(self):
-    #    self._test_expr(cg.sum_entries(self.var_mn.T))
-    #
-    #def test_upper_tri(self):
-    #    self._test_expr(cg.sum_entries(self.var_nn))
-    #    self._test_expr(cg.sum_entries(self.var_nn + self.const_nn))
-    #    self._test_expr(cg.sum_entries(self.var_nn + self.param_nn))
+    def test_mul(self):
+        self._test_expr(cg.sum_entries(cg.mul_elemwise(self.param_mn, self.var_mn)))
+        self._test_expr(cg.sum_entries(cg.mul_elemwise(self.const_mn, self.var_mn)))
+    
+    def test_mul_elem(self):
+        self._test_expr(cg.sum_entries(self.const_np * self.var_11))
+        self._test_expr(cg.sum_entries(self.var_11 * self.const_np))
+        self._test_expr(cg.sum_entries(self.var_mn * self.const_11))
+        self._test_expr(cg.sum_entries(self.var_11 * self.param_np))
+        self._test_expr(cg.sum_entries(self.var_mn * self.param_11))
+    
+    def test_div_elem(self):
+        self._test_expr(cg.sum_entries(self.var_11 / self.const_11))
+        self._test_expr(cg.sum_entries(self.var_mn / self.const_11))
+        self._test_expr(cg.sum_entries(self.var_11 / self.param_11))
+        self._test_expr(cg.sum_entries(self.var_mn / self.param_11))
+    
+    def test_neg(self):
+        self._test_expr(cg.sum_entries(-self.var_mn))
+        self._test_expr(cg.sum_entries(self.param_mn - self.var_mn))
+        self._test_expr(cg.sum_entries(self.const_mn - self.var_mn))
+    
+    def test_trace(self):
+        self._test_expr(cg.trace(self.var_nn))
+        self._test_expr(cg.trace(self.var_11))
+    
+    def test_transpose(self):
+        self._test_expr(cg.sum_entries(cg.trace(self.var_mn)))
+    
+    def test_reshape(self):
+        self._test_expr(cg.sum_entries(cg.reshape(self.var_mn, n, m)))
+    
+    def test_index(self):
+        self._test_expr(cg.sum_entries(self.var_mn[2:13:2,2:8]))
+        self._test_expr(cg.sum_entries(self.var_n1[2:13:2]))
+    
+    def test_diff(self):
+        self._test_expr(cg.sum_entries(cg.diff(self.var_n1)))
+        self._test_expr(cg.sum_entries(cg.diff(self.var_mn)))
+    
+    def test_hstack(self):
+        self._test_expr(cg.sum_entries(
+                cg.hstack(self.var_n1, self.var_np, self.var_nn)))
+        self._test_expr(cg.sum_entries(
+                cg.hstack(self.var_n1, self.const_np, self.param_nn)))
+    
+    def test_vstack(self):
+        self._test_expr(cg.sum_entries(
+                cg.vstack(self.var_1n, self.var_mn, self.var_nn)))
+        self._test_expr(cg.sum_entries(
+                cg.vstack(self.var_1n, self.const_mn, self.param_nn)))
+    
+    def test_transpose(self):
+        self._test_expr(cg.sum_entries(self.var_mn.T))
+    
+    def test_upper_tri(self):
+        self._test_expr(cg.sum_entries(self.var_nn))
+        self._test_expr(cg.sum_entries(self.var_nn + self.const_nn))
+        self._test_expr(cg.sum_entries(self.var_nn + self.param_nn))
     
     
 

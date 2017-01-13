@@ -111,6 +111,22 @@ class TestSymMatrix(unittest.TestCase):
         self.assertAlmostEqualMatrices(test_value, true_value)
         
 
+    def test_kron(self):
+        const_mn = sp.rand(m, n, dens)
+        const_np = sp.rand(m, p, dens)
+        true_value = sp.csc_matrix(sp.kron(const_mn, const_np))
+        test_value = sym.kron(sym.as_sym_matrix(const_mn),
+                              sym.as_sym_matrix(const_np)).value
+        self.assertAlmostEqualMatrices(test_value, true_value)
+        
+
+    def test_kron(self):
+        const_mn = sp.rand(m, n, dens)
+        true_value = sp.csc_matrix(const_mn.T)
+        test_value = sym.transpose(sym.as_sym_matrix(const_mn)).value
+        self.assertAlmostEqualMatrices(test_value, true_value)
+        
+
     def test_reciprocals(self):
         const_mn = sp.csc_matrix(sp.rand(n,n, dens))
         new_data = 1.0 / const_mn.data

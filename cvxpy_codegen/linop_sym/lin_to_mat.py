@@ -361,13 +361,16 @@ def rmul_mat(lin_op):
     """
     constant = const_mat(lin_op.data)
     if isinstance(constant, sym.SymMatrix):
-        raise TypeError('Right multiplication of variables by parameters not currently supported') # TODO
-    # Scalars don't need to be replicated.
-    if not intf.is_scalar(constant):
-        # Matrix is the kronecker product of constant.T and identity.
-        # Each column in the product is a linear combination of the
-        # columns of the left hand multiple.
-        constant = sp.kron(constant.T, sp.eye(lin_op.size[0])).tocsc()
+        sym_eye = sym.as_sym_matrix(sp.csc_matrix(sp.eye(lin_op.size[0])))
+        constant = sym.kron(sym.transpose(constant), sym_eye)
+                           
+    else:
+        # Scalars don't need to be replicated.
+        if not intf.is_scalar(constant):
+            # Matrix is the kronecker product of constant.T and identity.
+            # Each column in the product is a linear combination of the
+            # columns of the left hand multiple.
+            constant = sp.kron(constant.T, sp.eye(lin_op.size[0])).tocsc()
     return [constant]
 
 def index_mat(lin_op):

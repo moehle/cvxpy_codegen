@@ -81,9 +81,9 @@ void copy(long n, long *Ap, long *Aj, double *Ax, long *Zp, long *Zj, double *Zx
 
 {% macro copy_eval(expr) %}
 copy({{ expr.size[0] }},
-     {{- rowptr(expr.args[0]) }},
-     {{- colidx(expr.args[0]) }},
-     {{-  nzval(expr.args[0]) }},
+     {{- rowptr(expr.args[expr.copy_arg]) }},
+     {{- colidx(expr.args[expr.copy_arg]) }},
+     {{-  nzval(expr.args[expr.copy_arg]) }},
      {{- rowptr(expr) }},
      {{- colidx(expr) }},
      {{-  nzval(expr) }});
