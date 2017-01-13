@@ -2,9 +2,9 @@
 
 **WARNING:** This tool is still in an early stage of development, and many bugs might still exist.  Consider it an early alpha, and don't use it for safety-critical applications (yet).
 
-cvxpy-codegen generates embedded C code for solving convex optimization problems.  It allows the user to specify a family of convex optimization problems at a high abstraction level using Python, and then solve instances of this problem family in C (possibly on an embedded microcontroller.) CVXPY-CODEGEN uses CVXPY as a front end for specifying the convex optimization problem.  The generated C code calls an embedded solver (currently ECOS) to solve the problem.
+CVXPY-CODEGEN generates embedded C code for solving convex optimization problems.  It allows the user to specify a family of convex optimization problems at a high abstraction level using CVXPY in Python, and then solve instances of this problem family in C (possibly on an embedded microcontroller).  The generated C code is essentially a wrapper for embedded optimization solvers (currently only ECOS) for the specified family of problems.
 
-Abstractly, cvxpy-codegen addresses parametrized *families* of convex optimization problems of the form:
+Abstractly, CVXPY-CODEGEN addresses parametrized *families* of convex optimization problems of the form:
 
     minimize    f_0(x, a)
     subject to  f_i(x, a) <= 0, for i = 1,...,m.
@@ -37,3 +37,6 @@ If you'd rather not use random data, you can specify the data to be used by addi
 before generating the C code in Python. (Presumably you would replace the random matrices with whatever values you'd like.)
 
 The directory also contains a Python wrapper, so you can use your embedded C solver in Python as a C extension. (The default name of this extension is `cvxpy_codegen_solver`.)
+
+#### Limitations
+Due to the current solver, and the way CVXPY works, it's not possible to use a parameter as the positive semidefinite matrix in the `quad_form` atom. (As a partial fix, we *can* use `sum_squares(L*x)`, using the Cholesky factor `L` as a parameter instead of the positive semidefinite matrix itself.)
