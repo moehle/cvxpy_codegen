@@ -3,7 +3,7 @@
 #include "codegen.h"
 #include <stdio.h>
 
-{% macro param_workspace() %}
+{% macro param_handler_workspace() %}
     /* Storage for the parameters. */
     {% for p in named_params %}
     long    {{ p.name }}_rowptr[{{ p.size[0]+1 }}];
@@ -42,7 +42,7 @@ double {{ c.name }}_nzval{{ u.print_vec(c.nzval) }};
 {% endif %}
 
 {{ u.copy_declare() }} // TODO add logic to python for this
-void dense_structure(long m, long n, long *rowptr, long *colidx);
+void init_dense_sparsity(long m, long n, long *rowptr, long *colidx);
 {% for expr_name in unique_exprs %}
   {{- atoms.declare(expr_name) }}
 {% endfor %}
@@ -53,7 +53,7 @@ void transpose(long m, long n,
 
 void fill_param_tree(Params *params, Work *work){
     {% for p in named_params %}
-    dense_structure({{p.size[0]}}, {{p.size[1]}}, {{u.rowptr(p)}}, {{u.colidx(p)}});
+    init_dense_sparsity({{p.size[0]}}, {{p.size[1]}}, {{u.rowptr(p)}}, {{u.colidx(p)}});
     {{u.nzval(p)}} = &(params->{{ p.name -}}
         {%- if p.is_scalar -%}
         {%- elif p.is_column or p.is_row -%}
@@ -68,28 +68,25 @@ void fill_param_tree(Params *params, Work *work){
     {{ atoms.eval(expr) -}}
     {% endfor %}
 
-    // printf("TP11\n");
-
     {% for cbp in callback_params %}
     transpose({{ cbp.size[1] }}, {{ cbp.size[0] }},
               {{ u.rowptr(cbp) }}, {{ u.colidx(cbp) }}, {{ u.nzval(cbp) }},
               work->{{cbp.cbp_name}}_colptr, work->{{cbp.cbp_name}}_rowidx, work->{{cbp.cbp_name}}_nzval);
-
-    // printf("TP12\n");
 
     {% endfor %}
 }
 
 
 /* These are all functions of the parameters */
-  {% for expr_name in unique_exprs %}
-    {{- atoms.define(expr_name) }}
-  {% endfor %}
-
+{% for expr_name in unique_exprs %}
+  {{- atoms.define(expr_name) }}
+{% endfor %}
 
 
 {{ u.copy_define() }} // TODO add logic to python for this
-void dense_structure(long m, long n, long *rowptr, long *colidx){
+
+
+void init_dense_sparsity(long m, long n, long *rowptr, long *colidx){
     long i, j;  
     for(i=0; i<m; i++){
         rowptr[i] = i*n;

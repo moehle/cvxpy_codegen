@@ -18,29 +18,26 @@
  */
 
 {% import "utils/utils.c.jinja" as u with context %}
-{% from 'param/param.c.jinja' import param_handler_workspace with context %}
+{% from 'linop_sym/linop_sym.c.jinja' import linop_handler_workspace with context %}
 
 
 typedef struct params_struct{
-    {% for p in named_params %}
-    double {{ p.name -}}
-        {%- if p.is_scalar -%}
-        {%- elif p.is_column -%}
+    {% for p in params %}
+    double {{ p.name() -}}
+        {%- if p.size == (1,1) -%}
+        {%- elif p.size[1] == 1 -%}
             [{{ p.size[0] }}]
-        {%- elif p.is_row -%}
+        {%- elif p.size[0] == 1 -%}
             [{{ p.size[1] }}]
         {%- else -%}
             [{{ p.size[0] }}][{{ p.size[1] }}]
-        {%- endif -%};
+        {%- endif -%}
     {% endfor %}
 } Params;
 
 
 typedef struct work_struct{
 
-    {{ param_handler_workspace() }}
+    {{ linop_handler_workspace() }}
 
-    /* Storage for integer and double workspaces. */
-    long work_int[{{ work_int }}];
-    double work_double[{{ work_float }}];
 } Work;

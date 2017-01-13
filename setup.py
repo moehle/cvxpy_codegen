@@ -27,6 +27,7 @@ setup(
               'cvxpy_codegen.templates',
               'cvxpy_codegen.tests',
               'cvxpy_codegen.tests.param_handler',
+              'cvxpy_codegen.tests.linop_handler',
               'cvxpy_codegen.utils'], # TODO remove utils dir
     package_dir={'cvxpy_codegen': 'cvxpy_codegen'},
     package_data={'cvxpy_codegen.param'               : ['param.c.jinja'],
@@ -34,6 +35,7 @@ setup(
                   'cvxpy_codegen.linop_sym'           : ['linop_sym.c.jinja'],
                   'cvxpy_codegen.solvers'             : ['*.jinja'] + ecos_sources,
                   'cvxpy_codegen.tests.param_handler' : ['*.jinja'],
+                  'cvxpy_codegen.tests.linop_handler' : ['*.jinja'],
                   'cvxpy_codegen.utils'               : ['utils.c.jinja'],
                   'cvxpy_codegen.templates'           : ['*.jinja']},
     url='http://github.com/cvxgrp/cvxpy-codegen/', # TODO

@@ -18,18 +18,17 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from jinja2 import Environment, PackageLoader, contextfilter
-from cvxpy_codegen.utils.utils import FILE_SEP, call_macro, DEFAULT_TEMPLATE_VARS
+from cvxpy_codegen.utils.utils import FILE_SEP, call_macro
 from cvxpy_codegen.solvers.embedded_solver_intf import EmbeddedSolverIntf
 import os
 import shutil as sh
 import cvxpy.settings as s
-from cvxpy_codegen.utils.utils import FILE_SEP, PKG_PATH
+from cvxpy_codegen.utils.utils import render, PKG_PATH, EXP_CONE_LENGTH
 from glob import glob
 import ecos
 import cvxpy.problems.solvers.utilities as cvxpy_utils
 
 CVXPY_ECOS = cvxpy_utils.SOLVERS["ECOS"]
-EXP_CONE_LENGTH = 3
 
 class EcosIntf(EmbeddedSolverIntf):
 
@@ -95,8 +94,6 @@ class EcosIntf(EmbeddedSolverIntf):
                     EXP_CONE_LENGTH*dims[s.EXP_DIM] + 
                     sum(dims[s.SOC_DIM])) # TODO
 
-        self.template_vars.update(DEFAULT_TEMPLATE_VARS)
-
         self.template_vars.update({
                 'leq_dim'      :    dims[s.LEQ_DIM],
                 'eq_dim'       :    dims[s.EQ_DIM],
@@ -117,20 +114,10 @@ class EcosIntf(EmbeddedSolverIntf):
         
         # make target directory
         if os.path.exists(solver_dir):
-            sh.rmtree(solver_dir)
+            sh.rmtree(solver_dir)  # TODO this is destructive
         
         # Copy ecos source files
         sh.copytree(self.SOURCE_DIR, solver_dir, ignore=self.IGNORES)
 
         # Render interface template:
-        env = Environment(loader=PackageLoader('cvxpy_codegen', ''),
-                          lstrip_blocks=True,
-                          trim_blocks=True)
-        env.filters['call_macro'] = call_macro
-        solver_intf_c = env.get_template('solvers/ecos_intf.c.jinja')
-
-        # render and save source file # TODO
-        s = target_dir + FILE_SEP + 'solver_intf.c'
-        f = open(target_dir + FILE_SEP + 'solver_intf.c', 'w')
-        f.write(solver_intf_c.render(self.template_vars))
-        f.close()
+        render(target_dir, self.template_vars, 'solvers/ecos_intf.c.jinja', 'solver_intf.c')

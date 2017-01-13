@@ -1,6 +1,7 @@
 {% import "utils/utils.c.jinja" as u with context %}
 {% from 'solvers/'+solver_name+"_intf.c.jinja" import solver_workspace with context %}
-{% from 'param/param.c.jinja' import param_workspace with context %}
+{% from 'param/param.c.jinja' import param_handler_workspace with context %}
+{% from 'linop_sym/linop_sym.c.jinja' import linop_handler_workspace with context %}
 #ifndef CVXPY_CODEGEN
 #define CVXPY_CODEGEN
 
@@ -44,31 +45,16 @@ typedef struct work_struct{
     double *dual_ineq_var;
     double optval;
     int status;  /* Also returned by cg_solve. */
-
+    long solver_flag;
 
     /* Variables used by the solver. */
     {{ solver_workspace() }}
 
 
-    /* Matrix sparsity patterns. */
-    long *leq_colptr;
-    long *leq_rowidx;
-    long *eq_colptr;
-    long *eq_rowidx;
+    {{ linop_handler_workspace() }}
 
 
-    /* Problem coefficients. */
-    double obj_nzval[{{ obj_coeff.nnz }}];
-    double obj_offset;
-    double obj_vec[{{ x_length }}];
-    double obj_coeff[{{ x_length }}];
-    double eq_nzval[{{ eq_coeff.nnz }}];
-    double eq_offset[{{ eq_dim }}];
-    double leq_nzval[{{ leq_coeff.nnz }}];
-    double leq_offset[{{ cone_dim }}];
-    long solver_flag;
-
-    {{ param_workspace() }}
+    {{ param_handler_workspace() }}
 
     /* Storage for integer and double workspaces. */
     long work_int[{{ work_int }}];

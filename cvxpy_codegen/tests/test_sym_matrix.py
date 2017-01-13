@@ -104,6 +104,23 @@ class TestSymMatrix(unittest.TestCase):
         self.assertAlmostEqualMatrices(AdenseBsym.value, AB)
 
 
+    def test_diag(self):
+        const_n1 = sp.rand(n,1, dens)
+        true_value = sp.diags(np.squeeze(const_n1.toarray(), 1))
+        test_value = sym.diag(sym.as_sym_matrix(const_n1)).value
+        self.assertAlmostEqualMatrices(test_value, true_value)
+        
+
+    def test_reciprocals(self):
+        const_mn = sp.csc_matrix(sp.rand(n,n, dens))
+        new_data = 1.0 / const_mn.data
+        true_value = sp.csc_matrix((new_data, const_mn.indices, const_mn.indptr),
+                                   shape = const_mn.shape)
+        test_value = sym.reciprocals(sym.as_sym_matrix(const_mn)).value
+        self.assertAlmostEqualMatrices(test_value, true_value)
+        
+
+
     def test_symbolic_scalar_matrix_multiply(self):
         alphaAsparse = alpha*A_sparse
 

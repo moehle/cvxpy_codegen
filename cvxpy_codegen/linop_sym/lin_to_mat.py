@@ -71,31 +71,40 @@ def get_coefficients(lin_op):
         #coeffs = [(lo.CONSTANT_ID, mat.as_vector())]
     elif lin_op.type in TYPE_TO_FUNC:
         # A coefficient matrix for each argument.
-        #print(" ")
-        #print(" ")
-        #print("THIS")
+        print(" ")
+        print(" ")
+        print("THIS")
         coeff_mats = TYPE_TO_FUNC[lin_op.type](lin_op)
         coeffs = []
-        #print(lin_op.type)
-        #print(TYPE_TO_FUNC[lin_op.type])
-        #print(coeff_mats)
+        print(lin_op.type)
+        print(TYPE_TO_FUNC[lin_op.type])
+        #print(coeff_mats[0].shape)
+        print(lin_op.size)
+        #if lin_op.size[0] * lin_op.size[1] != coeff_mats[0].shape[0]:
+        #   raise Exception
+        print(type(coeff_mats[0]))
+        #if hasattr(coeff_mat, 'Ap'):
+        #    print("coeff_mat Ap", coeff_mat.Ap)
+        #    print("coeff_mat Ai", coeff_mat.Ai)
+        #    print("coeff_mat size", coeff_mat.size)
         for coeff_mat, arg in zip(coeff_mats, lin_op.args):
-            #print(" ")
-            #print("ARG")
-            #print("parent type: %s" % str(lin_op.type))
-            #print("arg type: %s" % str(arg.type))
-            #print("arg size: ", arg.size)
-            #print("arg linop: ", arg)
-            #print("parent coeff matrix", coeff_mat)
+            print(" ")
+            print("ARG")
+            print("parent type: %s" % str(lin_op.type))
+            print("arg type: %s" % str(arg.type))
+            print("arg size: ", arg.size)
+            print("arg linop: ", arg)
+            print("parent coeff matrix", coeff_mat)
             #if hasattr(coeff_mat, 'Ap'):
             #    print("parent coeff matrix Ap", coeff_mat.Ap)
             #    print("parent coeff matrix Ai", coeff_mat.Ai)
             #    print("parent coeff matrix size", coeff_mat.size)
             rh_coeffs = get_coefficients(arg)
-            #print(rh_coeffs)
-            #print([r[1].size for r in rh_coeffs])
+            print(rh_coeffs)
+            print([r[1].size for r in rh_coeffs])
+            #print("coeff_mat.shape = ", coeff_mat.shape)
             coeffs += mul_by_const(coeff_mat, rh_coeffs)
-            #print("new coeffs:", coeffs)
+            print("new coeffs:", coeffs)
             #print("new coeffs, first element, Ap:", coeffs[0][1].Ap)
             #print("new coeffs, first element, Ai:", coeffs[0][1].Ai)
             #print("new coeffs, first element, Ax:", coeffs[0][1].Ax)
@@ -264,6 +273,8 @@ def div_mat(lin_op):
         The matrix representing the div operation.
     """
     divisor = const_mat(lin_op.data)
+    if isinstance(divisor, sym.SymMatrix):
+        return [sym.diag(sym.reciprocals(divisor.as_vector()))]
     mat = sp.eye(lin_op.size[0]*lin_op.size[1])/divisor
     return [mat.tocsc()]
 
@@ -281,6 +292,8 @@ def mul_elemwise_mat(lin_op):
         The matrix representing the mul_elemwise operation.
     """
     constant = const_mat(lin_op.data)
+    if isinstance(constant, sym.SymMatrix):
+        return [sym.diag(constant.as_vector())]
     # Convert the constant to a giant diagonal matrix.
     vectorized = intf.from_2D_to_1D(flatten(constant))
     return [sp.diags(vectorized, 0).tocsc()]
@@ -316,10 +329,21 @@ def mul_mat(lin_op):
         The matrix for the multiplication on the left operator.
     """
     constant = sym.as_sym_matrix(const_mat(lin_op.data))
-    constant = sym.block_diag(lin_op.size[1]*[constant]) # TODO turn back into scipy
+    # TODO turn back into scipy:
+    print(constant.size)
+    print(len(lin_op.size[0]*lin_op.size[1]*[constant]))
+    #constant = sym.block_diag(lin_op.size[0]*lin_op.size[1]*[constant])
+    if constant.shape != (1,1):
+        constant = sym.block_diag(lin_op.size[1]*[constant])
     # Scalars don't need to be replicated.268
     #if not intf.is_scalar(constant):
     #    constant = sp.block_diag(lin_op.size[1]*[constant]).tocsc()
+    #print("\nMUL_MAT:")
+    #print(lin_op.data)
+    #print(const_mat(lin_op.data))
+    #print(sym.as_sym_matrix(const_mat(lin_op.data)).shape)
+    #print(constant.size)
+    #print("\n")
     return [constant]
 
 def rmul_mat(lin_op):
@@ -336,6 +360,8 @@ def rmul_mat(lin_op):
         The matrix for the multiplication on the right operator.
     """
     constant = const_mat(lin_op.data)
+    if isinstance(constant, sym.SymMatrix):
+        raise TypeError('Right multiplication of variables by parameters not currently supported') # TODO
     # Scalars don't need to be replicated.
     if not intf.is_scalar(constant):
         # Matrix is the kronecker product of constant.T and identity.
@@ -511,6 +537,8 @@ def conv_mat(lin_op):
     constant = const_mat(lin_op.data)
     # Cast to 1D.
     constant = intf.from_2D_to_1D(constant)
+    if isinstance(constant, sym.SymMatrix):
+        raise TypeError('Convolution of parameters and variables not currently supported') # TODO
 
     # Create a Toeplitz matrix with constant as columns.
     rows = lin_op.size[0]
@@ -539,6 +567,8 @@ def kron_mat(lin_op):
         The matrix representing the Kronecker product.
     """
     constant = const_mat(lin_op.data)
+    if isinstance(constant, sym.SymMatrix):
+        raise TypeError('Kronecker product of parameters and variables not currently supported') # TODO
     lh_rows, lh_cols = constant.shape
     rh_rows, rh_cols = lin_op.args[0].size
     # Stack sections for each column of the output.

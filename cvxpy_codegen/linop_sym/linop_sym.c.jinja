@@ -22,6 +22,24 @@
 #include <stdio.h>
 
 
+{% macro linop_handler_workspace() %}
+    /* Problem coefficients. */
+    double obj_coeff[{{ x_length }}];
+    double obj_offset;
+    double eq_nzval[{{ eq_coeff.nnz }}];
+    double eq_offset[{{ eq_dim }}];
+    double leq_nzval[{{ leq_coeff.nnz }}];
+    double leq_offset[{{ cone_dim }}];
+
+    /* Matrix sparsity patterns. */
+    long *leq_colptr;
+    long *leq_rowidx;
+    long *eq_colptr;
+    long *eq_rowidx;
+{% endmacro %}
+
+
+
 /* Sparsity pattern for the objective and constraint matrices. */
 long obj_colptr{{ u.print_vec(leq_coeff.indptr) }};
 long obj_rowidx{{ u.print_vec(leq_coeff.indices) }};
@@ -32,30 +50,33 @@ long leq_rowidx{{ u.print_vec(leq_coeff.indices) }};
 
 
 
-
+{# TODO: can this be cleaner? #}
 {% macro print_sym_expr( expr ) %}
     {% if isinstance(expr, SymMult) -%}
-       ( {{ print_sym_expr(expr.args[0]) }} * {{ print_sym_expr(expr.args[1]) }} )
+        ( {{ print_sym_expr(expr.args[0]) }} * {{ print_sym_expr(expr.args[1]) }} )
     {%- elif isinstance(expr, SymDiv) -%}
-       ( {{ print_sym_expr(expr.args[0]) }} / {{ print_sym_expr(expr.args[1]) }} )
+        ( {{ print_sym_expr(expr.args[0]) }} / {{ print_sym_expr(expr.args[1]) }} )
     {%- elif isinstance(expr, SymAdd) -%}
-       ( {{ print_sym_expr(expr.args[0]) }} + {{ print_sym_expr(expr.args[1]) }} )
+        ({%- for a in expr.args[:-1] -%}
+             {{- print_sym_expr(a) }} + 
+        {%- endfor -%}
+        {{- print_sym_expr(expr.args[-1]) }} )
     {%- elif isinstance(expr, SymParam) -%}
-       {%- if isinstance(expr.param, CallbackParam) -%}
-          work->{{ expr.param.name() }}_nzval[{{ expr.nz_idx}}]
-       {%- else -%}
-          {%- if expr.param.size == (1,1) -%}
-              params->{{ expr.param.name() }}
-          {%- elif expr.param.size[1] == 1 -%}
-              params->{{ expr.param.name() }}[{{ expr.idx[0] }}]
-          {%- elif expr.param.size[0] == 1 -%}
-              params->{{ expr.param.name() }}[{{ expr.idx[1] }}]
-          {%- else -%}
-              params->{{ expr.param.name() }}[{{ expr.idx[0] }}][{{expr.idx[1] }}]
-          {%- endif -%}
-       {%- endif -%}
+        {%- if isinstance(expr.param, CallbackParam) -%}
+            work->{{ expr.param.name() }}_nzval[{{ expr.nz_idx}}]
+        {%- else -%}
+            {%- if expr.param.size == (1,1) -%}
+                params->{{ expr.param.name() }}
+            {%- elif expr.param.size[1] == 1 -%}
+                params->{{ expr.param.name() }}[{{ expr.idx[0] }}]
+            {%- elif expr.param.size[0] == 1 -%}
+                params->{{ expr.param.name() }}[{{ expr.idx[1] }}]
+            {%- else -%}
+                params->{{ expr.param.name() }}[{{ expr.idx[0] }}][{{expr.idx[1] }}]
+            {%- endif -%}
+        {%- endif -%}
     {%- elif isinstance(expr, SymConst) -%}
-       {{ expr.value }}
+        {{ expr.value }}
     {%- endif %}
 {% endmacro %}
 

@@ -19,12 +19,13 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 
 import scipy.sparse as sp
 import numpy as np
-from jinja2 import contextfilter
 from cvxpy_codegen import CallbackParam, Constant, Parameter, Variable, __path__
 import os
+from jinja2 import Environment, PackageLoader, contextfilter
 
 PKG_PATH = os.path.dirname(os.path.abspath(__path__[0]))
 FILE_SEP = '/' # TODO generalize for windows
+EXP_CONE_LENGTH = 3
 
 class Counter():
     def __init__(self):
@@ -47,6 +48,11 @@ def call_macro(context, macro_name, *args , **kwargs):
 
 
 
+def make_target_dir(target_dir):
+    target_dir = os.path.abspath(target_dir)
+    if not os.path.exists(target_dir):
+        os.mkdir(target_dir)
+
 
 # General functions and classes needed to evaluate the templates. # TODO review these
 DEFAULT_TEMPLATE_VARS = {'isinstance' :  isinstance,
@@ -59,3 +65,19 @@ DEFAULT_TEMPLATE_VARS = {'isinstance' :  isinstance,
                          'Constant': Constant,
                          'Parameter': Parameter,
                          'Variable': Variable }
+
+
+def render(target_dir, template_vars, template_path, target_name):
+    total_template_vars = dict()
+    total_template_vars.update(template_vars)
+    total_template_vars.update(DEFAULT_TEMPLATE_VARS)
+
+    env = Environment(loader=PackageLoader('cvxpy_codegen', ''),
+                      lstrip_blocks=True,
+                      trim_blocks=True)
+    env.filters['call_macro'] = call_macro
+
+    template = env.get_template(template_path)
+    f = open(target_dir + FILE_SEP + target_name, 'w')
+    f.write(template.render(total_template_vars))
+    f.close()

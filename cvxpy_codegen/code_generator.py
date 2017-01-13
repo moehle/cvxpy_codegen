@@ -22,7 +22,7 @@ from cvxpy_codegen.templates.template_handler import TemplateHandler
 from cvxpy.problems.problem_data.sym_data import SymData
 from cvxpy_codegen.linop_sym.linop_handler_sym import LinOpHandlerSym
 from cvxpy_codegen.solvers.solver_intfs import SOLVER_INTFS
-from cvxpy_codegen.utils.utils import FILE_SEP
+from cvxpy_codegen.utils.utils import FILE_SEP, make_target_dir
 import cvxpy.settings as s
 import numpy as np
 import os
@@ -50,6 +50,7 @@ class CodeGenerator:
         self.named_vars = self.get_named_vars(vars)
         self.params = self.get_named_params(params)
 
+        # TODO rm params, so all params hanlded by the param_handler:
         self.template_vars = {'named_vars' : self.named_vars,
                               'params' : self.params}
 
@@ -83,7 +84,7 @@ class CodeGenerator:
 
     def codegen(self, target_dir):
 
-        self.make_target_dir(target_dir)
+        make_target_dir(target_dir)
         
         # Add solver to template variables.
         self.template_vars.update({'solver' : self.solver})
@@ -110,19 +111,7 @@ class CodeGenerator:
         self.template_vars.update(self.solver.get_template_vars(self.sym_data, self.template_vars))
         self.solver.render(target_dir)
 
-        # get template handler 
-        template_handler = TemplateHandler(target_dir)
-
         # Get template variables to render template
+        template_handler = TemplateHandler(target_dir)
         self.template_vars.update(template_handler.get_template_vars())
-
-        # render the templates
-        template_handler.render_and_save(self.template_vars)
-
-
-    def make_target_dir(self, target_dir):
-
-        target_dir = os.path.abspath(target_dir)
-
-        if not os.path.exists(target_dir):
-            os.mkdir(target_dir) #TODO add exception handling, and tests
+        template_handler.render(target_dir, self.template_vars)

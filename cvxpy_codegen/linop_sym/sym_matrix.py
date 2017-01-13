@@ -85,6 +85,14 @@ class SymMatrix():
     def __mul__(self, arg):
         arg_scalar = get_scalar(arg)
         self_scalar = get_scalar(self)
+        #print("\n\nTHIS")
+        #print(self)
+        #print(self.shape)
+        #print(self_scalar)
+        #print(arg)
+        #print(arg.shape)
+        #print(arg_scalar)
+        #print("THAT")
         if arg_scalar:
             return self.mul_elem(arg_scalar)
         elif self_scalar:
@@ -227,6 +235,34 @@ class SymMatrix():
                 p2 = j * m + i
                 Ax[p2] = self.Ax[p]
         return SymMatrix(Ap, Ai, Ax, m, n)
+
+
+def diag(A):
+    m, n = A.shape
+    if n != 1:
+       raise ValueError("argument to diag must be a column vector.")
+    Bp = np.zeros((m+1), dtype=int)
+    Bi = []
+    Bx = []
+    for p in range(A.nnz):
+        Bi += [A.Ai[p]]
+        Bx += [A.Ax[p]]
+        Bp[A.Ai[p]+1] = 1
+    Bp = list(np.cumsum(Bp))
+    return SymMatrix(Bp, Bi, Bx, m, m)
+
+
+
+def kron(A, B):
+    return NotImplemented
+
+
+def reciprocals(A):
+    Ax = []
+    for p in range(A.nnz):
+        Ax += [SymConst(1) / A.Ax[p]]
+    return SymMatrix(A.Ap, A.Ai, Ax, A.m, A.n)
+
 
 
 def get_scalar(expr):

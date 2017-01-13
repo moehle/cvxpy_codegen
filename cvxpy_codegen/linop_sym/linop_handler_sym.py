@@ -23,7 +23,9 @@ import cvxpy.lin_ops as lo
 import cvxpy_codegen.linop_sym.sym_matrix as sym
 from cvxpy_codegen.linop_sym.sym_expr import SymAdd, SymMult, SymDiv, SymParam, SymConst
 from cvxpy_codegen import Variable
-from cvxpy_codegen.utils.utils import FILE_SEP, call_macro, DEFAULT_TEMPLATE_VARS
+#from cvxpy_codegen.utils.utils import FILE_SEP, call_macro, DEFAULT_TEMPLATE_VARS
+from cvxpy_codegen.utils.utils import render, EXP_CONE_LENGTH
+import cvxpy.settings as s
 
 
 
@@ -102,13 +104,26 @@ class LinOpHandlerSym():
 
         #self.template_vars["callback_params"] = other_tvs["callback_params"] # TODO remove dependency on param_handler
 
+
+        # TODO this is duplicated from ecos_intf.py
+        dims = self.sym_data.dims
+        cone_dim = (dims[s.LEQ_DIM] + 
+                    EXP_CONE_LENGTH*dims[s.EXP_DIM] + 
+                    sum(dims[s.SOC_DIM]))
+
+        self.template_vars.update({
+                'x_length'     :    self.sym_data.x_length,
+                'leq_dim'      :    dims[s.LEQ_DIM],
+                'eq_dim'       :    dims[s.EQ_DIM],
+                'cone_dim'     :    cone_dim })
+        # TODO are leq_dim and cone_dim the same?
         
         self.template_vars.update({'obj_coeff'  : obj_coeff,
                                    'obj_offset' : obj_offset,
                                    'eq_coeff'   : eq_coeff,
                                    'eq_offset'  : eq_offset,
                                    'leq_coeff'  : leq_coeff,
-                                   'leq_offset' : leq_offset})
+                                   'leq_offset' : leq_offset })
 
         #print('BLAH')
         #print(self.template_vars['eq_coeff'].nnz)
@@ -186,20 +201,5 @@ class LinOpHandlerSym():
 
 
     def render(self, target_dir):
-        env = Environment(loader=PackageLoader('cvxpy_codegen', ''),
-                          lstrip_blocks=True,
-                          trim_blocks=True)
-        env.filters['call_macro'] = call_macro
-        linop_c = env.get_template('linop_sym/linop_sym.c.jinja')
-
-        template_vars = dict()
-        template_vars.update(self.template_vars)
-        template_vars.update(DEFAULT_TEMPLATE_VARS)
-
-        # render and save source file # TODO
-        f = open(target_dir + FILE_SEP + 'linop.c', 'w')
-        f.write(linop_c.render(template_vars))
-        f.close()
-
-
-
+        render(target_dir, self.template_vars,
+               'linop_sym/linop_sym.c.jinja', 'linop.c')

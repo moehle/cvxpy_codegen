@@ -19,7 +19,7 @@
 
 
 {% import "utils/utils.c.jinja" as u with context %}
-{% from 'param/param.c.jinja' import param_workspace with context %}
+{% from 'linop_sym/linop_sym.c.jinja' import linop_handler_workspace with context %}
 
 #include "codegen.h"
 #include <stdio.h>
@@ -77,23 +77,61 @@ int main(){
     {% endfor %}
 
 
-    fill_param_tree(&params, &work);
+    fill_matrices(&params, &work);
 
 
     printf("{");
-    {% for idx, cbp in enumerate(callback_params) %}
-    {% if idx > 0 %}
-    printf(",");
-    {% endif %}
-    printf("\"{{cbp.name}}\":{\"colptr\":");
-    json_vector_long(work.{{cbp.cbp_name}}_colptr, {{cbp.size[1]+1}});
-    printf(",\"rowidx\":");
-    json_vector_long(work.{{cbp.cbp_name}}_rowidx, {{cbp.sparsity.nnz}});
-    printf(",\"nzval\":");
-    json_vector_double(work.{{cbp.cbp_name}}_nzval, {{cbp.sparsity.nnz}});
-    printf("}");
 
-    {% endfor %}
+      /* Objective constraint. */
+      printf("\"obj_coeff\":");
+        json_vector_double(work.obj_coeff, {{ x_length }});
+      printf(",");
+      printf("\"obj_offset\":%9.9lf", work.obj_offset);
+
+      /* Equality constraint. */
+      printf(",");
+      printf("\"eq_size0\":%ld", {{ eq_dim }});
+      printf(",");
+      printf("\"eq_size1\":%ld", {{ x_length }});
+
+      printf(",");
+      printf("\"eq_colptr\":");
+        json_vector_long(work.eq_colptr, {{ x_length+1 }});
+
+      printf(",");
+      printf("\"eq_rowidx\":");
+        json_vector_long(work.eq_rowidx, {{ eq_coeff.nnz }});
+
+      printf(",");
+      printf("\"eq_nzval\":");
+        json_vector_double(work.eq_nzval, {{ eq_coeff.nnz }});
+
+      printf(",");
+      printf("\"eq_offset\":");
+        json_vector_double(work.eq_offset, {{ eq_dim }});
+
+      /* Inequality constraint. */
+      printf(",");
+      printf("\"leq_size0\":%ld", {{ leq_dim }});
+      printf(",");
+      printf("\"leq_size1\":%ld", {{ x_length }});
+
+      printf(",");
+      printf("\"leq_colptr\":");
+        json_vector_long(work.leq_colptr, {{ x_length+1 }});
+
+      printf(",");
+      printf("\"leq_rowidx\":");
+        json_vector_long(work.leq_rowidx, {{ leq_coeff.nnz }});
+
+      printf(",");
+      printf("\"leq_nzval\":");
+        json_vector_double(work.leq_nzval, {{ leq_coeff.nnz }});
+
+      printf(",");
+      printf("\"leq_offset\":");
+        json_vector_double(work.leq_offset, {{ leq_dim }});
+
     printf("}");
 
     return(0);

@@ -24,9 +24,8 @@ from cvxpy.expressions.constants.constant import Constant
 from cvxpy.atoms.atom import Atom
 from cvxpy_codegen.atoms.atoms import get_atom_data
 from cvxpy_codegen.param.expr_data import ParamData, ConstData, CbParamData
-from cvxpy_codegen.utils.utils import FILE_SEP, call_macro, DEFAULT_TEMPLATE_VARS
+from cvxpy_codegen.utils.utils import render
 import numpy
-from jinja2 import Environment, PackageLoader, contextfilter
 
 CBP_TO_SPARSITY = dict()
 
@@ -57,7 +56,7 @@ class ParamHandler():
         self.expr_ids = []
         self.unique_exprs = []
 
-        self.template_vars = DEFAULT_TEMPLATE_VARS
+        self.template_vars = dict()
 
 
     def cbp2sparsity(self): # TODO make this not global
@@ -132,12 +131,4 @@ class ParamHandler():
 
 
     def render(self, target_dir):
-        env = Environment(loader=PackageLoader('cvxpy_codegen', ''),
-                          lstrip_blocks=True,
-                          trim_blocks=True)
-        env.filters['call_macro'] = call_macro
-        param_c = env.get_template('param/param.c.jinja')
-
-        f = open(target_dir + FILE_SEP + 'param.c', 'w')
-        f.write(param_c.render(self.template_vars))
-        f.close()
+        render(target_dir, self.template_vars, 'param/param.c.jinja', 'param.c')

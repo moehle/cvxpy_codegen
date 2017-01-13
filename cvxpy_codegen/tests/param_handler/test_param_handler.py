@@ -27,10 +27,9 @@ import numpy as np
 import json
 from cvxpy_codegen.param.param_handler import ParamHandler
 from jinja2 import Environment, PackageLoader, contextfilter
-from cvxpy_codegen.utils.utils import FILE_SEP, call_macro, DEFAULT_TEMPLATE_VARS
+from cvxpy_codegen.utils.utils import render, make_target_dir
 import scipy.sparse as sp
 
-MODULE = 'cvxpy_codegen.tests.test_param_handler'
 HARNESS_C = 'tests/param_handler/harness.c.jinja'
 CODEGEN_H = 'tests/param_handler/codegen.h.jinja'
 target_dir = tu.TARGET_DIR
@@ -137,14 +136,14 @@ class TestParamHandler(tu.CodegenTestCase):
         # Set up param handler.
         param_handler = ParamHandler(expr_canon, [], [])
         template_vars = param_handler.get_template_vars()
-        self.make_target_dir(target_dir)
+        make_target_dir(target_dir)
         param_handler.render(target_dir)
 
         # Set up test handler.
-        self.render(target_dir, template_vars)
+        render(target_dir, template_vars, HARNESS_C, 'harness.c')
+        render(target_dir, template_vars, CODEGEN_H, 'codegen.h')
         tested_cb_param_values = self.run_test(target_dir)
-        self.render(target_dir, template_vars)
-        mat = list(self.run_test(target_dir).values())[0]
+        mat = list(tested_cb_param_values.values())[0]
         test_expr_value = sp.csc_matrix((mat['nzval'],
                                          mat['rowidx'],
                                          mat['colptr']))
@@ -153,29 +152,6 @@ class TestParamHandler(tu.CodegenTestCase):
             print('\nTest value:\n', test_expr_value)
             print('\nDifference:\n', test_expr_value - true_expr_value)
         self.assertAlmostEqualMatrices(true_expr_value, test_expr_value)
-
-
-    def make_target_dir(self, target_dir):
-        target_dir = os.path.abspath(target_dir)
-        if not os.path.exists(target_dir):
-            os.mkdir(target_dir)
-
-
-    def render(self, target_dir, template_vars):
-        env = Environment(loader=PackageLoader('cvxpy_codegen', ''),
-                          lstrip_blocks=True,
-                          trim_blocks=True)
-        env.filters['call_macro'] = call_macro
-
-        harness_c = env.get_template(HARNESS_C)
-        f = open(target_dir + FILE_SEP + 'harness.c', 'w')
-        f.write(harness_c.render(template_vars))
-        f.close()
-
-        codegen_h = env.get_template(CODEGEN_H)
-        f = open(target_dir + FILE_SEP + 'codegen.h', 'w')
-        f.write(codegen_h.render(template_vars))
-        f.close()
 
 
     def run_test(self, target_dir):
