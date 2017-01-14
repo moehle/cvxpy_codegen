@@ -145,7 +145,7 @@ class TestParamHandler(tu.CodegenTestCase):
         # Set up test handler.
         render(target_dir, template_vars, HARNESS_C, 'harness.c')
         render(target_dir, template_vars, CODEGEN_H, 'codegen.h')
-        tested_cb_param_values = self.run_test(target_dir)
+        tested_cb_param_values = self._run_test(target_dir)
         mat = list(tested_cb_param_values.values())[0]
         test_expr_value = sp.csc_matrix((mat['nzval'],
                                          mat['rowidx'],
@@ -157,7 +157,7 @@ class TestParamHandler(tu.CodegenTestCase):
         self.assertAlmostEqualMatrices(true_expr_value, test_expr_value)
 
 
-    def run_test(self, target_dir):
+    def _run_test(self, target_dir):
         prev_path = os.getcwd()
         os.chdir(target_dir)
         output = subprocess.check_output(

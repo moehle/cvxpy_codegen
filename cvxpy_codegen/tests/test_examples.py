@@ -33,11 +33,9 @@ class TestMpc(tu.CodegenTestCase):
         n = 3
         m = 1
         T = 6
-        alpha = 0.2
-        beta = 5
-        self.A_val = np.eye(n) + alpha*np.random.randn(n,n)
-        self.B_val = beta*np.random.randn(n,m)
-        self.x0_val = beta*np.random.randn(n,1)
+        self.A_val = np.eye(n) + .2*np.random.randn(n,n)
+        self.B_val = 5*np.random.randn(n,m)
+        self.x0_val = 5*np.random.randn(n,1)
 
         A  = cg.Parameter(n, n, name='A')
         B  = cg.Parameter(n, m, name='B')
@@ -73,7 +71,7 @@ class TestMpc(tu.CodegenTestCase):
     def test_mpc_quad(self):
         test_name = '_test_mpc_quad'
         self.mpc_setup(objective='quad')
-        self.run_codegen_test(self.prob, MODULE, self.class_name, test_name)
+        self._run_codegen_test(self.prob, MODULE, self.class_name, test_name)
 
     def _test_mpc_quad(self):
         self.mpc_setup(objective='quad')
@@ -85,7 +83,7 @@ class TestMpc(tu.CodegenTestCase):
     def test_mpc_1norm(self):
         test_name = '_test_mpc_1norm'
         self.mpc_setup(objective='1norm')
-        self.run_codegen_test(self.prob, MODULE, self.class_name, test_name)
+        self._run_codegen_test(self.prob, MODULE, self.class_name, test_name)
 
     def _test_mpc_1norm(self):
         self.mpc_setup(objective='1norm')
@@ -132,7 +130,7 @@ class TestLeastSquares(tu.CodegenTestCase):
     def test_least_squares(self):
         test_name = '_test_least_squares'
         self.mpc_setup()
-        self.run_codegen_test(self.prob, MODULE, self.class_name, test_name)
+        self._run_codegen_test(self.prob, MODULE, self.class_name, test_name)
 
     def _test_least_squares(self):
         self.mpc_setup()

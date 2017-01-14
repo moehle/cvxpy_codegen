@@ -42,8 +42,6 @@ def flatten(matrix):
         matrix = np_mat.const_to_matrix(matrix, convert_scalars=True)
         size = intf.size(matrix)
         return np_mat.reshape(matrix, (size[0]*size[1], 1))
-        #print(matrix.size)
-        #vec = np.reshape(matrix, (matrix.size[0]*matrix.size[1], 1))
     return vec
 
 def get_coefficients(lin_op):
@@ -71,46 +69,13 @@ def get_coefficients(lin_op):
         #coeffs = [(lo.CONSTANT_ID, mat.as_vector())]
     elif lin_op.type in TYPE_TO_FUNC:
         # A coefficient matrix for each argument.
-        print(" ")
-        print(" ")
-        print("THIS")
         coeff_mats = TYPE_TO_FUNC[lin_op.type](lin_op)
         coeffs = []
-        print(lin_op.type)
-        print(TYPE_TO_FUNC[lin_op.type])
-        #print(coeff_mats[0].shape)
-        print(lin_op.size)
-        #if lin_op.size[0] * lin_op.size[1] != coeff_mats[0].shape[0]:
-        #   raise Exception
-        print(type(coeff_mats[0]))
-        #if hasattr(coeff_mat, 'Ap'):
-        #    print("coeff_mat Ap", coeff_mat.Ap)
-        #    print("coeff_mat Ai", coeff_mat.Ai)
-        #    print("coeff_mat size", coeff_mat.size)
         for coeff_mat, arg in zip(coeff_mats, lin_op.args):
-            print(" ")
-            print("ARG")
-            print("parent type: %s" % str(lin_op.type))
-            print("arg type: %s" % str(arg.type))
-            print("arg size: ", arg.size)
-            print("arg linop: ", arg)
-            print("parent coeff matrix", coeff_mat)
-            #if hasattr(coeff_mat, 'Ap'):
-            #    print("parent coeff matrix Ap", coeff_mat.Ap)
-            #    print("parent coeff matrix Ai", coeff_mat.Ai)
-            #    print("parent coeff matrix size", coeff_mat.size)
             rh_coeffs = get_coefficients(arg)
-            print(rh_coeffs)
-            print([r[1].size for r in rh_coeffs])
-            #print("coeff_mat.shape = ", coeff_mat.shape)
             coeffs += mul_by_const(coeff_mat, rh_coeffs)
-            print("new coeffs:", coeffs)
-            #print("new coeffs, first element, Ap:", coeffs[0][1].Ap)
-            #print("new coeffs, first element, Ai:", coeffs[0][1].Ai)
-            #print("new coeffs, first element, Ax:", coeffs[0][1].Ax)
     else:
         raise Exception("Unknown linear operator '%s'" % lin_op.type)
-    #print(coeffs)
     coeffs = [(c[0], sym.as_sym_matrix(c[1])) for c in coeffs] # All coeffs as SymMatrix
     return coeffs
 
@@ -163,16 +128,9 @@ def const_mat(lin_op):
     """
     if lin_op.type == lo.PARAM: # TODO rm
         name = lin_op.data.name()
-        #print('\n')
-        #print(CBP_TO_SPARSITY)
-        #print(name)
-        #print(type(lin_op.data))
         if name in CBP_TO_SPARSITY.keys():
             sprs = CBP_TO_SPARSITY[name]
             sprs = sp.csc_matrix(sprs)
-            #print('\n')
-            #print(sprs.shape)
-            #print(lin_op.data.size)
             coeff = sym.as_sym_matrix(lin_op.data, sparsity=sprs)
         else:
             coeff = sym.as_sym_matrix(lin_op.data)
@@ -198,11 +156,7 @@ def mul_by_const(constant, rh_coeffs):
     new_coeffs = []
     # Multiply all right-hand terms by the left-hand constant.
     for (id_, coeff) in rh_coeffs:
-        #print("THAT")
-        #print(type(constant))
-        #print(coeff)
         new_coeffs.append((id_, coeff.__rmul__(constant)))
-        #print(constant*coeff)
     return new_coeffs
 
 def sum_entries_mat(lin_op):
@@ -328,22 +282,16 @@ def mul_mat(lin_op):
     list of SciPy CSC matrix or scalar.
         The matrix for the multiplication on the left operator.
     """
-    constant = sym.as_sym_matrix(const_mat(lin_op.data))
-    # TODO turn back into scipy:
-    print(constant.size)
-    print(len(lin_op.size[0]*lin_op.size[1]*[constant]))
-    #constant = sym.block_diag(lin_op.size[0]*lin_op.size[1]*[constant])
-    if constant.shape != (1,1):
-        constant = sym.block_diag(lin_op.size[1]*[constant])
-    # Scalars don't need to be replicated.268
-    #if not intf.is_scalar(constant):
-    #    constant = sp.block_diag(lin_op.size[1]*[constant]).tocsc()
-    #print("\nMUL_MAT:")
-    #print(lin_op.data)
-    #print(const_mat(lin_op.data))
-    #print(sym.as_sym_matrix(const_mat(lin_op.data)).shape)
-    #print(constant.size)
-    #print("\n")
+    constant = const_mat(lin_op.data)
+    #constant = sym.as_sym_matrix(const_mat(lin_op.data))
+    if isinstance(constant, sym.SymMatrix):
+        if constant.shape != (1,1):
+            constant = sym.block_diag(lin_op.size[1]*[constant])
+    else:
+        # TODO turn back into scipy:
+        # Scalars don't need to be replicated.268
+        if not intf.is_scalar(constant):
+            constant = sp.block_diag(lin_op.size[1]*[constant]).tocsc()
     return [constant]
 
 def rmul_mat(lin_op):

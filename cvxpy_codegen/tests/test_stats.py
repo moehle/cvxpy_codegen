@@ -33,7 +33,7 @@ class TestStats(tu.CodegenTestCase):
         constr = [x >= 1, x <= 0]
         obj = 0
         self.prob = cg.Problem(cg.Minimize(obj), constr)
-        self.run_codegen_test(self.prob, MODULE, self.class_name, '_test_infeas')
+        self._run_codegen_test(self.prob, MODULE, self.class_name, '_test_infeas')
 
     def _test_infeas(self):
         from cvxpy_codegen_solver import cg_solve
@@ -48,7 +48,7 @@ class TestStats(tu.CodegenTestCase):
         constr = [x <= 1]
         obj = x
         self.prob = cg.Problem(cg.Minimize(obj), constr)
-        self.run_codegen_test(self.prob, MODULE, self.class_name, '_test_unbounded')
+        self._run_codegen_test(self.prob, MODULE, self.class_name, '_test_unbounded')
 
     def _test_unbounded(self):
         from cvxpy_codegen_solver import cg_solve
@@ -63,7 +63,7 @@ class TestStats(tu.CodegenTestCase):
         constr = [x >= 1]
         obj = x
         self.prob = cg.Problem(cg.Minimize(obj), constr)
-        self.run_codegen_test(self.prob, MODULE, self.class_name, '_test_optimal')
+        self._run_codegen_test(self.prob, MODULE, self.class_name, '_test_optimal')
 
     def _test_optimal(self):
         from cvxpy_codegen_solver import cg_solve

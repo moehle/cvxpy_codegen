@@ -31,9 +31,12 @@ def getdata_index(expr, arg_data):
     step0 = 1 if slices[0].step==None else slices[0].step
     step1 = 1 if slices[1].step==None else slices[1].step
 
-    if start0 < 0 or stop0 >= arg_data[0].size[0]:
+    if start0 < 0 or stop0 > arg_data[0].size[0]:
         raise ValueError("First index out of bounds")
-    if stort1 < 0 or stop1 >= arg_data[0].size[0]:
+    if start1 < 0 or stop1 > arg_data[0].size[1]:
+        print('\n arg size:', arg_data[0].size[1])
+        print('\n stop:', stop1)
+        print('\n start', start1)
         raise ValueError("Second index out of bounds")
 
     data = {'start0' : start0,

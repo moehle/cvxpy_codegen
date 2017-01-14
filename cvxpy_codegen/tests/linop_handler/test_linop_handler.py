@@ -87,12 +87,12 @@ class TestLinopHandler(tu.CodegenTestCase):
         self._test_expr(cg.sum_entries(self.var_mn + self.const_mn))
     
     def test_mul(self):
-        self._test_expr(cg.sum_entries(self.var_mn * self.param_np)) # TODO FAILS
+        self._test_expr(cg.sum_entries(self.var_mn * self.param_np))
         self._test_expr(cg.sum_entries(self.var_mn * self.const_np))
         self._test_expr(cg.sum_entries(self.param_mn * self.var_np))
         self._test_expr(cg.sum_entries(self.const_mn * self.var_np))
     
-    def test_mul(self):
+    def test_mul_elemwise(self):
         self._test_expr(cg.sum_entries(cg.mul_elemwise(self.param_mn, self.var_mn)))
         self._test_expr(cg.sum_entries(cg.mul_elemwise(self.const_mn, self.var_mn)))
     
@@ -122,7 +122,7 @@ class TestLinopHandler(tu.CodegenTestCase):
         self._test_expr(cg.sum_entries(cg.trace(self.var_mn)))
     
     def test_reshape(self):
-        self._test_expr(cg.sum_entries(cg.reshape(self.var_mn, n, m)))
+        self._test_expr(cg.sum_entries(cg.reshape(self.var_mn, self.n, self.m)))
     
     def test_index(self):
         self._test_expr(cg.sum_entries(self.var_mn[2:13:2,2:8]))
@@ -188,7 +188,7 @@ class TestLinopHandler(tu.CodegenTestCase):
         # Set up test harness.
         render(target_dir, template_vars, HARNESS_C, 'harness.c')
         render(target_dir, template_vars, CODEGEN_H, 'codegen.h')
-        test_data = self.run_test(target_dir)
+        test_data = self._run_test(target_dir)
         test_obj_coeff  = np.array(test_data['obj_coeff'])
         test_obj_offset = np.array(test_data['obj_offset'])
         test_eq_coeff  = sp.csc_matrix((test_data['eq_nzval'],
@@ -232,7 +232,7 @@ class TestLinopHandler(tu.CodegenTestCase):
 
 
 
-    def run_test(self, target_dir):
+    def _run_test(self, target_dir):
         prev_path = os.getcwd()
         os.chdir(target_dir)
         output = subprocess.check_output(

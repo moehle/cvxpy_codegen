@@ -86,7 +86,7 @@ class TestAtoms(tu.CodegenTestCase):
     def _test_atom(self, atom_name):
         self.param_setup(atom=atom_name)
         method_name = '_test_' + atom_name
-        self.run_codegen_test(self.prob, MODULE, self.class_name, method_name)
+        self._run_codegen_test(self.prob, MODULE, self.class_name, method_name)
 
     def _run_test_atom(self, atom_name):
         self.param_setup(atom=atom_name)

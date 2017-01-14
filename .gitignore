@@ -1,4 +1,7 @@
 cg_build
+*.swp
+*.swo
+*.swn
 
 # PYTHON EXTENSIONS
 *.pyc

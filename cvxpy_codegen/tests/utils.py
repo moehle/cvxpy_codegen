@@ -67,7 +67,7 @@ class CodegenTestCase(unittest.TestCase):
         os.chdir(prev_path)
 
 
-    def run_isolated_test(self, module, cls, method):
+    def _run_isolated_test(self, module, cls, method):
         command = "%s.%s.%s" % (module, cls, method)
         try:
             output = subprocess.check_output(
@@ -81,8 +81,8 @@ class CodegenTestCase(unittest.TestCase):
         return exit_code
 
 
-    def run_codegen_test(self, prob, module, class_name, method_name):
+    def _run_codegen_test(self, prob, module, class_name, method_name):
         prob.codegen(TARGET_DIR)
         self.install_custom_solver(TARGET_DIR)
-        exit_code = self.run_isolated_test(module, class_name, method_name)
+        exit_code = self._run_isolated_test(module, class_name, method_name)
         self.assertEqual(exit_code, 0)
