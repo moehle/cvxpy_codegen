@@ -23,7 +23,7 @@ import numpy as np
 import scipy.sparse as sp
 import scipy.linalg as sp_la
 import cvxpy_codegen.linop_sym.sym_matrix as sym
-from cvxpy_codegen.param.param_handler import CBP_TO_SPARSITY
+from cvxpy_codegen.param.param_handler import CBP_TO_SPARSITY # TODO rm
 
 # Utility functions for converting LinOps into matrices.
 
@@ -37,7 +37,7 @@ def flatten(matrix):
     """
     if isinstance(matrix, sym.SymMatrix):
         vec = matrix.as_vector()
-    else: # TODO remove reference to intf
+    else:
         np_mat = intf.DEFAULT_INTF
         matrix = np_mat.const_to_matrix(matrix, convert_scalars=True)
         size = intf.size(matrix)
@@ -126,7 +126,7 @@ def const_mat(lin_op):
     -------
     A numerical constant.
     """
-    if lin_op.type == lo.PARAM: # TODO rm
+    if lin_op.type == lo.PARAM:
         name = lin_op.data.name()
         if name in CBP_TO_SPARSITY.keys():
             sprs = CBP_TO_SPARSITY[name]
@@ -288,7 +288,6 @@ def mul_mat(lin_op):
         if constant.shape != (1,1):
             constant = sym.block_diag(lin_op.size[1]*[constant])
     else:
-        # TODO turn back into scipy:
         # Scalars don't need to be replicated.268
         if not intf.is_scalar(constant):
             constant = sp.block_diag(lin_op.size[1]*[constant]).tocsc()

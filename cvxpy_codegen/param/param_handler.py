@@ -106,24 +106,24 @@ class ParamHandler():
             self.constants += [data]
 
         elif isinstance(expr, Atom):
-            #if not expr.parameters(): # TODO re-enable someday
-            #    self.constants += [expr.value] # expr is just a constant
-            #else:
-            # recurse on arguments:
-            if id(expr) in self.expr_ids: # Check if already there.
-                idx = self.expr_ids.index(id(expr))
-                self.expressions[idx].force_copy()
-                data = self.expressions[idx]
-            else:
-                arg_data = []
-                for arg in expr.args:
-                    arg_data += [self.process_expression(arg)]
-                data_list = get_atom_data(expr, arg_data)
-                self.expressions += data_list
-                data = data_list[-1]
-                self.expr_ids += [id(expr)]
-                if data.macro_name not in self.unique_exprs: # Check if already there.
-                     self.unique_exprs += [data.macro_name]
+            if not expr.parameters(): # expr is just a constant without parameters.
+                data = ConstData(Constant(expr.value))
+                self.constants += [data]
+            else: # Recurse on arguments:
+                if id(expr) in self.expr_ids: # Check if already there.
+                    idx = self.expr_ids.index(id(expr))
+                    self.expressions[idx].force_copy()
+                    data = self.expressions[idx]
+                else:
+                    arg_data = []
+                    for arg in expr.args:
+                        arg_data += [self.process_expression(arg)]
+                    data_list = get_atom_data(expr, arg_data)
+                    self.expressions += data_list
+                    data = data_list[-1]
+                    self.expr_ids += [id(expr)]
+                    if data.macro_name not in self.unique_exprs: # Check if already there.
+                         self.unique_exprs += [data.macro_name]
         else:
             raise TypeError('Invalid expression tree type: %s' % type(expr))
 

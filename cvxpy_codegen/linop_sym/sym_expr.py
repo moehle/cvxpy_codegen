@@ -46,14 +46,6 @@ class SymExpr():
         return SymConst(-1.0) * self
 
 
-# TODO remove?
-def as_sym_const(expr):
-    if isinstance(expr, float) or isinstance(expr, int):
-        return SymConst(expr)
-    elif isinstance(expr, SymConst):
-        return expr
-
-
 
 class SymConst(SymExpr):
     def __init__(self, value):
@@ -66,8 +58,6 @@ class SymConst(SymExpr):
 class SymParam(SymExpr):
     def __init__(self, param, idx, nz_idx):
         self.param = param
-        #if isinstance(param, callbackparam):
-        #  self.name = param.cbp_
         self.idx = idx
         self.nz_idx = nz_idx
 
@@ -75,7 +65,7 @@ class SymParam(SymExpr):
         return(self.param.name()+'['+str(self.idx[0])+','+str(self.idx[1])+']')
 
     @property
-    def value(self): # TODO test this:
+    def value(self):
         if self.param.size == (1,1):
             return self.param.value
         else:
@@ -97,10 +87,7 @@ class SymAdd(SymExpr):
     @property
     def value(self):
         return sum([a.value for a in self.args])
-        #return self.args[0].value + self.args[1].value
 
-    #def print(self):
-    #    return '( ' + self.args[0].print() + ' + ' + self.args[1].print() + ' )'
     def print(self):
         s = '( '
         for a in self.args[:-1]:

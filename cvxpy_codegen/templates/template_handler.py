@@ -51,4 +51,4 @@ class TemplateHandler():
         render(target_dir, template_vars, 'templates/cvxpy_codegen_solver.py.jinja', 'cvxpy_codegen_solver.py')
         render(target_dir, template_vars, 'templates/setup.py.jinja', 'setup.py')
         render(target_dir, template_vars, 'templates/Makefile.jinja', 'Makefile')
-        render(target_dir, template_vars, 'templates/test_solver.c.jinja', 'test_solver.c')
+        render(target_dir, template_vars, 'templates/example_problem.c.jinja', 'example_problem.c')

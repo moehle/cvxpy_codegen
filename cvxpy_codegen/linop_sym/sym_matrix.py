@@ -54,7 +54,7 @@ class SymMatrix():
     def shape(self):
         return (self.m,self.n)
 
-    @property # TODO remove
+    @property
     def size(self):
         return (self.m,self.n)
 
@@ -288,7 +288,7 @@ def kron(B, A):
     Zi = [0] * nnz_Z
     Zx = [0] * nnz_Z
     pZ = 0
-    # TODO could be more efficient..
+    # Could be more efficient..
     for jB in range(B.n):
         for pB in range(B.Ap[jB], B.Ap[jB+1]):
             iB = B.Ai[pB]

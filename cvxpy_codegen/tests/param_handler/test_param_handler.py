@@ -65,67 +65,70 @@ class TestParamHandler(tu.CodegenTestCase):
 
 
     # Test each atom:
-    def test_abs(self):
-        self._test_expr(cg.abs(self.param_mn))
-        self._test_expr(cg.abs(self.param_mn + self.const_mn))
-        self._test_expr(cg.abs(-self.param_mn))
+    #def test_abs(self):
+    #    self._test_expr(cg.abs(self.param_mn))
+    #    self._test_expr(cg.abs(self.param_mn + self.const_mn))
+    #    self._test_expr(cg.abs(-self.param_mn))
 
-    def test_add(self):
-        self._test_expr(self.param_mn + self.param_mn)
-        self._test_expr(self.param_mn - self.param_mn)
-        self._test_expr(self.param_n1 + self.const_n1)
-        self._test_expr(self.param_n1 - self.const_n1)
+    #def test_add(self):
+    #    self._test_expr(self.param_mn + self.param_mn)
+    #    self._test_expr(self.param_mn - self.param_mn)
+    #    self._test_expr(self.param_n1 + self.const_n1)
+    #    self._test_expr(self.param_n1 - self.const_n1)
 
-    def test_diag_vec(self):
-        self._test_expr(cg.diag(self.param_n1))
-        self._test_expr(cg.diag(-self.param_n1))
-        self._test_expr(cg.diag(self.param_1n))
+    #def test_diag_vec(self):
+    #    self._test_expr(cg.diag(self.param_n1))
+    #    self._test_expr(cg.diag(-self.param_n1))
+    #    self._test_expr(cg.diag(self.param_1n))
 
-    def test_diag_mat(self):
-        self._test_expr(cg.diag(self.param_nn))
-        self._test_expr(cg.diag(cg.diag(self.param_n1)))
-        self._test_expr(cg.diag(self.param_nn - cg.diag(self.param_n1)))
-       
-    def test_hstack(self):
-        self._test_expr(cg.hstack(self.param_nn, self.param_n1))
-        self._test_expr(cg.hstack(self.param_np, self.const_n1, self.param_nn))
+    #def test_diag_mat(self):
+    #    self._test_expr(cg.diag(self.param_nn))
+    #    self._test_expr(cg.diag(cg.diag(self.param_n1)))
+    #    self._test_expr(cg.diag(self.param_nn - cg.diag(self.param_n1)))
+    #   
+    #def test_hstack(self):
+    #    self._test_expr(cg.hstack(self.param_nn, self.param_n1))
+    #    self._test_expr(cg.hstack(self.param_np, self.const_n1, self.param_nn))
 
-    def test_index(self):
-        self._test_expr(self.param_mn[0:8:2, 1:17:3])
-        self._test_expr(self.param_n1[0:8:2])
-        self._test_expr(self.param_1n[:5])
-        self._test_expr(self.param_1n[5:])
+    #def test_index(self):
+    #    self._test_expr(self.param_mn[0:8:2, 1:17:3])
+    #    self._test_expr(self.param_n1[0:8:2])
+    #    self._test_expr(self.param_1n[:5])
+    #    self._test_expr(self.param_1n[5:])
 
-    def test_max_entries(self):
-        self._test_expr(cg.max_entries(self.param_mn))
-        self._test_expr(cg.max_entries(-self.param_n1[:4]))
+    #def test_max_entries(self):
+    #    self._test_expr(cg.max_entries(self.param_mn))
+    #    self._test_expr(cg.max_entries(-self.param_n1[:4]))
 
-    def test_mul(self):
-        self._test_expr(self.param_mn * self.param_np)
-        self._test_expr(self.param_mn * self.const_np)
-        self._test_expr(self.param_mn * self.param_n1)
-        self._test_expr(self.param_mn * self.param_11)
-        self._test_expr(self.param_11 * self.param_mn)
-        self._test_expr(self.const_mn * self.param_11)
-        self._test_expr(self.const_11 * self.param_mn)
+    #def test_mul(self):
+    #    self._test_expr(self.param_mn * self.param_np)
+    #    self._test_expr(self.param_mn * self.const_np)
+    #    self._test_expr(self.param_mn * self.param_n1)
+    #    self._test_expr(self.param_mn * self.param_11)
+    #    self._test_expr(self.param_11 * self.param_mn)
+    #    self._test_expr(self.const_mn * self.param_11)
+    #    self._test_expr(self.const_11 * self.param_mn)
 
-    def test_neg(self):
-        self._test_expr(-self.param_mn)
-        self._test_expr(-self.param_n1)
+    #def test_neg(self):
+    #    self._test_expr(-self.param_mn)
+    #    self._test_expr(-self.param_n1)
 
-    def test_reshape(self):
-        self._test_expr(cg.reshape(self.param_mn, self.n, self.m))
-        self._test_expr(cg.reshape(self.param_mn + self.const_mn, self.n, self.m))
-        self._test_expr(cg.reshape(self.param_n1, 1, self.n))
+    #def test_reshape(self):
+    #    self._test_expr(cg.reshape(self.param_mn, self.n, self.m))
+    #    self._test_expr(cg.reshape(self.param_mn + self.const_mn, self.n, self.m))
+    #    self._test_expr(cg.reshape(self.param_n1, 1, self.n))
 
-    def test_trace(self):
-        self._test_expr(cg.trace(self.param_nn))
-        self._test_expr(cg.trace(cg.diag(self.param_n1)))
-        self._test_expr(cg.trace(self.param_11))
+    #def test_trace(self):
+    #    self._test_expr(cg.trace(self.param_nn))
+    #    self._test_expr(cg.trace(cg.diag(self.param_n1)))
+    #    self._test_expr(cg.trace(self.param_11))
 
-    def test_vstack(self):
-        self._test_expr(cg.vstack(self.param_n1, self.param_11, self.const_11))
-        self._test_expr(cg.vstack(self.param_mn, self.param_pn, self.const_1n))
+    #def test_vstack(self):
+    #    self._test_expr(cg.vstack(self.param_n1, self.param_11, self.const_11))
+    #    self._test_expr(cg.vstack(self.param_mn, self.param_pn, self.const_1n))
+
+    def test_const_expr(self):
+        self._test_expr(cg.max_entries(self.const_nn) + self.param_11)
     
 
 

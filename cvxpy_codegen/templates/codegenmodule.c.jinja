@@ -49,7 +49,7 @@ static PyObject *solve_wrapper(PyObject *self, PyObject *args){
   {% for v in named_vars %}
   PyArrayObject *{{ v.name() }};
   {% endfor %}
-  PyObject *var_dict;
+  PyObject *return_dict;
 
   /* Parse the supplied parameter values. */
   char parse_str[] = "
@@ -93,23 +93,6 @@ static PyObject *solve_wrapper(PyObject *self, PyObject *args){
   printf("TP52\n");
 
 
-  {#
-  ///* Build a dictionary mapping the variable name to its Numpy array. */
-  //{% if len(named_vars) > 0 %}
-  //char dict_string[] = "{
-  //{%- for i in range(len(named_vars)-1) -%}
-  //s:O,
-  //{%- endfor -%}
-  //s:O}";
-  //var_dict = Py_BuildValue(dict_string,
-  //{% for v in named_vars[:-1] %}
-  //"{{ v.name() }}", {{ v.name() }},
-  //{% endfor %}
-  //"{{ named_vars[-1].name() }}", {{ named_vars[-1].name() }});
-  //printf("TP53\n");
-  #}
-
-
   /* Build a dictionary mapping the variable name to its Numpy array. */
   char dict_string[] = "({
   {%- if len(named_vars) > 0 -%}
@@ -119,14 +102,12 @@ static PyObject *solve_wrapper(PyObject *self, PyObject *args){
   s:O
   {%- endif -%}
   },{s:i,s:d})";
-  var_dict = Py_BuildValue(dict_string,
+  return_dict = Py_BuildValue(dict_string,
   {% for v in named_vars %}
   "{{ v.name() }}", {{ v.name() }},
   {% endfor %}
   status_str, work.status, objective_str, work.optval);
   printf("TP53\n");
-
-
 
   /* Release reference to the Numpy arrays. */
   {% for v in named_vars %}
@@ -135,10 +116,7 @@ static PyObject *solve_wrapper(PyObject *self, PyObject *args){
   {% endfor %}
   printf("TP54\n");
 
-
-  return var_dict;
-
-  // TODO: get statistics for the solution.
+  return return_dict;
 
 }
 
@@ -148,12 +126,6 @@ static PyMethodDef CvxpyCodegenSolverMethods[] = {
   { NULL, NULL, 0, NULL }
 };
 
-
-/* CODE FOR PYTHON 2.7 */
-// TODO
-
-
-/* CODE FOR PYTHON 3.5 */
 
 static struct PyModuleDef CvxpyCodegenSolverModule = {
   PyModuleDef_HEAD_INIT,

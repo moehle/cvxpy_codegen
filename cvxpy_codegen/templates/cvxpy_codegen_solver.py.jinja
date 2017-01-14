@@ -5,8 +5,6 @@ def cg_solve({%- for p in named_params -%}
               {{ p.name }},
               {%- endfor %}):
 
-    # TODO: allow user to pass vectors and scalars flexibly
-
     {% for p in named_params %}
     {{ p.name }} = numpy.ascontiguousarray(numpy.asmatrix({{ p.name }}), dtype=float)
     if {{p.name}}.shape != {{p.size}}:
@@ -17,7 +15,6 @@ def cg_solve({%- for p in named_params -%}
                                         {{ p.name }},
                                         {%- endfor %})
 
-    # TODO magic numbers
     s = stats_dict['status']
     if s == 0:
         s = 'optimal'
