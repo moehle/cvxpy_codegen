@@ -18,9 +18,6 @@
  */
 
 
-{% import "utils/utils.c.jinja" as u with context %}
-{% from 'linop_sym/linop_sym.c.jinja' import linop_handler_workspace with context %}
-
 #include "codegen.h"
 #include <stdio.h>
 
@@ -76,6 +73,8 @@ int main(){
       {%- endif -%};
     {% endfor %}
 
+
+    fill_param_tree(&params, &work);
 
     fill_matrices(&params, &work);
 

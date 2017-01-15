@@ -31,6 +31,7 @@ import cvxpy.problems.solvers.utilities as cvxpy_utils
 CVXPY_ECOS = cvxpy_utils.SOLVERS["ECOS"]
 
 class EcosIntf(EmbeddedSolverIntf):
+    # TODO clean up; many attributes are not used.
 
     name = 'ecos'
     REQ_INIT = True

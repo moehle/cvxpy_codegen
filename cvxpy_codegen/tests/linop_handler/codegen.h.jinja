@@ -17,8 +17,8 @@
  *  along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-{% import "utils/utils.c.jinja" as u with context %}
 {% from 'linop_sym/linop_sym.c.jinja' import linop_handler_workspace with context %}
+{% from 'param/param.c.jinja' import param_handler_workspace with context %}
 
 
 typedef struct params_struct{
@@ -31,7 +31,7 @@ typedef struct params_struct{
             [{{ p.size[1] }}]
         {%- else -%}
             [{{ p.size[0] }}][{{ p.size[1] }}]
-        {%- endif -%}
+        {%- endif -%};
     {% endfor %}
 } Params;
 
@@ -39,5 +39,11 @@ typedef struct params_struct{
 typedef struct work_struct{
 
     {{ linop_handler_workspace() }}
+
+    {{ param_handler_workspace() }}
+
+    /* Storage for integer and double workspaces. */
+    long work_int[{{ work_int }}];
+    double work_double[{{ work_float }}];
 
 } Work;

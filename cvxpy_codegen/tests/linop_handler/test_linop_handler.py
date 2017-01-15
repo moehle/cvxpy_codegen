@@ -154,6 +154,15 @@ class TestLinopHandler(tu.CodegenTestCase):
     
     
 
+    # Test combinations of linop_handler and param_handler:
+    
+    def test_combination(self):
+        self._test_expr(cg.sum_entries((self.param_mn * self.param_nn) * self.var_n1))
+        self._test_expr(cg.sum_entries((self.param_mn * self.const_nn) * self.var_n1))
+        self._test_expr(cg.sum_entries(-(self.param_mn * self.param_nn) * self.var_n1))
+        self._test_expr(cg.sum_entries(-(self.param_mn * self.const_nn) * self.var_n1))
+
+
 
 
     def _test_expr(self, expr, printing=False):
@@ -168,16 +177,7 @@ class TestLinopHandler(tu.CodegenTestCase):
         true_leq_coeff  = data[s.G]
         true_leq_offset = data[s.H]
 
-        # Set up linop handler.
-        sym_data = SymData(obj, constrs, ECOS)
-        constr_map = sym_data.constr_map
-        eq_constrs, leq_constrs, __ = ECOS.split_constr(constr_map)
-        linop_handler = LinOpHandlerSym(sym_data, obj, eq_constrs, leq_constrs)
-        template_vars = linop_handler.get_template_vars()
-        make_target_dir(target_dir)
-        linop_handler.render(target_dir)
-
-        # TODO should all remove this, to make linop test independent of param_handler:
+        # Do code generation
         vars = prob.variables()
         params = prob.parameters()
         obj, constraints = prob.canonical_form
@@ -236,7 +236,7 @@ class TestLinopHandler(tu.CodegenTestCase):
         prev_path = os.getcwd()
         os.chdir(target_dir)
         output = subprocess.check_output(
-                         ['gcc', 'harness.c', 'linop.c', '-o' 'main'],
+                         ['gcc', 'harness.c', 'linop.c', 'param.c', '-o' 'main'],
                          stderr=subprocess.STDOUT)
         exec_output = subprocess.check_output(['./main'], stderr=subprocess.STDOUT)
         os.chdir(prev_path)
