@@ -9,6 +9,8 @@ IMPLEMENTED:
   affine.hstack
     affine.bmat
   max_entries
+  affine.index
+  affine.diag
 
 NEEDS PSD CONE:
   lambda_max
@@ -62,8 +64,6 @@ SCALAR:
   total_variation
   affine.sum_entries
 AFFINE:
-  affine.index
-  affine.diag
   affine.diff
   affine.conv
   affine.cumsum

@@ -21,6 +21,8 @@
 
 {% from "atoms/abs.c.jinja" import abs_declare, abs_define, abs_eval with context%}
 {% from "atoms/add.c.jinja" import add_declare, add_define, add_eval with context%}
+{% from "atoms/scalar_add.c.jinja" import scalar_add_declare, scalar_add_define, scalar_add_eval with context%}
+{% from "atoms/scalar_radd.c.jinja" import scalar_radd_declare, scalar_radd_define, scalar_radd_eval with context%}
 {% from "atoms/diag_mat.c.jinja" import diag_mat_declare, diag_mat_define, diag_mat_eval with context%}
 {% from "atoms/diag_vec.c.jinja" import diag_vec_declare, diag_vec_define, diag_vec_eval with context%}
 {% from "atoms/hstack.c.jinja" import hstack_declare, hstack_define, hstack_eval with context%}

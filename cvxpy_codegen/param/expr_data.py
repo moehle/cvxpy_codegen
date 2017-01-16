@@ -123,9 +123,8 @@ class AtomData(ExprData):
         self.work_int = work_int
         self.work_float = work_float
         has_const_or_param = \
-                any([type(a)=='const' or type(a)=='param' for a in arg_data])
-        #if inplace and has_const_or_param: # This condition is too weak (ie, wrong)
-        if inplace: # TODO this condition is too strong (ie, conservative)
+                any([a.type =='const' or a.type =='param' for a in arg_data])
+        if inplace and has_const_or_param:
             self.make_copy = True
         else:
             self.make_copy = False

@@ -22,17 +22,37 @@ from cvxpy_codegen.param.expr_data import AtomData
 def getdata_add(expr, arg_data):
     data = arg_data[0]
     sparsity = arg_data[0].sparsity
-    work_int = arg_data[0].sparsity.shape[1]
-    work_float = arg_data[0].sparsity.shape[1]
 
     data_list = []
     for i, arg in enumerate(arg_data[1:]):
-        sparsity += arg.sparsity
+        if data.size == (1,1):
+            sparsity = arg.sparsity
+            macro_name = 'scalar_add'
+            work_int = 0
+            work_float = 0
+            inplace = True
+            copy_arg = 1
+        elif arg.size == (1,1):
+            sparsity = data.sparsity
+            macro_name = 'scalar_radd'
+            work_int = 0
+            work_float = 0
+            inplace = True
+            copy_arg = 0
+        else:
+            sparsity += arg.sparsity
+            macro_name = 'add'
+            work_int = arg.sparsity.shape[1]
+            work_float = arg.sparsity.shape[1]
+            inplace = False
+            copy_arg = 0
         data = AtomData(expr, arg_data = [data, arg],
-                        macro_name = "add",
+                        macro_name = macro_name,
                         sparsity = sparsity,
                         work_int = work_int,
-                        work_float = work_float)
+                        work_float = work_float,
+                        inplace = inplace,
+                        copy_arg = copy_arg)
         data_list += [data]
 
     return data_list

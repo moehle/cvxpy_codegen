@@ -122,8 +122,9 @@ class ParamHandler():
                     self.expressions += data_list
                     data = data_list[-1]
                     self.expr_ids += [id(expr)]
-                    if data.macro_name not in self.unique_exprs: # Check if already there.
-                         self.unique_exprs += [data.macro_name]
+                    for d in data_list:
+                        if d.macro_name not in self.unique_exprs: # Check if already there.
+                            self.unique_exprs += [d.macro_name]
         else:
             raise TypeError('Invalid expression tree type: %s' % type(expr))
 
