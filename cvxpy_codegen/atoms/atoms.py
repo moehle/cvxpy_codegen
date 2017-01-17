@@ -17,19 +17,20 @@ You should have received a copy of the GNU General Public License
 along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from cvxpy_codegen.atoms.mul import *
-from cvxpy_codegen.atoms.add import *
-from cvxpy_codegen.atoms.pos import *
 from cvxpy_codegen.atoms.abs import *
-from cvxpy_codegen.atoms.trace import *
-from cvxpy_codegen.atoms.max_entries import *
-from cvxpy_codegen.atoms.neg import *
-from cvxpy_codegen.atoms.vstack import *
-from cvxpy_codegen.atoms.hstack import *
-from cvxpy_codegen.atoms.index import *
+from cvxpy_codegen.atoms.add import *
 from cvxpy_codegen.atoms.diag_vec import *
 from cvxpy_codegen.atoms.diag_mat import *
+from cvxpy_codegen.atoms.hstack import *
+from cvxpy_codegen.atoms.index import *
+from cvxpy_codegen.atoms.max_entries import *
+from cvxpy_codegen.atoms.mul import *
+from cvxpy_codegen.atoms.mul_elemwise import *
+from cvxpy_codegen.atoms.neg import *
+from cvxpy_codegen.atoms.pos import *
 from cvxpy_codegen.atoms.reshape import *
+from cvxpy_codegen.atoms.trace import *
+from cvxpy_codegen.atoms.vstack import *
 
 
 from cvxpy.atoms.affine.binary_operators import MulExpression
@@ -41,6 +42,7 @@ from cvxpy.atoms.affine.hstack import hstack
 from cvxpy.atoms.affine.diag import diag_vec, diag_mat
 from cvxpy.atoms.affine.reshape import reshape
 from cvxpy.atoms.affine.index import index
+from cvxpy.atoms.affine.mul_elemwise import mul_elemwise
 from cvxpy.atoms import *
 
 
@@ -50,6 +52,7 @@ GET_ATOMDATA = {MulExpression : getdata_mul,
                 pos           : getdata_pos,
                 vstack        : getdata_vstack,
                 hstack        : getdata_hstack,
+                mul_elemwise  : getdata_mul_elemwise,
                 index         : getdata_index,
                 diag_vec      : getdata_diag_vec,
                 diag_mat      : getdata_diag_mat,

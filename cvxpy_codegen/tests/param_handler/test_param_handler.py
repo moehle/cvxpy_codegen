@@ -114,6 +114,14 @@ class TestParamHandler(tu.CodegenTestCase):
         self._test_expr(self.const_mn * self.param_11)
         self._test_expr(self.const_11 * self.param_mn)
 
+    def test_mul_elemwise(self):
+        self._test_expr(cg.mul_elemwise(self.param_mn, self.const_mn))
+        self._test_expr(cg.mul_elemwise(self.param_mn, self.param_mn))
+        self._test_expr(cg.mul_elemwise(self.param_n1, self.param_n1))
+        self._test_expr(cg.mul_elemwise(self.param_n1, self.const_n1))
+        self._test_expr(cg.mul_elemwise(self.param_11, self.param_11))
+        self._test_expr(cg.mul_elemwise(self.param_11, self.const_11))
+
     def test_neg(self):
         self._test_expr(-self.param_mn)
         self._test_expr(-self.param_n1)
