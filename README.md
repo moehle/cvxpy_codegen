@@ -15,6 +15,8 @@ The parameter `a` defines a specific problem instance in the family; for every s
 To make this all concrete, let's try a simple least-squares problem:
 
     import cvxpy_codegen as cg
+    m = 10
+    n = 5
     A = cg.Parameter(m, n, name='A')
     b = cg.Parameter(m, name='b')
     x = cg.Variable(n, name='x')
@@ -49,9 +51,9 @@ As a more sophistocated example, we consider a constrained, linear optimal contr
     m = 3
     T = 15
 
-    A  = cg.Parameter(n, n, name='A',  value=np.eye(n) + .2*np.random.randn(n,n))
-    B  = cg.Parameter(n, m, name='B',  value=5*np.random.randn(n,m))
-    x0 = cg.Parameter(n, 1, name='x0', value=5*np.random.randn(n,1))
+    A  = cg.Parameter(n, n, name='A')
+    B  = cg.Parameter(n, m, name='B')
+    x0 = cg.Parameter(n, 1, name='x0')
 
     x = cg.Variable(n, T+1, name='x')
     u = cg.Variable(m, T, name='u')
