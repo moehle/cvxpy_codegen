@@ -24,7 +24,6 @@ import os
 from jinja2 import Environment, PackageLoader, contextfilter
 
 PKG_PATH = os.path.dirname(os.path.abspath(__path__[0]))
-FILE_SEP = '/' # TODO generalize for windows
 EXP_CONE_LENGTH = 3
 
 class Counter():
@@ -78,6 +77,6 @@ def render(target_dir, template_vars, template_path, target_name):
     env.filters['call_macro'] = call_macro
 
     template = env.get_template(template_path)
-    f = open(target_dir + FILE_SEP + target_name, 'w')
+    f = open(os.path.join(target_dir, target_name), 'w')
     f.write(template.render(total_template_vars))
     f.close()
