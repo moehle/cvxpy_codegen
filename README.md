@@ -28,7 +28,7 @@ Then the generated code is available in the `least_squares_example` directory (w
 
     cd ~/least_squares_example
     make
-    ./test_solver
+    ./example_problem
 
 If you'd rather not use random data, you can specify the data to be used by adding 
 
