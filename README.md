@@ -70,7 +70,7 @@ As a more sophistocated example, we consider a constrained, linear optimal contr
     prob.codegen('opt_ctrl_example')
 
 #### Installation
-To install, clone this repository, `cd` over the directory of the cloned repo, and run `python setup.py install`.  Currently, CVXPY-CODEGEN is not available through any Python repository.
+To install, clone this repository, `cd` over the directory of the cloned repo, and run `python setup.py install`.  Currently, CVXPY-CODEGEN is not available through any Python repository.  CVXPY-CODEGEN was only tested in Linux with Python 3.5.
 
 #### Limitations
 It is *not* possible (and will never be possible) to change the dimensions of the parameters within a single family of convex problems.
