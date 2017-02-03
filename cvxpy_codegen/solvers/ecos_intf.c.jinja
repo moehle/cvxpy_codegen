@@ -20,7 +20,6 @@
 {% import "utils/utils.c.jinja" as u with context %}
 #include "codegen.h"
 #include "ecos.h"
-#include <stdio.h> // TODO
 #include <math.h>
 
 
@@ -37,12 +36,11 @@ void solver_init(Work *work){
 
     /* Zero out the floating point values to avoid numerical difficulties. */
     long i;
-    // TODO economize here?
     for (i=0; i<{{  eq_nnz  }}; i++)  work->eq_nzval[i]   = 0;
     for (i=0; i<{{ leq_nnz  }}; i++)  work->leq_nzval[i]  = 0;
     for (i=0; i<{{  eq_dim  }}; i++)  work->eq_offset[i]  = 0;
     for (i=0; i<{{ leq_dim  }}; i++)  work->leq_offset[i] = 0;
-    for (i=0; i<{{ x_length }}; i++)  work->obj_coeff[i]    = 0;
+    for (i=0; i<{{ x_length }}; i++)  work->obj_coeff[i]  = 0;
 
     work->solver_work = ECOS_setup({{ x_length }}, {{ cone_dim }}, {{ eq_dim }},
                                    {{ leq_dim }}, {{ len(soc_dims) }}, soc_sizes, {{ exp_cones }}, 
@@ -56,20 +54,12 @@ void solver_init(Work *work){
 /* Solve the problem using ECOS. */
 void solver_solve(Work *work){
 
-    printf("TP1.0\n");
-
     idxint solver_flag;
-
-    printf("TP1.1\n");
 
     ECOS_updateData(work->solver_work, work->leq_nzval, work->eq_nzval,
                      work->obj_coeff, work->leq_offset, work->eq_offset);
 
-    printf("TP1.2\n");
-
     solver_flag = ECOS_solve(work->solver_work);
-
-    printf("TP1.3\n");
 
     work->primal_var = work->solver_work->x;
     work->dual_eq_var = work->solver_work->y;
@@ -106,8 +96,6 @@ void solver_solve(Work *work){
 
     }
 
-
-    printf("TP1.4\n");
 } 
 
 

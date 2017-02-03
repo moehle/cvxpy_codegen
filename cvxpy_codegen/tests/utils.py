@@ -20,7 +20,7 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 import os
 import shutil as sh
 import imp
-from cvxpy_codegen.utils.utils import FILE_SEP, PKG_PATH
+from cvxpy_codegen.utils.utils import PKG_PATH
 import unittest
 import subprocess
 import sys
@@ -28,7 +28,7 @@ import numpy as np
 import scipy.sparse as sp
 
 
-TARGET_DIR = os.getcwd() + FILE_SEP + 'cg_build'
+TARGET_DIR = os.path.join(os.getcwd(), 'cg_build')
 
 
 class CodegenTestCase(unittest.TestCase):

@@ -28,7 +28,7 @@ setup(
               'cvxpy_codegen.tests',
               'cvxpy_codegen.tests.param_handler',
               'cvxpy_codegen.tests.linop_handler',
-              'cvxpy_codegen.utils'], # TODO remove utils dir
+              'cvxpy_codegen.utils'],
     package_dir={'cvxpy_codegen': 'cvxpy_codegen'},
     package_data={'cvxpy_codegen.param'               : ['param.c.jinja'],
                   'cvxpy_codegen.atoms'               : ['*.jinja'],
@@ -38,12 +38,13 @@ setup(
                   'cvxpy_codegen.tests.linop_handler' : ['*.jinja'],
                   'cvxpy_codegen.utils'               : ['utils.c.jinja'],
                   'cvxpy_codegen.templates'           : ['*.jinja']},
-    url='http://github.com/cvxgrp/cvxpy-codegen/', # TODO
+    url='http://github.com/moehle/cvxpy-codegen/',
     license='GPLv3',
-    zip_safe=False, # TODO
+    zip_safe=False,
     description='Embedded C code generation for convex optimization problem using CVXPY.',
     install_requires=["ecos >= 2",
-                      "cvxpy >= 0.4", # TODO check
+                      "cvxpy >= 0.4, <1.0",
                       "numpy >= 1.9",
+                      "jinja2 >= 2.8",
                       "scipy >= 0.15"],
 )

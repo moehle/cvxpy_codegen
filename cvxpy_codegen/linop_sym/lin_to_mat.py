@@ -18,7 +18,7 @@ along with CVXPY.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import cvxpy.lin_ops.lin_op as lo
-import cvxpy.interface as intf # TODO
+import cvxpy.interface as intf
 import numpy as np
 import scipy.sparse as sp
 import scipy.linalg as sp_la

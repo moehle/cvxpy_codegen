@@ -21,7 +21,6 @@
 {% import "utils/utils.c.jinja" as u with context %}
 {% import 'solvers/'+solver_name+"_intf.c.jinja" as solver with context %}
 #include "codegen.h"
-#include <stdio.h>
 
 
 /* Functions defined in solver interface. */
@@ -48,8 +47,6 @@ void cg_init(Work *work){
 /* Main solve function */
 int cg_solve(Params *params, Work *work, Vars *vars){
 
-    printf("TP-2\n");
-
     {% if expressions %}
     /* Get values for the internal params */
     fill_param_tree(params, work);
@@ -58,17 +55,11 @@ int cg_solve(Params *params, Work *work, Vars *vars){
     /* Fill the data matrices using the parameters */
     fill_matrices(params, work);
 
-    printf("TP0\n");
-
     /* Call the solver to solve the problem */
     solver_solve(work);
 
-    printf("TP1\n");
-
     /* Get the user-defined variable values */
     recover_vars(work, vars);
-
-    printf("TP2\n");
 
     return(work->status);
 }

@@ -19,24 +19,40 @@
 
 {% import "utils/utils.c.jinja" as u with context %}
 
-{% from "atoms/abs.c.jinja" import abs_declare, abs_define, abs_eval with context%}
-{% from "atoms/add.c.jinja" import add_declare, add_define, add_eval with context%}
-{% from "atoms/scalar_add.c.jinja" import scalar_add_declare, scalar_add_define, scalar_add_eval with context%}
-{% from "atoms/scalar_radd.c.jinja" import scalar_radd_declare, scalar_radd_define, scalar_radd_eval with context%}
-{% from "atoms/diag_mat.c.jinja" import diag_mat_declare, diag_mat_define, diag_mat_eval with context%}
-{% from "atoms/diag_vec.c.jinja" import diag_vec_declare, diag_vec_define, diag_vec_eval with context%}
-{% from "atoms/hstack.c.jinja" import hstack_declare, hstack_define, hstack_eval with context%}
-{% from "atoms/index.c.jinja" import index_declare, index_define, index_eval with context%}
-{% from "atoms/max_entries.c.jinja" import max_entries_declare, max_entries_define, max_entries_eval with context%}
-{% from "atoms/mul.c.jinja" import mul_declare, mul_define, mul_eval with context%}
-{% from "atoms/mul_elemwise.c.jinja" import mul_elemwise_declare, mul_elemwise_define, mul_elemwise_eval with context%}
-{% from "atoms/scalar_mul.c.jinja" import scalar_mul_declare, scalar_mul_define, scalar_mul_eval with context%}
-{% from "atoms/scalar_rmul.c.jinja" import scalar_rmul_declare, scalar_rmul_define, scalar_rmul_eval with context%}
-{% from "atoms/neg.c.jinja" import neg_declare, neg_define, neg_eval with context%}
-{% from "atoms/reshape.c.jinja" import reshape_declare, reshape_define, reshape_eval with context%}
-{% from "atoms/trace.c.jinja" import trace_declare, trace_define, trace_eval with context%}
-{% from "atoms/vstack.c.jinja" import vstack_declare, vstack_define, vstack_eval with context%}
-{# TODO make nicer ^^^ #}
+{% from "atoms/abs.c.jinja"
+      import abs_declare, abs_define, abs_eval with context%}
+{% from "atoms/add.c.jinja" 
+      import add_declare, add_define, add_eval with context%}
+{% from "atoms/scalar_add.c.jinja" 
+      import scalar_add_declare, scalar_add_define, scalar_add_eval with context%}
+{% from "atoms/scalar_radd.c.jinja" 
+      import scalar_radd_declare, scalar_radd_define, scalar_radd_eval with context%}
+{% from "atoms/diag_mat.c.jinja" 
+      import diag_mat_declare, diag_mat_define, diag_mat_eval with context%}
+{% from "atoms/diag_vec.c.jinja" 
+      import diag_vec_declare, diag_vec_define, diag_vec_eval with context%}
+{% from "atoms/hstack.c.jinja" 
+      import hstack_declare, hstack_define, hstack_eval with context%}
+{% from "atoms/index.c.jinja" 
+      import index_declare, index_define, index_eval with context%}
+{% from "atoms/max_entries.c.jinja" 
+      import max_entries_declare, max_entries_define, max_entries_eval with context%}
+{% from "atoms/mul.c.jinja" 
+      import mul_declare, mul_define, mul_eval with context%}
+{% from "atoms/mul_elemwise.c.jinja" 
+      import mul_elemwise_declare, mul_elemwise_define, mul_elemwise_eval with context%}
+{% from "atoms/scalar_mul.c.jinja" 
+      import scalar_mul_declare, scalar_mul_define, scalar_mul_eval with context%}
+{% from "atoms/scalar_rmul.c.jinja" 
+      import scalar_rmul_declare, scalar_rmul_define, scalar_rmul_eval with context%}
+{% from "atoms/neg.c.jinja" 
+      import neg_declare, neg_define, neg_eval with context%}
+{% from "atoms/reshape.c.jinja" 
+      import reshape_declare, reshape_define, reshape_eval with context%}
+{% from "atoms/trace.c.jinja" 
+      import trace_declare, trace_define, trace_eval with context%}
+{% from "atoms/vstack.c.jinja" 
+      import vstack_declare, vstack_define, vstack_eval with context%}
 
 
 {% macro declare(macro_name) %}

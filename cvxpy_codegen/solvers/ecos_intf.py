@@ -18,12 +18,11 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from jinja2 import Environment, PackageLoader, contextfilter
-from cvxpy_codegen.utils.utils import FILE_SEP, call_macro
+from cvxpy_codegen.utils.utils import render, PKG_PATH, EXP_CONE_LENGTH, call_macro
 from cvxpy_codegen.solvers.embedded_solver_intf import EmbeddedSolverIntf
 import os
 import shutil as sh
 import cvxpy.settings as s
-from cvxpy_codegen.utils.utils import render, PKG_PATH, EXP_CONE_LENGTH
 from glob import glob
 import ecos
 import cvxpy.problems.solvers.utilities as cvxpy_utils
@@ -31,19 +30,14 @@ import cvxpy.problems.solvers.utilities as cvxpy_utils
 CVXPY_ECOS = cvxpy_utils.SOLVERS["ECOS"]
 
 class EcosIntf(EmbeddedSolverIntf):
-    # TODO clean up; many attributes are not used.
-
     name = 'ecos'
-    REQ_INIT = True
-    REQ_CLEANUP = True
     SOLVER_TEMPLATE = "solvers/ecos_intf.c.jinja"
 
-    SOURCE_DIR = PKG_PATH + FILE_SEP + 'cvxpy_codegen/solvers/ecos'
+    SOURCE_DIR = os.path.join(PKG_PATH, 'cvxpy_codegen/solvers/ecos')
     IGNORES = None
 
-    # How should CVXPY should handle get sym_data for this embedded solver:
+    # How should CVXPY should handle sym_data for this embedded solver:
     CVXPY_SOLVER = CVXPY_ECOS
-
 
     # Macros to be used for the Python interface.
     DEFINE_MACROS = [('PYTHON',None),
@@ -93,7 +87,7 @@ class EcosIntf(EmbeddedSolverIntf):
         dims = sym_data.dims
         cone_dim = (dims[s.LEQ_DIM] + 
                     EXP_CONE_LENGTH*dims[s.EXP_DIM] + 
-                    sum(dims[s.SOC_DIM])) # TODO
+                    sum(dims[s.SOC_DIM]))
 
         self.template_vars.update({
                 'leq_dim'      :    dims[s.LEQ_DIM],
@@ -111,11 +105,11 @@ class EcosIntf(EmbeddedSolverIntf):
 
     # ECOS doesn't really have code gen, so just copy all the source files:
     def render(self, target_dir):
-        solver_dir = target_dir + FILE_SEP + self.name
+        solver_dir = os.path.join(target_dir, self.name)
         
         # make target directory
         if os.path.exists(solver_dir):
-            sh.rmtree(solver_dir)  # TODO this is destructive
+            sh.rmtree(solver_dir)
         
         # Copy ecos source files
         sh.copytree(self.SOURCE_DIR, solver_dir, ignore=self.IGNORES)

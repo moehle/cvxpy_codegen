@@ -23,7 +23,6 @@ import cvxpy.lin_ops as lo
 import cvxpy_codegen.linop_sym.sym_matrix as sym
 from cvxpy_codegen.linop_sym.sym_expr import SymAdd, SymMult, SymDiv, SymParam, SymConst
 from cvxpy_codegen import Variable
-#from cvxpy_codegen.utils.utils import FILE_SEP, call_macro, DEFAULT_TEMPLATE_VARS
 from cvxpy_codegen.utils.utils import render, EXP_CONE_LENGTH
 import cvxpy.settings as s
 

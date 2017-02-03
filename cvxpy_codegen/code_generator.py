@@ -22,7 +22,7 @@ from cvxpy_codegen.templates.template_handler import TemplateHandler
 from cvxpy.problems.problem_data.sym_data import SymData
 from cvxpy_codegen.linop_sym.linop_handler_sym import LinOpHandlerSym
 from cvxpy_codegen.solvers.solver_intfs import SOLVER_INTFS
-from cvxpy_codegen.utils.utils import FILE_SEP, make_target_dir
+from cvxpy_codegen.utils.utils import make_target_dir
 import cvxpy.settings as s
 import numpy as np
 import os

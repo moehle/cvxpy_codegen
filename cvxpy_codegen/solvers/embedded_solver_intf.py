@@ -19,4 +19,4 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 
 class EmbeddedSolverIntf():
     def __init__(self):
-         a = 5 # TODO
+        return None

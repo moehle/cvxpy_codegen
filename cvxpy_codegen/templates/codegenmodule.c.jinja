@@ -18,8 +18,6 @@
  */
 
 #include <Python.h>
-#include <stdio.h>
-#include "amd.h"
 #include "codegen.h"
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include "numpy/arrayobject.h"
@@ -69,16 +67,13 @@ static PyObject *solve_wrapper(PyObject *self, PyObject *args){
   {% for p in named_params %}
   // memcpy(params.{{ p.name }}, {{ p.name }}->data, {{ p.size[0]*p.size[1] }}*sizeof(double));
   memcpy(params.{{ p.name }}, PyArray_DATA({{ p.name }}), {{ p.size[0]*p.size[1] }}*sizeof(double));
-  // printf("{{p.name}}[0] = %f\n", params.{{p.name}}[0][0]);
   {% endfor %}
 
 
   /* Setup, solve, and clean up. */
   cg_init(&work);
   cg_solve(&params, &work, &vars);
-  printf("TP50\n");
   cg_cleanup(&work);
-  printf("TP51\n");
 
   /* Convert the variables from the structure into Numpy arrays. */
   {% for v in named_vars %}
@@ -90,7 +85,6 @@ static PyObject *solve_wrapper(PyObject *self, PyObject *args){
   // memcpy({{ v.name() }}->data, vars.{{ v.name() }}[0], {{ v.size[0]*v.size[1] }}*sizeof(double));
   memcpy(PyArray_DATA({{ v.name() }}), vars.{{ v.name() }}[0], {{ v.size[0]*v.size[1] }}*sizeof(double));
   {% endfor %}
-  printf("TP52\n");
 
 
   /* Build a dictionary mapping the variable name to its Numpy array. */
@@ -107,14 +101,11 @@ static PyObject *solve_wrapper(PyObject *self, PyObject *args){
   "{{ v.name() }}", {{ v.name() }},
   {% endfor %}
   status_str, work.status, objective_str, work.optval);
-  printf("TP53\n");
 
   /* Release reference to the Numpy arrays. */
   {% for v in named_vars %}
-  // printf("{{v.name()}}[0] = %f\n", {{v.name()}}->data[0]);
   Py_DECREF({{ v.name() }});
   {% endfor %}
-  printf("TP54\n");
 
   return return_dict;
 

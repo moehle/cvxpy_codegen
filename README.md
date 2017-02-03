@@ -69,5 +69,15 @@ As a more sophistocated example, we consider a constrained, linear optimal contr
     prob = cg.Problem(cg.Minimize(obj), constr)
     prob.codegen('opt_ctrl_example')
 
+#### Installation
+To install, clone this repository, `cd` over the directory of the cloned repo, and run `python setup.py install`.  Currently, CVXPY-CODEGEN is not available through any Python repository.
+
 #### Limitations
-Due to the current solver, and the way CVXPY works, it's not possible to use a parameter as the positive semidefinite matrix in the `quad_form` atom. (As a partial fix, we *can* use `sum_squares(L*x)`, using the Cholesky factor `L` as a parameter instead of the positive semidefinite matrix itself.)
+It is *not* possible (and will never be possible) to change the dimensions of the parameters within a single family of convex problems.
+
+Sparse parameters are not currently supported.
+
+Due to the way CVXPY currently works, it's not possible to use a parameter as the positive semidefinite matrix in the `quad_form` atom. (As a partial fix, we *can* use `sum_squares(L*x)`, using the Cholesky factor `L` as a parameter instead of the positive semidefinite matrix itself.)
+
+#### License
+CVXPY-CODEGEN is currently licensed under GPL version 3.  This is because the only supported backend solver, ECOS, is under GPL version 3.  (If you have a different license for ECOS, I'd be more than happy to provide a more permissive license for CVXPY-CODEGEN.)  I am planning on adding at least one more solver, in which case the license for the generated code would have the most permissive license compatible with the chosen backend solver.

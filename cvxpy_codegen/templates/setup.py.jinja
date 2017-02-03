@@ -1,4 +1,4 @@
-from distutils.core import run_setup, setup, Extension # TODO rm run_setup
+from distutils.core import setup, Extension
         
 SOURCES = ([
 {% for s in solver_sources + intf_sources %}
@@ -17,7 +17,7 @@ DEFINE_MACROS = ([
 
 
 ext = Extension("_cvxpy_codegen_solver",
-                libraries = ['rt'], # TODO necessary? right place?
+                libraries = ['rt'],
                 define_macros = DEFINE_MACROS,
                 sources = SOURCES,
                 include_dirs = INCLUDE_DIRS)

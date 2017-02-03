@@ -7,8 +7,7 @@
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- *  
- *  CVXPY-CODEGEN is distributed in the hope that it will be useful,
+ *  *  CVXPY-CODEGEN is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
@@ -30,10 +29,10 @@ int main(){
 
     {% for p in named_params %}
       {%- if p.is_scalar -%}
-    params.{{ p.name }} = {{ p.value }};
+    params.{{ p.name }} = {{ p.value[0,0] }};
       {%- elif p.is_column -%}
         {% for i in range(p.size[0]) %}
-    params.{{ p.name }}[{{ i }}] = {{ p.value[i,0] }}; {# TODO should have no 0 idx? #}
+    params.{{ p.name }}[{{ i }}] = {{ p.value[i,0] }};
         {% endfor %}
       {%- elif p.is_row -%}
         {% for j in range(p.size[1]) %}
