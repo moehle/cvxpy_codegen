@@ -25,7 +25,6 @@ from cvxpy_codegen.solvers.solver_intfs import SOLVER_INTFS
 from cvxpy_codegen.utils.utils import make_target_dir
 import cvxpy.settings as s
 import numpy as np
-import os
 
 
 

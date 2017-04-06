@@ -46,7 +46,6 @@ def call_macro(context, macro_name, *args , **kwargs):
     return context.vars[macro_name](*args, **kwargs)
 
 
-
 def make_target_dir(target_dir):
     target_dir = os.path.abspath(target_dir)
     if not os.path.exists(target_dir):
@@ -54,16 +53,16 @@ def make_target_dir(target_dir):
 
 
 # General functions and classes needed to evaluate the templates. # TODO review these
-DEFAULT_TEMPLATE_VARS = {'isinstance' :  isinstance,
-                         'len'        :  len,
-                         'enumerate'  :  enumerate,
-                         'id': id, 
-                         'type': type,
-                         'set': set,
+DEFAULT_TEMPLATE_VARS = {'isinstance' : isinstance,
+                         'len'        : len,
+                         'enumerate'  : enumerate,
+                         'id'         : id, 
+                         'type'       : type,
+                         'set'        : set,
                          'CallbackParam': CallbackParam,
-                         'Constant': Constant,
-                         'Parameter': Parameter,
-                         'Variable': Variable }
+                         'Constant'   : Constant,
+                         'Parameter'  : Parameter,
+                         'Variable'   : Variable }
 
 
 def render(target_dir, template_vars, template_path, target_name):

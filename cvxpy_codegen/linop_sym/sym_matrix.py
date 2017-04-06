@@ -20,7 +20,6 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 import scipy.sparse as sp
 from cvxpy_codegen import Parameter, CallbackParam
 import numpy as np
-from numba import jit
 from cvxpy_codegen.linop_sym.sym_expr import SymConst, SymParam, SymExpr
 
 class SymMatrix():
