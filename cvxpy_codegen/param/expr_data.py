@@ -53,7 +53,7 @@ class ParamData(ExprData):
         self.type = 'param'
         self.name = expr.name()
         if expr.value is None:
-            self.value = np.random.randn(*expr.size)
+            self.value = np.squeeze(np.random.randn(*expr.size))
         else:
             self.value = expr.value
         self.var_ids = [CONST_ID]
