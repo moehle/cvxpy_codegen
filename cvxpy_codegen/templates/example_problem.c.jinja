@@ -29,7 +29,7 @@ int main(){
 
     {% for p in named_params %}
       {%- if p.is_scalar -%}
-    params.{{ p.name }} = {{ p.value[0,0] }};
+    params.{{ p.name }} = {{ p.value }};
       {%- elif p.is_column -%}
         {% for i in range(p.size[0]) %}
     params.{{ p.name }}[{{ i }}] = {{ p.value[i,0] }};
