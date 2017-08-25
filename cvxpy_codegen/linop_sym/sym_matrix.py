@@ -81,17 +81,24 @@ class SymMatrix():
         return self.Ap[-1]
 
 
+    def print_Ap(self, ):
+        return NotImplemented
+
+    def print_Ai(self):
+        #for i in self.Ai:
+        #   s += "work->eq_nzval[%d] = %d;", % (i, );
+        return NotImplemented
+
+    def print_Ax(self, prefix = ""):
+        s = ""
+        for p, elem in enumerate(self.Ax):
+           s += '%s[%d] = %s;\n' % (prefix, p, elem.print());
+        return s
+
+
     def __mul__(self, arg):
         arg_scalar = get_scalar(arg)
         self_scalar = get_scalar(self)
-        #print("\n\nTHIS")
-        #print(self)
-        #print(self.shape)
-        #print(self_scalar)
-        #print(arg)
-        #print(arg.shape)
-        #print(arg_scalar)
-        #print("THAT")
         if arg_scalar:
             return self.mul_elem(arg_scalar)
         elif self_scalar:
@@ -273,9 +280,6 @@ def transpose(A):
     Atp[0] = 0
 
     return SymMatrix(Atp, Ati, Atx, A.n, A.m)
-
-
-
 
 
 def kron(B, A):

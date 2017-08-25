@@ -1,4 +1,3 @@
-{% import "utils/utils.c.jinja" as u with context %}
 {% from 'solvers/'+solver_name+"_intf.c.jinja" import solver_workspace with context %}
 {% from 'param/param.c.jinja' import param_handler_workspace with context %}
 {% from 'linop_sym/linop_sym.c.jinja' import linop_handler_workspace with context %}

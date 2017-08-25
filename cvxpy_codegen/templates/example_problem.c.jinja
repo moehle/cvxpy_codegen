@@ -16,7 +16,6 @@
  *  along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-{% import "utils/utils.c.jinja" as u with context %}
 #include "codegen.h"
 #include <stdio.h>
 
@@ -51,7 +50,14 @@ int main(){
     cg_solve(&params, &work, &vars);
     cg_cleanup(&work); 
 
+
+    printf("Optimal value: %f\n", work.optval);
+
     {% for var in named_vars %}
+      {#
+      {{ cprint_var(var) }}
+      #}
+      
       {% for i in range(var.size[0]) %}
         {% for j in range(var.size[1]) %}
     printf("{{ var.name() }}[{{ i }}][{{ j }}] = %f\n", vars.{{ var.name() }}[{{ i }}][{{ j }}]);

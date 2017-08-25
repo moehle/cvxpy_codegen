@@ -202,3 +202,6 @@ class LinOpHandlerSym():
     def render(self, target_dir):
         render(target_dir, self.template_vars,
                'linop_sym/linop_sym.c.jinja', 'linop.c')
+
+
+#TODO clean up this file

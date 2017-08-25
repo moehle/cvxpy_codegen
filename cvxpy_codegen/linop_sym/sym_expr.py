@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-
+from cvxpy.expressions.constants.callback_param import CallbackParam
 
 class SymExpr():
     "abstract class"
@@ -62,7 +62,21 @@ class SymParam(SymExpr):
         self.nz_idx = nz_idx
 
     def print(self):
-        return(self.param.name()+'['+str(self.idx[0])+','+str(self.idx[1])+']')
+        p = self.param
+        if isinstance(p, CallbackParam): # These are sparse.
+            s = 'work->' + p.name()
+            s += "_nzval[%d]" % self.nz_idx
+        else: # Is a param.  These are dense.
+            s = 'params->' + p.name()
+            if p.size == (1,1):
+                s += "" # TODO  rm? how?
+            elif p.size[1] == 1:
+                s += "[%d]" % self.idx[0]
+            elif p.size[0] == 1:
+                s += "[%d]"
+            else:
+                s += "[%d][%d]" % (self.idx[0], self.idx[1])
+        return s
 
     @property
     def value(self):

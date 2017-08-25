@@ -30,6 +30,16 @@ import numpy as np
 
 
 
+# TODO this doesn't seem to work, and should maybe be moved elsewhere
+def cprint_var(var):
+    s = ""
+    for i in range(var.size[0]):
+        for j in range(var.size[1]):
+            s += '"  printf(\%s[\%d][\%d] = \%f\n", vars.%s[%d][%d];' % (var.name(), i, j)
+    return s
+
+
+
 class CodeGenerator:
     
 
@@ -51,7 +61,8 @@ class CodeGenerator:
 
         # TODO rm params, so all params hanlded by the param_handler:
         self.template_vars = {'named_vars' : self.named_vars,
-                              'params' : self.params}
+                              'params' : self.params,
+                              'cprint_var' : cprint_var}
 
 
 
@@ -84,7 +95,7 @@ class CodeGenerator:
     def codegen(self, target_dir):
 
         make_target_dir(target_dir)
-        
+
         # Add solver to template variables.
         self.template_vars.update({'solver' : self.solver})
         self.template_vars.update({'solver_name' : self.solver.name})
@@ -107,7 +118,8 @@ class CodeGenerator:
         linop_handler.render(target_dir)
 
         # Get template variables from solver, then render.
-        self.template_vars.update(self.solver.get_template_vars(self.sym_data, self.template_vars))
+        self.template_vars.update(self.solver.get_template_vars(
+                self.sym_data, self.template_vars))
         self.solver.render(target_dir)
 
         # Get template variables to render template
