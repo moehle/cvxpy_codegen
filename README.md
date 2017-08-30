@@ -14,15 +14,16 @@ The parameter `a` defines a specific problem instance in the family; for every s
 #### Least squares example
 To make this all concrete, let's try a simple least-squares problem:
 
-    import cvxpy_codegen as cg
+    import cvxpy as cvx
+    from cvxpy_codegen import codegen
     m = 10
     n = 5
-    A = cg.Parameter(m, n, name='A')
-    b = cg.Parameter(m, name='b')
-    x = cg.Variable(n, name='x')
-    f0 = cg.norm(A*x - b)
-    prob = cg.Problem(cg.Minimize(f0))
-    prob.codegen('least_squares_example')
+    A = cvx.Parameter(m, n, name='A')
+    b = cvx.Parameter(m, name='b')
+    x = cvx.Variable(n, name='x')
+    f0 = cvx.norm(A*x - b)
+    prob = cvx.Problem(cvx.Minimize(f0))
+    codegen(prob, 'least_squares_example')
 
 Then the generated code is available in the `least_squares_example` directory (which is in the currenty directory).  The API is contained in the header file `codegen.h`.  To test out the embedded solver on randomly generated data, run
 
@@ -44,30 +45,30 @@ The directory also contains a Python wrapper, so you can use your embedded C sol
 #### Optimal control example
 As a more sophistocated example, we consider a constrained, linear optimal control problem (such as for model predictive control, or MPC).
 
-    import cvxpy_codegen as cg
-    import numpy as np
+    import cvxpy as cvx
+    from cvxpy_codegen import codegen
     np.random.seed(0)
     n = 5
     m = 3
     T = 15
 
-    A  = cg.Parameter(n, n, name='A')
-    B  = cg.Parameter(n, m, name='B')
-    x0 = cg.Parameter(n, 1, name='x0')
+    A  = cvx.Parameter(n, n, name='A')
+    B  = cvx.Parameter(n, m, name='B')
+    x0 = cvx.Parameter(n, 1, name='x0')
 
-    x = cg.Variable(n, T+1, name='x')
-    u = cg.Variable(m, T, name='u')
+    x = cvx.Variable(n, T+1, name='x')
+    u = cvx.Variable(m, T, name='u')
 
     obj = 0
     constr = []
     constr += [x[:,0] == x0]
     for t in range(T):
         constr += [x[:,t+1] == A*x[:,t] + B*u[:,t]]
-        constr += [cg.norm(u[:,t], 'inf') <= 1] 
-        obj += cg.sum_squares(x[:,t+1]) + cg.sum_squares(u[:,t])
+        constr += [cvx.norm(u[:,t], 'inf') <= 1] 
+        obj += cvx.sum_squares(x[:,t+1]) + cvx.sum_squares(u[:,t])
 
-    prob = cg.Problem(cg.Minimize(obj), constr)
-    prob.codegen('opt_ctrl_example')
+    prob = cvx.Problem(cg.Minimize(obj), constr)
+    codegen(prob, 'opt_ctrl_example')
 
 #### Installation
 To install, clone this repository, `cd` over the directory of the cloned repo, and run `python setup.py install`.  Currently, CVXPY-CODEGEN is not available through any Python repository.  CVXPY-CODEGEN was only tested in Linux with Python 3.5.
