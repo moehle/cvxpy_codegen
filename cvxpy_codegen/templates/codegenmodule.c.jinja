@@ -112,23 +112,35 @@ static PyObject *solve_wrapper(PyObject *self, PyObject *args){
 }
 
 
+
 static PyMethodDef CvxpyCodegenSolverMethods[] = {
   { "solve", solve_wrapper, METH_VARARGS, "Solves the specified optimization problem." },
   { NULL, NULL, 0, NULL }
 };
 
-
+#if PY_MAJOR_VERSION >= 3
 static struct PyModuleDef CvxpyCodegenSolverModule = {
   PyModuleDef_HEAD_INIT,
   "_cvxpy_codegen_solver",   /* name of module */
   NULL, /* module documentation, may be NULL */
-  -1,       /* size of per-interpreter state of the module,
-               or -1 if the module keeps state in global variables. */
+  -1,   /* size of per-interpreter state of the module,
+           or -1 if the module keeps state in global variables. */
   CvxpyCodegenSolverMethods
 };
+#endif
 
+#if PY_MAJOR_VERSION >= 3
 PyMODINIT_FUNC PyInit__cvxpy_codegen_solver(void)
+#else
+PyMODINIT_FUNC init_cvxpy_codegen_solver(void)
+#endif
 {
   import_array();
-  return PyModule_Create(&CvxpyCodegenSolverModule);
+
+  #if PY_MAJOR_VERSION >= 3
+    return PyModule_Create(&CvxpyCodegenSolverModule);
+  #else
+    Py_InitModule3("_cvxpy_codegen_solver",
+                   CvxpyCodegenSolverMethods, NULL);
+  #endif
 }

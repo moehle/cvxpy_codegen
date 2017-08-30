@@ -35,11 +35,12 @@ class SymExpr():
         return SymMult(expr, self)
 
     def __add__(self, expr):
-        #if isinstance(self, SymAdd):
-        #    return SymAdd(self.args
         return SymAdd(self, expr)
 
-    def __truediv__(self, expr):
+    def __div__(self, expr): # For Python 2.
+        return SymDiv(self, expr)
+
+    def __truediv__(self, expr): # For Python 3.
         return SymDiv(self, expr)
 
     def __neg__(self):
@@ -51,7 +52,7 @@ class SymConst(SymExpr):
     def __init__(self, value):
         self.value = float(value)
 
-    def print(self):
+    def print_self(self):
         return str(self.value)
         
 
@@ -61,7 +62,7 @@ class SymParam(SymExpr):
         self.idx = idx
         self.nz_idx = nz_idx
 
-    def print(self):
+    def print_self(self):
         p = self.param
         if isinstance(p, CallbackParam): # These are sparse.
             s = 'work->' + p.name()
@@ -102,11 +103,11 @@ class SymAdd(SymExpr):
     def value(self):
         return sum([a.value for a in self.args])
 
-    def print(self):
+    def print_self(self):
         s = '( '
         for a in self.args[:-1]:
-            s += a.print() + ' + '
-        s += self.args[-1].print() + ' )'
+            s += a.print_self() + ' + '
+        s += self.args[-1].print_self() + ' )'
         return s
 
 class SymMult(SymExpr):
@@ -117,8 +118,8 @@ class SymMult(SymExpr):
     def value(self):
         return self.args[0].value * self.args[1].value
 
-    def print(self):
-        return '( ' + self.args[0].print() + ' * ' + self.args[1].print() + ' )'
+    def print_self(self):
+        return '( ' + self.args[0].print_self() + ' * ' + self.args[1].print_self() + ' )'
 
 
 class SymDiv(SymExpr):
@@ -127,11 +128,8 @@ class SymDiv(SymExpr):
 
     @property
     def value(self):
-        #print('\n')
-        #print(self.args[0].value)
-        #print(self.args[1].value)
         return self.args[0].value / self.args[1].value
 
-    def print(self):
-        return '( ' + self.args[0].print() + ' / ' + self.args[1].print() + ' )'
+    def print_self(self):
+        return '( ' + self.args[0].print_self() + ' / ' + self.args[1].print_self() + ' )'
 

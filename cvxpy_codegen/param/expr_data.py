@@ -49,7 +49,7 @@ class ExprData():
 
 class ParamData(ExprData):
     def __init__(self, expr):
-        super(ParamData, self).__init__(expr)
+        ExprData.__init__(self, expr)
         self.type = 'param'
         self.name = expr.name()
         if expr.value is None:
@@ -71,7 +71,7 @@ class ParamData(ExprData):
 class CbParamData(ExprData):
     def __init__(self, expr, arg_data):
         sparsity = arg_data[0].sparsity
-        super(CbParamData, self).__init__(expr, arg_data, sparsity=sparsity)
+        ExprData.__init__(self, expr, arg_data=arg_data, sparsity=sparsity)
         self.type = 'cbparam'
         self.name = expr.name()
         self.cbp_name = expr.name()
@@ -90,7 +90,7 @@ class ConstData(ExprData):
     def __init__(self, expr):
         value = expr.data if isinstance(expr, LinOp) else expr.value
         sparsity = sp.csr_matrix(value, dtype=bool)
-        super(ConstData, self).__init__(expr, sparsity=sparsity)
+        ExprData.__init__(self, expr, sparsity=sparsity)
         self.type = 'const'
         self.name = 'const%d' % CONST_COUNT.get_count()
         self.value = sp.csr_matrix(value)
@@ -112,7 +112,7 @@ class AtomData(ExprData):
                  sparsity=None, inplace=False, macro_name=None,
                  work_int=0, work_float=0, size=None, data=None,
                  copy_arg=0):
-        super(AtomData, self).__init__(expr, arg_data, sparsity=sparsity)
+        ExprData.__init__(self, expr, arg_data=arg_data, sparsity=sparsity)
         self.type = 'expr'
         self.name = 'expr%d' % EXPR_COUNT.get_count()
         if size is not None:

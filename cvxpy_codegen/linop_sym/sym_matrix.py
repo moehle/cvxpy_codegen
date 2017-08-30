@@ -92,7 +92,7 @@ class SymMatrix():
     def print_Ax(self, prefix = ""):
         s = ""
         for p, elem in enumerate(self.Ax):
-           s += '%s[%d] = %s;\n' % (prefix, p, elem.print());
+           s += '%s[%d] = %s;\n' % (prefix, p, elem.print_self());
         return s
 
 
@@ -399,6 +399,9 @@ class SymMatrixIter():
         self.A = A
         self.j = 0
         self.p = 0
+
+    def next(self): # For Python 2 compatibility.
+        return self.__next__()
 
     def __next__(self):
         if self.p == self.A.Ap[-1]:
