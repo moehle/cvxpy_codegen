@@ -19,7 +19,8 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
 import cvxpy_codegen.tests.utils as tu
-import cvxpy_codegen as cg
+import cvxpy as cvx
+from cvxpy_codegen import codegen
 import numpy as np
 
 MODULE = 'cvxpy_codegen.tests.test_examples'
@@ -37,33 +38,33 @@ class TestMpc(tu.CodegenTestCase):
         self.B_val = 5*np.random.randn(n,m)
         self.x0_val = 5*np.random.randn(n,1)
 
-        A  = cg.Parameter(n, n, name='A')
-        B  = cg.Parameter(n, m, name='B')
-        x0 = cg.Parameter(n, 1, name='x0')
+        A  = cvx.Parameter(n, n, name='A')
+        B  = cvx.Parameter(n, m, name='B')
+        x0 = cvx.Parameter(n, 1, name='x0')
 
         A.value  = self.A_val
         B.value  = self.B_val
         x0.value = self.x0_val
 
-        x = cg.Variable(n, T+1, name='x')
-        u = cg.Variable(m, T, name='u')
+        x = cvx.Variable(n, T+1, name='x')
+        u = cvx.Variable(m, T, name='u')
 
         obj = 0
         constr = []
         constr += [x[:,0] == x0]
         for t in range(T):
             constr += [x[:,t+1] == A*x[:,t] + B*u[:,t]]
-            constr += [cg.norm(u[:,t], 'inf') <= 1] 
+            constr += [cvx.norm(u[:,t], 'inf') <= 1] 
             if objective == 'quad':
-                obj += cg.sum_squares(x[:,t+1]) + cg.sum_squares(u[:,t])
+                obj += cvx.sum_squares(x[:,t+1]) + cvx.sum_squares(u[:,t])
             elif objective == '1norm':
-                obj += cg.norm(x[:,t+1], 1) + cg.norm(u[:,t], 1)
+                obj += cvx.norm(x[:,t+1], 1) + cvx.norm(u[:,t], 1)
             elif objective == 'exp1norm':
-                obj += cg.exp(cg.norm(x[:,t+1], 1)) + cg.norm(u[:,t], 1)
+                obj += cvx.exp(cvx.norm(x[:,t+1], 1)) + cvx.norm(u[:,t], 1)
             else:
                 raise Exception
 
-        self.prob = cg.Problem(cg.Minimize(obj), constr)
+        self.prob = cvx.Problem(cvx.Minimize(obj), constr)
         self.prob.solve()
         self.x_opt = x.value
 
@@ -117,12 +118,12 @@ class TestLeastSquares(tu.CodegenTestCase):
         m = 10
         self.A_val = np.random.randn(m,n)
         self.b_val = np.random.randn(m,1)
-        A = cg.Parameter(m, n, name='A', value=self.A_val)
-        b = cg.Parameter(m, 1, name='b', value=self.b_val)
-        x = cg.Variable(n, name='x')
-        objective = cg.norm(A*x - b)
+        A = cvx.Parameter(m, n, name='A', value=self.A_val)
+        b = cvx.Parameter(m, 1, name='b', value=self.b_val)
+        x = cvx.Variable(n, name='x')
+        objective = cvx.norm(A*x - b)
 
-        self.prob = cg.Problem(cg.Minimize(objective))
+        self.prob = cvx.Problem(cvx.Minimize(objective))
         self.prob.solve()
         self.x_opt = x.value
 
@@ -139,28 +140,6 @@ class TestLeastSquares(tu.CodegenTestCase):
         self.assertAlmostEqualMatrices(self.x_opt, var_dict['x'])
     
 
-    
-
-
-# TODO:
-#class TestMDP(tu.CodegenTestCase):
-#    class_name = 'TestMDP'
-#
-#    def mpc_setup(self, objective='quad'):
-#        np.random.seed(0)
-#        n = 100
-#        m = 10
-#        P = []
-#        for u in range(m):
-#            P += [sp.rand(n,n,.3)]
-#            for i in range(n):
-#                P[u][i,:] /= sum(P_val[u][i,:])
-#
-#        alpha = cg.Parameter(value=.99)
-#        g = cg.Parameter(n,m, value=np.random.rand(n,m))
-#
-#        self.alpha_val = alpha.value
-#        self.g_val = g.value
     
 
     

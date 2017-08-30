@@ -17,7 +17,11 @@ You should have received a copy of the GNU General Public License
 along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-__version__ = ".0.0.1"
+from cvxpy_codegen.code_generator import CodeGenerator
 
-from cvxpy import *
-from cvxpy_codegen.codegen import codegen
+
+def codegen(prob, target_dir):
+    vars = prob.variables()
+    params = prob.parameters()
+    obj, constraints = prob.canonical_form
+    CodeGenerator(obj, constraints, vars, params).codegen(target_dir)

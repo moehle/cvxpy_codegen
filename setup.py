@@ -45,6 +45,7 @@ setup(
     install_requires=["ecos >= 2",
                       "cvxpy >= 0.4, <1.0",
                       "numpy >= 1.9",
+                      "python >= 3.5",
                       "jinja2 >= 2.8",
                       "scipy >= 0.15"],
 )

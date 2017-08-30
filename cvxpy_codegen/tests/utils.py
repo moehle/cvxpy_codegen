@@ -26,6 +26,7 @@ import subprocess
 import sys
 import numpy as np
 import scipy.sparse as sp
+from cvxpy_codegen import codegen
 
 
 TARGET_DIR = os.path.join(os.getcwd(), 'cg_build')
@@ -82,7 +83,7 @@ class CodegenTestCase(unittest.TestCase):
 
 
     def _run_codegen_test(self, prob, module, class_name, method_name):
-        prob.codegen(TARGET_DIR)
+        codegen(prob, TARGET_DIR)
         self.install_custom_solver(TARGET_DIR)
         exit_code = self._run_isolated_test(module, class_name, method_name)
         self.assertEqual(exit_code, 0)
