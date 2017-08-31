@@ -110,8 +110,8 @@ class ConstData(ExprData):
 class AtomData(ExprData):
     def __init__(self, expr, arg_data, 
                  sparsity=None, inplace=False, macro_name=None,
-                 work_int=0, work_float=0, size=None, data=None,
-                 copy_arg=0):
+                 work_int=0, work_float=0, work_varargs=0,
+                 size=None, data=None, copy_arg=0):
         ExprData.__init__(self, expr, arg_data=arg_data, sparsity=sparsity)
         self.type = 'expr'
         self.name = 'expr%d' % EXPR_COUNT.get_count()
@@ -122,6 +122,7 @@ class AtomData(ExprData):
         self.copy_arg = copy_arg # If self.make_copy is True, copy this argument.
         self.work_int = work_int
         self.work_float = work_float
+        self.work_varargs = work_varargs
         has_const_or_param = \
                 any([a.type =='const' or a.type =='param' for a in arg_data])
         if inplace and has_const_or_param:

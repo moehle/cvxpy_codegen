@@ -21,23 +21,21 @@
 
 
 {% macro scalar_add_declare() %}
-void scalar_add(long nnz, double alpha, double *Bx);
+void scalar_add(double alpha, CsrMatrix Bx);
 {% endmacro %}
 
 
 {% macro scalar_add_define() %}
-void scalar_add(long nnz, double alpha, double *Bx){
-
-  long p;
+void scalar_add(double alpha, CsrMatrix Bx){
+  long p, nnz=Bx.nnz;
   for(p=0; p<nnz; p++){
-    Bx[p] += alpha;
+    B.x[p] += alpha;
   }
 }
 {% endmacro %}
 
 
 {% macro scalar_add_eval(expr) %}
-scalar_add({{ expr.sparsity.nnz }}l,
-{{-  u.nzval(expr.args[0]) }}[0],
-{{-  u.nzval(expr) }});
+scalar_add(work->{{- expr.args[0].storage.name }}[0],
+           work->{{- expr.storage.name }} }});
 {% endmacro %}

@@ -36,6 +36,26 @@ typedef struct params_struct{
 } Params;
 
 
+typedef struct csr_matrix{
+    long *p;
+    long *j;
+    double *x;
+    long m;
+    long n;
+    long nnz;
+} CsrMatrix;
+
+
+typedef struct csc_matrix{
+    long *p;
+    long *i;
+    double *x;
+    long m;
+    long n;
+    long nnz;
+} CscMatrix;
+
+
 typedef struct work_struct{
 
     {{ param_handler_workspace() }}

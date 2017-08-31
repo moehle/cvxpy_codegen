@@ -21,23 +21,22 @@
 
 
 {% macro abs_declare() -%}
-void absatom(long nnz, double *Ax);
+void absatom(CsrMatrix A);
 {%- endmacro %}
 
 
 {% macro abs_define() %}
-void absatom(long nnz, double *Ax){
-  long p;
+void absatom(CsrMatrix A){
+  long p, nnz=A.nnz;
   double x;
   for(p=0; p<nnz; p++){
-    x = Ax[p];
-    Ax[p] = x>0 ? x : -x;
+    x = A.x[p];
+    A.x[p] = x>0 ? x : -x;
   }
 }
 {% endmacro %}
 
 
 {% macro abs_eval(expr) %}
-absatom({{ expr.sparsity.nnz }}l,
-{{- u.nzval(expr) }});
+absatom(work->{{ expr.storage.name }});
 {% endmacro %}

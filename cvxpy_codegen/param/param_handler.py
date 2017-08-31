@@ -73,6 +73,7 @@ class ParamHandler():
 
         work_int = max([data.work_int for data in self.expressions] + [0])
         work_float = max([data.work_float for data in self.expressions] + [0])
+        work_varargs = max([data.work_varargs for data in self.expressions] + [0])
 
         self.template_vars.update({'named_params': self.named_params,
                                    'constants': self.constants,
