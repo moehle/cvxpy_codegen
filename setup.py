@@ -21,7 +21,9 @@ setup(
     author_email='moehle@stanford.edu',
     packages=['cvxpy_codegen',
               'cvxpy_codegen.atoms',
+              'cvxpy_codegen.linop.linops', # TODO keep?
               'cvxpy_codegen.linop_sym',
+              'cvxpy_codegen.linop',
               'cvxpy_codegen.param',
               'cvxpy_codegen.solvers',
               'cvxpy_codegen.templates',
@@ -31,6 +33,8 @@ setup(
               'cvxpy_codegen.utils'],
     package_dir={'cvxpy_codegen': 'cvxpy_codegen'},
     package_data={'cvxpy_codegen.param'               : ['param.c.jinja'],
+                  'cvxpy_codegen.linop'               : ['linop.c.jinja'],
+                  'cvxpy_codegen.linop.linops'        : ['*.jinja'],
                   'cvxpy_codegen.atoms'               : ['*.jinja'],
                   'cvxpy_codegen.linop_sym'           : ['linop_sym.c.jinja'],
                   'cvxpy_codegen.solvers'             : ['*.jinja'] + ecos_sources,

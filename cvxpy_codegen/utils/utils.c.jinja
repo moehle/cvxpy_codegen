@@ -58,6 +58,34 @@ copy(work->{{ expr.args[expr.copy_arg].name }}, work->{{ expr.name }});
 
 
 
+{% macro copy_linop_declare() %}
+void copy_linop(LinopCoeff *A, LinopCoeff *Z);
+{% endmacro %}
+
+
+{% macro copy_linop_define() %}
+void copy_linop(LinopCoeff *A, LinopCoeff *Z){
+  long i, p, p2, m=A->m;
+  for(i=0; i<m; i++){
+    Z->p[i] = A->p[i];
+    p2 = A->p[i+1];
+    for(p=A->p[i]; p<p2; p++){
+      Z->j[p] = A->j[p];
+      Z->x[p] = A->x[p];
+    }
+  }
+  Z->p[m] = A->p[m];
+}
+{% endmacro %}
+
+
+{% macro copy_linop_eval(expr) %}
+copy_linop(&work->{{ expr.args[expr.copy_arg].name }}, &work->{{ expr.name }});
+{% endmacro %}
+
+
+
+
 {# gets a pointer to a pointer to the doubles #}
 {% macro ptr( expr ) %}
 {% if expr.size[0]==1 and expr.size[1]==1 %}

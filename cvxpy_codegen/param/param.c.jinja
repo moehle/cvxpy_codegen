@@ -34,12 +34,12 @@
     {% endfor %}
     {% endif %}
 
+    /* Matrices for referencing constants. (Data stored elsewhere.) */
     {% for c in constants %}
-    /* Matrix for referencing constants. (Data stored elsewhere.) */
     CsrMatrix {{ c.name }};
     {% endfor %}
-
 {% endmacro %}
+
 
 {% if constants %}
 /* Stored constant values used to evaluate expressions of parameters */
@@ -50,6 +50,7 @@ double {{ c.name }}_nzval{{ u.print_vec(c.nzval) }};
 
 {% endfor %}
 {% endif %}
+
 
 
 {{ u.copy_declare() }} {# TODO add logic to python for including this or not #}

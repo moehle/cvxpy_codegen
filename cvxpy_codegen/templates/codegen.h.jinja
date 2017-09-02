@@ -1,6 +1,6 @@
 {% from 'solvers/'+solver_name+"_intf.c.jinja" import solver_workspace with context %}
 {% from 'param/param.c.jinja' import param_handler_workspace with context %}
-{% from 'linop_sym/linop_sym.c.jinja' import linop_handler_workspace with context %}
+{% from 'linop/linop.c.jinja' import linop_handler_workspace with context %}
 #ifndef CVXPY_CODEGEN
 #define CVXPY_CODEGEN
 
@@ -56,6 +56,18 @@ typedef struct csc_matrix{
 } CscMatrix;
 
 
+typedef struct linop_coeff{
+    long *p;
+    long *j;
+    double *x;
+    long m;
+    long n;
+    long nnz;
+    long m_var; /* Shape of the represented variable. */
+    long n_var; /* Note that m_var * n_var = m. */
+} LinopCoeff;
+
+
 typedef struct work_struct{
 
     /* Results. */
@@ -78,7 +90,8 @@ typedef struct work_struct{
     /* Storage for integer and double workspaces. */
     long work_int[{{ work_int }}];
     double work_double[{{ work_float }}];
-    CsrMatrix work_varargs[{{ work_varargs }}];
+    {# CsrMatrix work_varargs[{{ work_varargs }}]; #}
+    LinopCoeff work_coeffs[{{ work_coeffs }}];
 } Work;
 
 

@@ -36,6 +36,7 @@ class Counter():
         return c
 
 
+# TODO deprecate this, should be sp.csr_matrix((m,n))
 # Get a sparse zero matrix.
 def spzeros(m, n, dtype=float):
     return sp.csr_matrix(np.zeros((m,n)), dtype=dtype)

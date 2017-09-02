@@ -1,0 +1,40 @@
+LINOPS
+-clean up code
+  -convert things to LinopCoeff
+  -rewrite linop jinja files to atom format
+  -merge atoms with linops
+-handle linops with stored data
+-write more linops
+  -promote_mat
+  -neg_mat
+  -mul_mat
+  -rmul_mat
+  -mul_elemwise_mat
+  -div_mat
+  -sum_entries_mat
+  -trace_mat
+  -index_mat
+  -transpose_mat
+  -reshape
+  -sum
+  -diag_vec_mat
+  -diag_mat_mat
+  -upper_tri_mat
+  -conv_mat
+  -kron_mat
+-write tests
+-write code for directly evaluating linop_coeffs of constants
+
+PARAMS
+-write varargs atoms
+  -add
+  -hstack
+  -vstack
+
+CVXPY 1.0
+
+
+GENERAL
+-remove -g flag from Makefile
+-make variable printing / parameter reading work better
+-combine param_handler and linop_handler

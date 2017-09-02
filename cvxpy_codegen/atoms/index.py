@@ -34,9 +34,6 @@ def getdata_index(expr, arg_data):
     if start0 < 0 or stop0 > arg_data[0].size[0]:
         raise ValueError("First index out of bounds")
     if start1 < 0 or stop1 > arg_data[0].size[1]:
-        print('\n arg size:', arg_data[0].size[1])
-        print('\n stop:', stop1)
-        print('\n start', start1)
         raise ValueError("Second index out of bounds")
 
     data = {'start0' : start0,

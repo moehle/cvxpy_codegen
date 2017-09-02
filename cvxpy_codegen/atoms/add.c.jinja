@@ -29,6 +29,7 @@ void add(CsrMatrix A, CsrMatrix B, CsrMatrix Z, long *w, double *x);
 void add(CsrMatrix A, CsrMatrix B, CsrMatrix Z, long *w, double *x){
   long i, j, p, p2, q=0, m=A.m, n=A.n;
   Z.p[0] = 0;
+  for(i=0; i<m; i++) w[i] = 0;
   for(i=0; i<m; i++){
     Z.p[i+1] = Z.p[i];
     p2 = A.p[i+1];

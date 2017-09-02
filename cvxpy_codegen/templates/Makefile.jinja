@@ -1,7 +1,7 @@
 OPTS = -Wall
 CC = gcc
 LDFLAGS = -Lecos -lm
-CFLAGS = -Wall
+CFLAGS = -Wall -g
 INCLUDE = -Iecos/include  -Iecos/external/SuiteSparse_config
 
 example_problem: solver_intf.o codegen.o linop.o param.o example_problem.o ecos/libecos.a

@@ -20,7 +20,7 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 import numpy as np
 import scipy.sparse as sp
 from cvxpy_codegen.utils.utils import Counter, spzeros
-from cvxpy.lin_ops.lin_op import LinOp
+from cvxpy.lin_ops.lin_op import LinOp # TODO what is this?
 
 
 EXPR_COUNT = Counter()
@@ -137,6 +137,7 @@ class AtomData(ExprData):
             return self.args[self.copy_arg].storage
         else:
             return self
+        # TODO is copy_arg really necessary?
 
     def force_copy(self):
         self.make_copy = True

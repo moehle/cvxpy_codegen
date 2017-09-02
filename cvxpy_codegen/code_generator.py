@@ -20,7 +20,8 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 from cvxpy_codegen.param.param_handler import ParamHandler
 from cvxpy_codegen.templates.template_handler import TemplateHandler
 from cvxpy.problems.problem_data.sym_data import SymData
-from cvxpy_codegen.linop_sym.linop_handler_sym import LinOpHandlerSym
+#from cvxpy_codegen.linop_sym.linop_handler_sym import LinOpHandlerSym
+from cvxpy_codegen.linop.linop_handler import LinOpHandler
 from cvxpy_codegen.solvers.solver_intfs import SOLVER_INTFS
 from cvxpy_codegen.utils.utils import make_target_dir
 import cvxpy.settings as s
@@ -113,9 +114,16 @@ class CodeGenerator:
         param_handler.cbp2sparsity() # TODO remove somehow?
 
         # Get template vars for the linear expr tree processor, then render.
-        linop_handler = LinOpHandlerSym(self.sym_data, objective, eq_constr, leq_constr)
+        linop_handler = LinOpHandler(self.sym_data, objective, eq_constr, leq_constr)
         self.template_vars.update(linop_handler.get_template_vars())
         linop_handler.render(target_dir)
+        
+        #raise Exception("CHECKPOINT REACHED")
+
+        # # Get template vars for the linear expr tree processor, then render.
+        # linop_handler = LinOpHandlerSym(self.sym_data, objective, eq_constr, leq_constr)
+        # self.template_vars.update(linop_handler.get_template_vars())
+        # linop_handler.render(target_dir)
 
         # Get template variables from solver, then render.
         self.template_vars.update(self.solver.get_template_vars(
