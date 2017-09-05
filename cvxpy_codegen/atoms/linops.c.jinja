@@ -1,0 +1,28 @@
+{% import "utils/utils.c.jinja" as u with context %}
+
+{% from "atoms/add/add_coeffs.c.jinja"
+      import add_coeffs_declare, add_coeffs_define, add_coeffs_eval with context%}
+{% from "atoms/add/null.c.jinja"
+      import null_declare, null_define, null_eval with context%}
+{% from "atoms/index/index_coeffs.c.jinja"
+      import index_coeffs_declare, index_coeffs_define, index_coeffs_eval with context%}
+{% from "atoms/neg/neg_coeffs.c.jinja"
+      import neg_coeffs_declare, neg_coeffs_define, neg_coeffs_eval with context%}
+
+
+{% macro declare(macro_name) %}
+  {{- (macro_name+'_declare') | call_macro() -}}
+{% endmacro %}
+
+
+{% macro define(macro_name) %}
+  {{- (macro_name+'_define') | call_macro() -}}
+{% endmacro %}
+
+
+{% macro eval(expr) %}
+  {%- if expr.make_copy -%}
+  {{- u.copy_linop_eval(expr) -}}
+  {%- endif -%}
+  {{- (expr.macro_name+'_eval') | call_macro(expr) -}}
+{% endmacro %}

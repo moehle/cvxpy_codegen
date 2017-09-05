@@ -1,17 +1,10 @@
-from cvxpy.lin_ops.lin_utils import get_expr_params
 from cvxpy.expressions.constants.callback_param import CallbackParam
 from cvxpy.expressions.constants.parameter import Parameter
-from cvxpy.expressions.constants.constant import Constant
-#from cvxpy_codegen.templates.atoms.atoms import GET_ATOMDATA
-from cvxpy_codegen.linop.linops.linops import GET_LINOPDATA # TODO put this into __init__.py
 from cvxpy_codegen.param.expr_data import ParamData, ConstData, CbParamData, CONST_ID
 from cvxpy_codegen.linop.linop_data import LinOpData, LinOpCoeffData, VarData
-from copy import copy
 from cvxpy.lin_ops.lin_op import SCALAR_CONST, DENSE_CONST, SPARSE_CONST, PARAM, VARIABLE
 from cvxpy_codegen.linop.constr_data import ConstrData
 import scipy.sparse as sp
-import numpy as np
-#from cvxpy.lin_ops.lin_utils import get_expr_vars
 from cvxpy_codegen.utils.utils import render
 
 
@@ -23,8 +16,7 @@ class LinOpHandler():
 
         # A list of all variables (not just the named ones).
         self.vars = []
-        self.var_ids = [] # TODO delete? (maybe not, actually)
-        self.id2var = dict() # TODO delete?
+        self.var_ids = []
         
         # List of Coefficients of linear expressions, corresponding to a variable.
         self.linop_coeffs = []
@@ -46,6 +38,10 @@ class LinOpHandler():
 
         # The unique types of linops found in the linop trees.
         self.unique_linops = []
+
+        # The atoms found in the linop trees.
+        self.linop_exprs = []
+        self.unique_atoms = []
 
         # Symbolic problem data.
         self.sym_data = sym_data
@@ -85,7 +81,6 @@ class LinOpHandler():
         # Recover the sparsity patterns of the coefficient matrices.
         obj_coeff, eq_coeff, leq_coeff = self.get_sparsity()
 
-        # TODO reduce?
         # Fill out the variables needed to render the C template.
         self.template_vars.update({'vars': self.vars,
                                    'linop_coeffs': self.linop_coeffs,
@@ -100,6 +95,8 @@ class LinOpHandler():
                                    'eq_coeff': eq_coeff,
                                    'leq_coeff': leq_coeff,
                                    'unique_linops': self.unique_linops,
+                                   'linop_exprs': self.linop_exprs,
+                                   'unique_atoms': self.unique_atoms,
                                    'var_offsets' : self.sym_data.var_offsets,
                                    'CONST_ID' : CONST_ID,
                                    'x_length' : self.sym_data.x_length })
@@ -151,31 +148,30 @@ class LinOpHandler():
             data = ConstData(expr)
             self.linop_constants += [data]
 
-        elif expr.type == VARIABLE: # TODO use self.varids
-            id_ = expr.data
-            if id_ not in self.id2var.keys(): # Check if already there.
-                data = VarData(expr)
+        elif expr.type == VARIABLE:
+            data = VarData(expr)
+            if expr.data not in self.var_ids: # Check if already there.
                 self.vars += [data]
-                self.id2var[id_] = data
-            else:
-                data = self.id2var[id_]
+                self.var_ids += [expr.data]
 
         else:  # expr is a linear operator expression:
             if id(expr) in self.linop_ids: # Check if already there.
                 idx = self.linop_ids.index(id(expr))
-                self.expressions[idx].force_copy() # TODO remove [1]
+                self.expressions[idx].force_copy()
                 data = self.expressions[idx]
             else:
                 arg_data = []
-                for arg in expr.args:
-                    arg_data += [self.process_expression(arg)] # recurse on args
+                for arg in expr.args: # Recurse on args.
+                    arg_data += [self.process_expression(arg)]
                 data = LinOpData(expr, arg_data)
-                self.linop_coeffs += [data.coeffs[v] for v in data.coeffs]
-                #self.linop_offsets += [data.offsets[v] for v in data.offsets] #TODO
+                self.linop_coeffs += data.coeffs.values() # Coefficients of variables.
+                if data.has_offset:
+                    self.linop_exprs += [data.offset_expr] # Expressions of constants.
                 self.linops += [data]
                 for coeff in data.coeffs.values():
                     if coeff.macro_name not in self.unique_linops:
                          self.unique_linops += [coeff.macro_name]
+
         return data
 
 
@@ -186,7 +182,7 @@ class LinOpHandler():
 
 
 # TODO should this be random? How to make the code deterministic
-# TODO Could also move this to utilities, and share with param_handler
+# TODO Could also move this to utilities, to share with param_handler
 def get_val_or_rand(param):
     if not param.value is None:
         return param.value

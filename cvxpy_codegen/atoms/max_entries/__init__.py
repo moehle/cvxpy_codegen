@@ -17,4 +17,4 @@ You should have received a copy of the GNU General Public License
 along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-
+from cvxpy_codegen.atoms.max_entries.max_entries import atomdata_max_entries

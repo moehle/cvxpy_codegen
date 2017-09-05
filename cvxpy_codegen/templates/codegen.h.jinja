@@ -90,7 +90,7 @@ typedef struct work_struct{
     /* Storage for integer and double workspaces. */
     long work_int[{{ work_int }}];
     double work_double[{{ work_float }}];
-    {# CsrMatrix work_varargs[{{ work_varargs }}]; #}
+    CsrMatrix work_varargs[{{ work_varargs }}];
     LinopCoeff work_coeffs[{{ work_coeffs }}];
 } Work;
 

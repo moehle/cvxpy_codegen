@@ -27,7 +27,7 @@
 
     /* Storage for the callback parameters. */
     {% for cbp in callback_params %}
-    CscMatrix {{ cbp.name }};
+    CscMatrix {{ cbp.cbp_name }};
     long   {{cbp.cbp_name}}_colptr[{{ cbp.size[1]+1 }}];
     long   {{cbp.cbp_name}}_rowidx[{{ cbp.sparsity.nnz }}];
     double {{cbp.cbp_name}}_nzval[{{ cbp.sparsity.nnz }}];
@@ -87,12 +87,12 @@ void param_init(Work *work){
     {% endfor %}
 
     {% for cbp in callback_params %}
-    work->{{ cbp.name }}.p = work->{{ cbp.name }}_colptr;
-    work->{{ cbp.name }}.i = work->{{ cbp.name }}_rowidx;
-    work->{{ cbp.name }}.x = work->{{ cbp.name }}_nzval;
-    work->{{ cbp.name }}.m = {{ cbp.size[0] }};
-    work->{{ cbp.name }}.n = {{ cbp.size[1] }};
-    work->{{ cbp.name }}.nnz = {{ cbp.sparsity.nnz }};
+    work->{{ cbp.cbp_name }}.p = work->{{ cbp.cbp_name }}_colptr;
+    work->{{ cbp.cbp_name }}.i = work->{{ cbp.cbp_name }}_rowidx;
+    work->{{ cbp.cbp_name }}.x = work->{{ cbp.cbp_name }}_nzval;
+    work->{{ cbp.cbp_name }}.m = {{ cbp.size[0] }};
+    work->{{ cbp.cbp_name }}.n = {{ cbp.size[1] }};
+    work->{{ cbp.cbp_name }}.nnz = {{ cbp.sparsity.nnz }};
 
     {% endfor %}
 

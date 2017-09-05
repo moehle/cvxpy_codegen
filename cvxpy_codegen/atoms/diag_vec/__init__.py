@@ -17,4 +17,4 @@ You should have received a copy of the GNU General Public License
 along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-
+from cvxpy_codegen.atoms.diag_vec.diag_vec import atomdata_diag_vec

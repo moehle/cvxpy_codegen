@@ -81,6 +81,7 @@ class ParamHandler():
                                    'expressions': self.expressions,
                                    'work_int': work_int,
                                    'work_float': work_float,
+                                   'work_varargs': work_varargs,
                                    'unique_exprs': self.unique_exprs})
 
         return self.template_vars
@@ -119,13 +120,11 @@ class ParamHandler():
                     arg_data = []
                     for arg in expr.args:
                         arg_data += [self.process_expression(arg)]
-                    data_list = get_atom_data(expr, arg_data)
-                    self.expressions += data_list
-                    data = data_list[-1]
+                    data = get_atom_data(expr, arg_data)
+                    self.expressions += [data]
                     self.expr_ids += [id(expr)]
-                    for d in data_list:
-                        if d.macro_name not in self.unique_exprs: # Check if already there.
-                            self.unique_exprs += [d.macro_name]
+                    if data.macro_name not in self.unique_exprs:
+                            self.unique_exprs += [data.macro_name]
         else:
             raise TypeError('Invalid expression tree type: %s' % type(expr))
 

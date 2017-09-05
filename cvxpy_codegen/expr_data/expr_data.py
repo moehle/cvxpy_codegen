@@ -61,7 +61,6 @@ class ParamData(ExprData):
         self.is_scalar = True if self.size == (1,1) else False
         self.is_column = True if self.size[1] == 1 else False
         self.is_row    = True if self.size[0] == 1 else False # TODO add tests for these
-        self.cname = self.name
         
     @property
     def storage(self):
@@ -79,7 +78,6 @@ class CbParamData(ExprData):
         self.var_ids = [CONST_ID]
         self.inplace = True
         self.mem_name = arg_data[0].name
-        self.cname = self.storage.name
 
     @property
     def storage(self):
@@ -102,7 +100,6 @@ class ConstData(ExprData):
         self.nnz = self.value.nnz
         self.var_ids = [CONST_ID]
         self.mem_name = self.name
-        self.cname = self.storage.name
 
     @property
     def storage(self):
@@ -133,7 +130,6 @@ class AtomData(ExprData):
         else:
             self.make_copy = False
         self.data = data
-        self.cname = self.storage.name
 
     @property
     def storage(self):

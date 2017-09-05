@@ -1,0 +1,61 @@
+{% import "utils/utils.c.jinja" as u with context %}
+
+
+{% macro index_coeffs_declare() %}
+void lo_index(long m,
+           long start0, long stop0, long step0,
+           long start1, long stop1, long step1,
+           long *Ap, long *Aj, double *Ax,
+           long *Zp, long *Zj, double *Zx);
+{% endmacro %}
+
+
+{% macro index_coeffs_define() %}
+void lo_index(long m,
+           long start0, long stop0, long step0,
+           long start1, long stop1, long step1,
+           long *Ap, long *Aj, double *Ax,
+           long *Zp, long *Zj, double *Zx){
+
+  int i, j, idx, p, p2, pZ=0, iZ=0;
+  Zp[0] = 0;
+  for (i=start0; i<stop0; i+=step0){
+    for (j=start1; j<stop1; j+=step1){
+      Zp[iZ+1] = Zp[iZ];
+      idx = i + j * m;
+      p2 = Ap[idx+1];
+      for (p=Ap[idx]; p<p2; p++){
+        Zj[pZ] = Aj[p];
+        Zx[pZ++] = Ax[p];
+        Zp[iZ+1]++;
+      }
+      iZ++;
+    }
+  }
+}
+{% endmacro %}
+
+
+{% macro index_coeffs_eval(expr) %}
+lo_index({{ expr.size[0] }}l, 
+         {{- expr.data['start0'] }},
+         {{- expr.data['stop0'] }},
+         {{- expr.data['step0'] }},
+         {{- expr.data['start1'] }},
+         {{- expr.data['stop1'] }},
+         {{- expr.data['step1'] }},
+         work->{{- expr.args[0].name }}_rowptr,
+         work->{{- expr.args[0].name }}_colidx,
+         work->{{- expr.args[0].name }}_nzval,
+         work->{{- expr.name }}_rowptr,
+         work->{{- expr.name }}_colidx,
+         work->{{- expr.name }}_nzval);
+{% endmacro %}
+{#
+{{- u.rowptr(expr.args[0]) }},
+{{- u.colidx(expr.args[0]) }},
+{{-  u.nzval(expr.args[0]) }},
+{{- u.rowptr(expr) }},
+{{- u.colidx(expr) }},
+{{-  u.nzval(expr) }});
+#}

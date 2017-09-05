@@ -17,4 +17,10 @@ You should have received a copy of the GNU General Public License
 along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+from cvxpy_codegen.param.expr_data import AtomData
 
+def atomdata_abs(expr, arg_data):
+    return AtomData(expr, arg_data,
+                    macro_name = "abs",
+                    sparsity = arg_data[0].sparsity,
+                    inplace = True)

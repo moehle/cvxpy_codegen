@@ -17,4 +17,11 @@ You should have received a copy of the GNU General Public License
 along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+from cvxpy_codegen.param.expr_data import AtomData
+import scipy.sparse as sp
 
+def atomdata_diag_mat(expr, arg_data):
+    sparsity = sp.csr_matrix(arg_data[0].sparsity.diagonal()).T
+    return AtomData(expr, arg_data,
+                    macro_name = 'diag_mat',
+                    sparsity = sparsity)

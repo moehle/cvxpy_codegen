@@ -17,4 +17,18 @@ You should have received a copy of the GNU General Public License
 along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+from cvxpy_codegen.param.expr_data import AtomData
+from cvxpy_codegen.linop.linop_coeff_data import LinOpCoeffData
 
+def atomdata_neg(expr, arg_data):
+    return AtomData(expr, arg_data,
+                   macro_name = "neg",
+                   sparsity = arg_data[0].sparsity,
+                   inplace = True)
+
+
+def coeffdata_neg(linop, args, var):
+    return LinOpCoeffData(linop, args, var,
+                          sparsity = args[0].sparsity,
+                          inplace = True,
+                          macro_name = 'neg_coeffs')

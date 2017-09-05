@@ -17,4 +17,22 @@ You should have received a copy of the GNU General Public License
 along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+from cvxpy_codegen.param.expr_data import AtomData
+import scipy.sparse as sp
 
+# Note: From CVXPY, we can only get column vectors.
+def atomdata_diag_vec(expr, arg_data):
+    
+    m = arg_data[0].size[0]
+    n = arg_data[0].size[1]
+
+    sp_mat = sp.coo_matrix(arg_data[0].sparsity)
+    data = sp_mat.data
+    macro_name = "diag_vec"
+    idxs = sp_mat.row
+    shape = (m,m)
+    sparsity = sp.csr_matrix(sp.coo_matrix((data, (idxs, idxs)), shape=shape))
+
+    return AtomData(expr, arg_data,
+                    macro_name = macro_name,
+                    sparsity = sparsity)

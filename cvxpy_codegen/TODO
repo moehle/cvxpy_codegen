@@ -1,9 +1,10 @@
-LINOPS
--clean up code
-  -convert things to LinopCoeff
-  -rewrite linop jinja files to atom format
-  -merge atoms with linops
+LINOP INTEGRATION
+-write code for directly evaluating linop_coeffs of constants
+-combine param_handler and linop_handler
 -handle linops with stored data
+-rm references to u.nzval, etc.
+  -convert things to LinopCoeff
+  -convert things to CsrMatrix
 -write more linops
   -promote_mat
   -neg_mat
@@ -23,18 +24,15 @@ LINOPS
   -conv_mat
   -kron_mat
 -write tests
--write code for directly evaluating linop_coeffs of constants
-
-PARAMS
--write varargs atoms
-  -add
+-write varargs atoms for param_handler
   -hstack
   -vstack
 
+
 CVXPY 1.0
+-quadratic problems
 
 
 GENERAL
 -remove -g flag from Makefile
 -make variable printing / parameter reading work better
--combine param_handler and linop_handler

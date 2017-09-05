@@ -45,7 +45,7 @@ void solver_init(Work *work){
     for (i=0; i<{{ leq_nnz  }}; i++)  work->leq_nzval[i]  = 0;
     for (i=0; i<{{  eq_dim  }}; i++)  work->eq_offset[i]  = 0;
     for (i=0; i<{{ leq_dim  }}; i++)  work->leq_offset[i] = 0;
-    for (i=0; i<{{ x_length }}; i++)  work->obj_coeff[i]  = 0;
+    for (i=0; i<{{ x_length }}; i++)  work->obj_vec[i]  = 0;
 
     printf("TP31\n");
 
@@ -53,7 +53,7 @@ void solver_init(Work *work){
                                    {{ leq_dim }}, {{ len(soc_dims) }}, soc_sizes, {{ exp_cones }}, 
                                    work->leq_nzval, work->leq_colptr, work->leq_rowidx,
                                    work->eq_nzval, work->eq_colptr, work->eq_rowidx,
-                                   work->obj_coeff, work->leq_offset,
+                                   work->obj_vec, work->leq_offset,
                                    work->eq_offset);
     printf("TP32\n");
 
@@ -70,14 +70,14 @@ void solver_solve(Work *work){
     for (i=0; i<5; i++)  printf("work->leq_nzval[%ld]  = %f\n", i, work->leq_nzval[i]  );
     for (i=0; i<0; i++)  printf("work->eq_offset[%ld]  = %f\n", i, work->eq_offset[i]  );
     for (i=0; i<5; i++)  printf("work->leq_offset[%ld] = %f\n", i, work->leq_offset[i] );
-    for (i=0; i<5; i++)  printf("work->obj_coeff[%ld]  = %f\n", i, work->obj_coeff[i]  );
+    for (i=0; i<5; i++)  printf("work->obj_vec[%ld]    = %f\n", i, work->obj_vec[i]  );
 
     /* Convert from our format (Ax+b=0) to ECOS format (Ax=b). */
     for (i=0; i<{{  eq_dim  }}; i++)  work->eq_offset[i]  = -work->eq_offset[i];
     for (i=0; i<{{ leq_dim  }}; i++)  work->leq_offset[i] = -work->leq_offset[i];
 
     ECOS_updateData(work->solver_work, work->leq_nzval, work->eq_nzval,
-                     work->obj_coeff, work->leq_offset, work->eq_offset);
+                     work->obj_vec, work->leq_offset, work->eq_offset);
 
     solver_flag = ECOS_solve(work->solver_work);
 

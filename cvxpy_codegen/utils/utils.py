@@ -21,7 +21,7 @@ import scipy.sparse as sp
 import numpy as np
 from cvxpy_codegen import CallbackParam, Constant, Parameter, Variable, __path__
 import os
-from jinja2 import Environment, PackageLoader, contextfilter
+from jinja2 import Environment, PackageLoader, contextfilter, StrictUndefined
 
 PKG_PATH = os.path.dirname(os.path.abspath(__path__[0]))
 EXP_CONE_LENGTH = 3
@@ -71,9 +71,11 @@ def render(target_dir, template_vars, template_path, target_name):
     total_template_vars.update(template_vars)
     total_template_vars.update(DEFAULT_TEMPLATE_VARS)
 
-    env = Environment(loader=PackageLoader('cvxpy_codegen', ''),
+    env = Environment(# StrictUndefined(), # TODO re enable
+                      loader=PackageLoader('cvxpy_codegen', ''),
                       lstrip_blocks=True,
                       trim_blocks=True)
+
     env.filters['call_macro'] = call_macro
 
     template = env.get_template(template_path)
