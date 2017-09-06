@@ -17,8 +17,8 @@ You should have received a copy of the GNU General Public License
 along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from cvxpy_codegen.param.expr_data import AtomData
-from cvxpy_codegen.linop.linop_coeff_data import LinOpCoeffData
+from cvxpy_codegen.object_data.atom_data import AtomData
+from cvxpy_codegen.object_data.linop_coeff_data import LinOpCoeffData
 import scipy.sparse as sp
 import numpy as np
 

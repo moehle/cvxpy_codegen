@@ -17,19 +17,23 @@ You should have received a copy of the GNU General Public License
 along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from cvxpy_codegen.object_data.atom_data import AtomData
+import numpy as np
 import scipy.sparse as sp
+from cvxpy.lin_ops.lin_op import LinOp # TODO what is this?
 
-def atomdata_hstack(expr, arg_data):
-    data_list = []
-    sparsity = arg_data[0].sparsity
-    data = arg_data[0]
-    for i, arg in enumerate(arg_data[1:]):
-        sparsity = sp.hstack([sparsity, arg.sparsity])
-        data = AtomData(expr, [data, arg],
-                               macro_name = "hstack",
-                               sparsity = sparsity,
-                               size = sparsity.shape)
-        data_list += [data]
 
-    return data_list
+class ExprData():
+
+    def __init__(self, expr, arg_data=[], sparsity=None):
+        if sparsity == None:
+            sparsity = sp.csr_matrix(np.full(expr.size, True, dtype=bool))
+        self.sparsity = sparsity
+        self.args = arg_data
+        self.size = expr.size
+        self.length = expr.size[0] * expr.size[1]
+
+    def is_vector(self):
+        return (expr.size[0] == 1) or (expr.size[1] == 1)
+
+    def is_scalar(self):
+        return expr.size == (1,1)

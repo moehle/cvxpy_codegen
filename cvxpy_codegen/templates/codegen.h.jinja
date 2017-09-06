@@ -1,6 +1,6 @@
 {% from 'solvers/'+solver_name+"_intf.c.jinja" import solver_workspace with context %}
-{% from 'param/param.c.jinja' import param_handler_workspace with context %}
-{% from 'linop/linop.c.jinja' import linop_handler_workspace with context %}
+{% from 'expr_handler/expr_handler.c.jinja'
+        import expr_handler_workspace with context %}
 #ifndef CVXPY_CODEGEN
 #define CVXPY_CODEGEN
 
@@ -81,11 +81,7 @@ typedef struct work_struct{
     /* Variables used by the solver. */
     {{ solver_workspace() }}
 
-
-    {{ linop_handler_workspace() }}
-
-
-    {{ param_handler_workspace() }}
+    {{ expr_handler_workspace() }}
 
     /* Storage for integer and double workspaces. */
     long work_int[{{ work_int }}];

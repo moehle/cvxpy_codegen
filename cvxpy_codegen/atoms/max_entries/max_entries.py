@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from cvxpy_codegen.param.expr_data import AtomData
+from cvxpy_codegen.object_data.atom_data import AtomData
 
 def atomdata_max_entries(expr, arg_data):
     return AtomData(expr, arg_data,

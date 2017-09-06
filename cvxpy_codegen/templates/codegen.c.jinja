@@ -27,54 +27,30 @@ void solver_solve(Work *work);
 
 /* Function declarations */
 void recover_vars(Work *work, Vars *vars);
-{% if expressions %}
-void fill_param_tree(Params *params, Work *work);
-{% endif %}
 void fill_matrices(Params *params, Work *work);
-void param_init(Work *work); {# TODO maybe make a header? #}
-void linop_init(Work *work);
+void expr_handler_init(Work *work);
 void solver_init(Work *work);
 
 
 /* Initialization function. */
 void cg_init(Work *work){
     
-    printf("TP0\n");
-    param_init(work);
-    printf("TP1\n");
-    linop_init(work);
-    printf("TP2\n");
+    expr_handler_init(work);
     solver_init(work);
-    printf("TP3\n");
 }
 
 
 /* Main solve function */
 int cg_solve(Params *params, Work *work, Vars *vars){
 
-    printf("TP4\n");
-
-    {% if expressions %}
-    /* Get values for the internal params */
-    fill_param_tree(params, work);
-
-    printf("TP5\n");
-
-    {% endif %}
     /* Fill the data matrices using the parameters */
     fill_matrices(params, work);
-
-    printf("TP6\n");
 
     /* Call the solver to solve the problem */
     solver_solve(work);
 
-    printf("TP7\n");
-
     /* Get the user-defined variable values */
     recover_vars(work, vars);
-
-    printf("TP8\n");
 
     return(work->status);
 }

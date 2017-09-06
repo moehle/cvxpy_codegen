@@ -50,11 +50,10 @@ void solver_init(Work *work){
     printf("TP31\n");
 
     work->solver_work = ECOS_setup({{ x_length }}, {{ cone_dim }}, {{ eq_dim }},
-                                   {{ leq_dim }}, {{ len(soc_dims) }}, soc_sizes, {{ exp_cones }}, 
-                                   work->leq_nzval, work->leq_colptr, work->leq_rowidx,
-                                   work->eq_nzval, work->eq_colptr, work->eq_rowidx,
-                                   work->obj_vec, work->leq_offset,
-                                   work->eq_offset);
+             {{ leq_dim }}, {{ len(soc_dims) }}, soc_sizes, {{ exp_cones }}, 
+             work->leq_coeff.x, work->leq_coeff.p, work->leq_coeff.i,
+             work->eq_coeff.x, work->eq_coeff.p, work->eq_coeff.i,
+             work->obj_vec, work->leq_offset, work->eq_offset);
     printf("TP32\n");
 
 }

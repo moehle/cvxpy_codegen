@@ -17,19 +17,11 @@ You should have received a copy of the GNU General Public License
 along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+from cvxpy_codegen.object_data.expr_data import ExprData
 from cvxpy_codegen.object_data.atom_data import AtomData
-import scipy.sparse as sp
-
-def atomdata_hstack(expr, arg_data):
-    data_list = []
-    sparsity = arg_data[0].sparsity
-    data = arg_data[0]
-    for i, arg in enumerate(arg_data[1:]):
-        sparsity = sp.hstack([sparsity, arg.sparsity])
-        data = AtomData(expr, [data, arg],
-                               macro_name = "hstack",
-                               sparsity = sparsity,
-                               size = sparsity.shape)
-        data_list += [data]
-
-    return data_list
+from cvxpy_codegen.object_data.const_data import ConstData, CONST_ID
+from cvxpy_codegen.object_data.constr_data import ConstrData
+from cvxpy_codegen.object_data.param_data import ParamData, CbParamData
+#from cvxpy_codegen.object_data.linop_data import LinopData #TODO causes circular import
+from cvxpy_codegen.object_data.linop_coeff_data import LinOpCoeffData
+from cvxpy_codegen.object_data.var_data import VarData

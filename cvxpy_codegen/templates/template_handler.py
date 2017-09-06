@@ -22,8 +22,7 @@ import numpy
 
 
 INTF_SOURCES = ['codegen.c',
-                'linop.c',
-                'param.c',
+                'expr_handler.c',
                 'solver_intf.c',
                 'codegenmodule.c', ]
 

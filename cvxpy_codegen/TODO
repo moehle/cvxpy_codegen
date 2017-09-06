@@ -1,10 +1,5 @@
 LINOP INTEGRATION
--write code for directly evaluating linop_coeffs of constants
--combine param_handler and linop_handler
--handle linops with stored data
--rm references to u.nzval, etc.
-  -convert things to LinopCoeff
-  -convert things to CsrMatrix
+-write tests
 -write more linops
   -promote_mat
   -neg_mat
@@ -23,7 +18,9 @@ LINOP INTEGRATION
   -upper_tri_mat
   -conv_mat
   -kron_mat
--write tests
+-rm references to u.nzval, etc.
+  -convert things to LinopCoeff
+  -convert things to CsrMatrix
 -write varargs atoms for param_handler
   -hstack
   -vstack
