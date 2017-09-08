@@ -30,8 +30,7 @@ class LinOpCoeffData(ExprData):
                  work_coeffs=0,
                  data=None,
                  copy_arg=0):
-        super(LinOpCoeffData, self).__init__(linop_data, arg_data,
-                                             sparsity=sparsity)
+        ExprData.__init__(self, linop_data, arg_data, sparsity=sparsity)
         self.inplace = inplace
         self.macro_name = macro_name
         self.work_int = work_int

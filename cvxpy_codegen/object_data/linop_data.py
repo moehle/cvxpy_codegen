@@ -32,7 +32,7 @@ LINOP_COUNT = Counter()
 
 class LinOpData(ExprData):
     def __init__(self, expr, arg_data):
-        super(LinOpData, self).__init__(expr, arg_data)
+        ExprData.__init__(self, expr, arg_data)
         self.type = 'linop'
         self.opname = expr.type
         self.name = 'linop%d' % LINOP_COUNT.get_count()
