@@ -8,6 +8,15 @@
       import index_coeffs_declare, index_coeffs_define, index_coeffs_eval with context%}
 {% from "atoms/neg/neg_coeffs.c.jinja"
       import neg_coeffs_declare, neg_coeffs_define, neg_coeffs_eval with context%}
+{% from "atoms/reshape/reshape_coeffs.c.jinja" 
+      import reshape_coeffs_declare, reshape_coeffs_define, 
+             reshape_coeffs_eval with context%}
+{% from "atoms/sum_entries/sum_entries_coeffs.c.jinja" 
+      import sum_entries_coeffs_declare, sum_entries_coeffs_define, 
+             sum_entries_coeffs_eval with context%}
+{% from "atoms/transpose/transpose_coeffs.c.jinja" 
+      import transpose_coeffs_declare, transpose_coeffs_define, 
+             transpose_coeffs_eval with context%}
 
 
 {% macro declare(macro_name) %}

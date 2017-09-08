@@ -18,7 +18,6 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from cvxpy_codegen.object_data.expr_data import ExprData
-from cvxpy_codegen.object_data.const_data import CONST_ID
 import numpy as np
 
 
@@ -32,12 +31,13 @@ class ParamData(ExprData):
             self.value = np.squeeze(np.random.randn(*expr.size))
         else:
             self.value = expr.value
-        self.var_ids = [CONST_ID]
+        self.var_ids = []
         self.mem_name = self.name
         self.is_scalar = True if self.size == (1,1) else False
         self.is_column = True if self.size[1] == 1 else False
         self.is_row    = True if self.size[0] == 1 else False # TODO add tests for these
         self.cname = self.name
+        self.has_offset = True
         
     @property
     def storage(self):
@@ -52,10 +52,11 @@ class CbParamData(ExprData):
         self.type = 'cbparam'
         self.name = expr.name()
         self.cbp_name = expr.name()
-        self.var_ids = [CONST_ID]
+        self.var_ids = []
         self.inplace = True
         self.mem_name = arg_data[0].name
         self.cname = self.storage.name
+        self.has_offset = True
 
     @property
     def storage(self):

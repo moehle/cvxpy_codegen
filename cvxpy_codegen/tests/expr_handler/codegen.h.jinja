@@ -18,7 +18,8 @@
  */
 
 {% import "utils/utils.c.jinja" as u with context %}
-{% from 'param/param.c.jinja' import param_handler_workspace with context %}
+{% from 'expr_handler/expr_handler.c.jinja'
+        import expr_handler_workspace with context %}
 
 
 typedef struct params_struct{
@@ -56,12 +57,25 @@ typedef struct csc_matrix{
 } CscMatrix;
 
 
+typedef struct linop_coeff{
+    long *p;
+    long *j;
+    double *x;
+    long m;
+    long n;
+    long nnz;
+    long m_var; /* Shape of the represented variable. */
+    long n_var; /* Note that m_var * n_var = m. */
+} LinopCoeff;
+
+
 typedef struct work_struct{
 
-    {{ param_handler_workspace() }}
+    {{ expr_handler_workspace() }}
 
     /* Storage for integer and double workspaces. */
     long work_int[{{ work_int }}];
     double work_double[{{ work_float }}];
     CsrMatrix work_varargs[{{ work_varargs }}];
+    LinopCoeff work_coeffs[{{ work_coeffs }}];
 } Work;

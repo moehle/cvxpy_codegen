@@ -1,35 +1,33 @@
-LINOP INTEGRATION
--write tests
+TASKS
+-get cvxpy 1.0 to work
 -write more linops
-  -promote_mat
-  -neg_mat
-  -mul_mat
-  -rmul_mat
-  -mul_elemwise_mat
-  -div_mat
-  -sum_entries_mat
-  -trace_mat
-  -index_mat
-  -transpose_mat
-  -reshape
-  -sum
-  -diag_vec_mat
-  -diag_mat_mat
-  -upper_tri_mat
-  -conv_mat
-  -kron_mat
+  [x] neg
+  [x] index
+  [x] sum_entries
+  [x] sum
+  [x] transpose
+  [x] reshape  // has problems with copy
+  [ ] mul
+  [ ] rmul
+  [ ] promote
+  [ ] div
+  [ ] diag_vec
+  [ ] diag_mat
+  [ ] mul_elemwise
+  [ ] trace
+  [ ] upper_tri
+  [ ] conv
+  [ ] kron
+  [ ] hstack
+  [ ] vstack
 -rm references to u.nzval, etc.
   -convert things to LinopCoeff
   -convert things to CsrMatrix
+-rm references to spzeros
 -write varargs atoms for param_handler
   -hstack
   -vstack
-
-
-CVXPY 1.0
+-move constants to separate file
 -quadratic problems
-
-
-GENERAL
--remove -g flag from Makefile
 -make variable printing / parameter reading work better
+-remove -g flag from Makefile

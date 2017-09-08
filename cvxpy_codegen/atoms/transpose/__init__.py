@@ -17,8 +17,4 @@ You should have received a copy of the GNU General Public License
 along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from cvxpy_codegen.object_data.atom_data import AtomData
-
-def atomdata_max_entries(expr, arg_data):
-    return AtomData(expr, arg_data,
-                    macro_name = "max_entries")
+from cvxpy_codegen.atoms.transpose.transpose import atomdata_transpose, coeffdata_transpose

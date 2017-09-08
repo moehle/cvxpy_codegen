@@ -24,7 +24,12 @@ import numpy as np
 
 def atomdata_index(expr, arg_data):
 
-    slices = expr.get_data()[0]
+    # TODO rm for cvxpy 1.0
+    if hasattr(expr, 'data'):
+        slices = expr.data
+    else:
+        slices = expr.get_data()[0]
+
     start0 = 0 if slices[0].start==None else slices[0].start
     start1 = 0 if slices[1].start==None else slices[1].start
     stop0 = arg_data[0].sparsity.shape[0] if slices[0].stop==None else slices[0].stop
@@ -69,11 +74,14 @@ def coeffdata_index(linop, args, var):
             'stop1'  : slice1.stop,
             'step1'  : step1}
 
+    if data['stop0'] > sz0 or data['stop1'] > sz1:
+        raise Exception("Index out of bounds.") 
+
     idxs0 = range(*slice0.indices(sz0))
     idxs1 = range(*slice1.indices(sz1))
     indices = []
-    for idx0 in idxs0:
-      for idx1 in idxs1:
+    for idx1 in idxs1:
+      for idx0 in idxs0:
         indices += [idx0 + sz0 * idx1]
     sp.csr_matrix(args[0].sparsity)[indices,:]
     sparsity = args[0].sparsity[indices, :]

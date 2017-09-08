@@ -25,6 +25,7 @@ from cvxpy.lin_ops.lin_op import SCALAR_CONST, DENSE_CONST, SPARSE_CONST, PARAM,
 from cvxpy_codegen.linop.constr_data import ConstrData
 import scipy.sparse as sp
 from cvxpy_codegen.utils.utils import render
+from cvxpy_codegen.atoms import get_atom_data
 
 from cvxpy.lin_ops.lin_op import LinOp
 from cvxpy.expressions.constants.callback_param import CallbackParam
@@ -105,7 +106,7 @@ class ExprHandler():
         work_float   = max([c.work_float  for c in self.linop_coeffs] +
                            [data.work_float for data in self.expressions] + [0])
         work_varargs = max([data.work_varargs for data in self.expressions] + [0])
-        work_coeffs  = max([c.work_coeffs for c in self.linop_coeffs])
+        work_coeffs  = max([c.work_coeffs for c in self.linop_coeffs] + [0])
 
         # Recover the sparsity patterns of the coefficient matrices.
         obj_coeff, eq_coeff, leq_coeff = self.get_sparsity()
@@ -152,6 +153,8 @@ class ExprHandler():
 
         if isinstance(expr, CallbackParam) or \
                   (expr_type == PARAM and isinstance(expr_data, CallbackParam)):
+            if is_linop:
+                expr = expr_data
             data_arg = self.process_expression(expr.atom)
             data = CbParamData(expr, [data_arg])
             if expr.id not in self.cbparam_ids: # Check if already there.
@@ -160,6 +163,8 @@ class ExprHandler():
 
         elif isinstance(expr, Parameter) or \
                   (expr_type == PARAM and isinstance(expr_data, Parameter)):
+            if is_linop:
+                expr = expr_data
             data = ParamData(expr)
             if expr.id not in self.param_ids: # Check if already there.
                 self.named_params += [data]
@@ -192,8 +197,8 @@ class ExprHandler():
                     data = get_atom_data(expr, arg_data)
                     self.expressions += [data]
                     self.expr_ids += [id(expr)]
-                    if data.macro_name not in self.unique_exprs:
-                            self.unique_exprs += [data.macro_name]
+                    if data.macro_name not in self.unique_atoms:
+                        self.unique_atoms += [data.macro_name]
 
         elif is_linop is True:  # expr is a linear operator expression:
             if id(expr) in self.linop_ids: # Check if already there.
@@ -208,10 +213,13 @@ class ExprHandler():
                 self.linop_coeffs += data.coeffs.values() # Coefficients of variables.
                 if data.has_offset:
                     self.expressions += [data.offset_expr] # Expressions of constants.
+                    if data.offset_expr.macro_name not in self.unique_atoms:
+                        self.unique_atoms += [data.offset_expr.macro_name]
+
                 self.linops += [data]
                 for coeff in data.coeffs.values():
                     if coeff.macro_name not in self.unique_linops:
-                         self.unique_linops += [coeff.macro_name]
+                        self.unique_linops += [coeff.macro_name]
 
         else:
             raise TypeError('Invalid expression tree type: %s' % type(expr))

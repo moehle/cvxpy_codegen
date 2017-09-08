@@ -46,10 +46,14 @@ void add_coeffs(long n_args, LinopCoeff *C, LinopCoeff *Z, long *w, double *x){
           x[j] += C[k].x[p];
         }
       }
-      p2 = Z->p[i+1];
-      for(p=Z->p[i]; p<p2; p++) Z->x[p] = x[Z->j[p]];
     }
+    p2 = Z->p[i+1];
+    for(p=Z->p[i]; p<p2; p++) Z->x[p] = x[Z->j[p]];
   }
+  Z->m = m;
+  Z->n = n;
+  Z->m_var = C[0].m_var;
+  Z->n_var = C[0].n_var;
 }
 {% endmacro %}
 

@@ -1,0 +1,56 @@
+/*
+ *  Copyright 2017 Nicholas Moehle
+ *  
+ *  This file is part of CVXPY-CODEGEN.
+ *  
+ *  CVXPY-CODEGEN is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *  
+ *  CVXPY-CODEGEN is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License
+ *  along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+{% import "utils/utils.c.jinja" as u with context %}
+
+
+{% macro transpose_coeffs_declare() -%}
+void transpose_coeffs(LinopCoeff *A, LinopCoeff *Z);
+{%- endmacro %}
+
+
+{% macro transpose_coeffs_define() %}
+void transpose_coeffs(LinopCoeff *A, LinopCoeff *Z){
+  long iA, jA, iA_var, jA_var, mA_var=A->m_var;
+  long iZ, jZ, iZ_var, jZ_var, mZ_var=Z->m_var, mZ=Z->m;
+  long p, p2, count=0;
+
+  Z->p[0] = 0;
+  for (iZ=0; iZ<mZ; iZ++){
+    iZ_var = iZ % mZ_var;
+    jZ_var = iZ / mZ_var;
+    iA_var = jZ_var;
+    jA_var = iZ_var;
+    iA = iA_var + jA_var * mA_var;
+    p2 = A->p[iA+1];
+    for (p=A->p[iA]; p<p2; p++){
+      Z->j[count] = A->j[p];
+      Z->x[count++] = A->x[p];
+      // Zp[iZ+1]++;
+    }
+    Z->p[iZ+1] = Z->p[iZ] + p2 - A->p[iA];
+  }
+}
+{% endmacro %}
+
+
+{% macro transpose_coeffs_eval(expr) %}
+transpose_coeffs(&work->{{ expr.args[0].storage.name }},
+                 &work->{{ expr.storage.name }});
+{% endmacro %}

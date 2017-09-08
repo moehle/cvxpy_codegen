@@ -28,8 +28,10 @@ from cvxpy_codegen.atoms.mul import atomdata_mul
 from cvxpy_codegen.atoms.mul_elemwise import atomdata_mul_elemwise
 from cvxpy_codegen.atoms.neg import atomdata_neg, coeffdata_neg
 from cvxpy_codegen.atoms.pos import atomdata_pos
-from cvxpy_codegen.atoms.reshape import atomdata_reshape
+from cvxpy_codegen.atoms.reshape import atomdata_reshape, coeffdata_reshape
+from cvxpy_codegen.atoms.sum_entries import atomdata_sum_entries, coeffdata_sum_entries
 from cvxpy_codegen.atoms.trace import atomdata_trace
+from cvxpy_codegen.atoms.transpose import atomdata_transpose, coeffdata_transpose
 from cvxpy_codegen.atoms.vstack import atomdata_vstack
 
 
@@ -59,7 +61,9 @@ from cvxpy.atoms.affine.hstack import hstack
 from cvxpy.atoms.affine.diag import diag_vec, diag_mat
 from cvxpy.atoms.affine.reshape import reshape
 from cvxpy.atoms.affine.index import index
+from cvxpy.atoms.affine.sum_entries import sum_entries
 from cvxpy.atoms.affine.mul_elemwise import mul_elemwise
+from cvxpy.atoms.affine.transpose import transpose
 from cvxpy.atoms import *
 
 
@@ -76,17 +80,25 @@ GET_ATOM_DATA = {MulExpression : atomdata_mul,
                  reshape       : atomdata_reshape,
                  abs           : atomdata_abs,
                  trace         : atomdata_trace,
+                 transpose     : atomdata_transpose,
+                 sum_entries   : atomdata_sum_entries,
                  max_entries   : atomdata_max_entries }
 
 
-GET_COEFF_DATA = {'sum'      : coeffdata_add,
-                  'index'    : coeffdata_index,
-                  'neg'      : coeffdata_neg}
+GET_COEFF_DATA = {'sum'         : coeffdata_add,
+                  'index'       : coeffdata_index,
+                  'neg'         : coeffdata_neg,
+                  'reshape'     : coeffdata_reshape,
+                  'sum_entries' : coeffdata_sum_entries,
+                  'transpose'   : coeffdata_transpose}
 
 
-GET_ATOM_DATA_FROM_LINOP = { 'sum'      : atomdata_add,
-                             'index'    : atomdata_index,
-                             'neg'      : atomdata_neg}
+GET_ATOM_DATA_FROM_LINOP = {'sum'         : atomdata_add,
+                            'index'       : atomdata_index,
+                            'neg'         : atomdata_neg,
+                            'reshape'     : atomdata_reshape,
+                            'sum_entries' : atomdata_sum_entries,
+                            'transpose'   : atomdata_transpose}
 
 
 def get_atom_data(expr, arg_data):
@@ -99,7 +111,7 @@ def get_atom_data(expr, arg_data):
 def get_coeff_data(linop_data, arg_data, vid):
     if not linop_data.opname in GET_COEFF_DATA.keys():
         raise TypeError("Evaluating linear coefficients for "
-                        "atom %s not supported." % str(linop.opname))
+                        "atom %s not supported." % str(linop_data.opname))
     return GET_COEFF_DATA[linop_data.opname](linop_data, arg_data, vid)
 
 

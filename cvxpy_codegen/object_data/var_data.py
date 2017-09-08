@@ -32,3 +32,9 @@ class VarData(ExprData):
         self.sparsity = sp.csr_matrix(sp.eye(self.length, dtype=bool))
         self.var_ids = {self.id}
         self.storage = self # Where is the coefficient stored in C?
+        self.has_offset = False
+        self.coeffs = {self.id : self}
+        self.vid = self.id
+
+    def get_matrix(self, sym_data):
+        return self.sparsity

@@ -18,12 +18,24 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from cvxpy_codegen.object_data.atom_data import AtomData
+from cvxpy_codegen.object_data.linop_coeff_data import LinOpCoeffData
 import scipy.sparse as sp
 import numpy as np
 
+# TODO remove for cvxpy 1.0:
+from cvxpy.lin_ops.lin_op import LinOp
+
 def atomdata_reshape(expr, arg_data):
 
-    m_new, n_new = expr.get_data()
+    ## TODO remove for cvxpy 1.0:
+    #print(expr)
+    #if isinstance(expr, LinOpData):
+    #    m_new, n_new = expr.size
+    #else:
+    #    m_new, n_new = expr.get_data()
+
+    m_new, n_new = expr.size
+
     
     m = arg_data[0].size[0]
     n = arg_data[0].size[1]
@@ -36,6 +48,15 @@ def atomdata_reshape(expr, arg_data):
                     work_int = m_new,
                     work_float = m_new,
                     data = (m_new, n_new))
+
+
+
+def coeffdata_reshape(linop, args, var):
+    return LinOpCoeffData(linop, args, var,
+                          sparsity = args[0].sparsity,
+                          inplace = True,
+                          macro_name = 'reshape_coeffs')
+
 
 
 def reshape(A, m_new,n_new):

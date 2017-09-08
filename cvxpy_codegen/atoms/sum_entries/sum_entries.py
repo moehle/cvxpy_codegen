@@ -18,7 +18,22 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from cvxpy_codegen.object_data.atom_data import AtomData
+from cvxpy_codegen.object_data.linop_coeff_data import LinOpCoeffData
+import numpy as np
+import scipy.sparse as sp
 
-def atomdata_max_entries(expr, arg_data):
-    return AtomData(expr, arg_data,
-                    macro_name = "max_entries")
+def atomdata_sum_entries(expr, arg_data):
+        return AtomData(expr, arg_data,
+                        macro_name = 'sum_entries')
+
+
+
+def coeffdata_sum_entries(linop, args, var):
+    work_int = args[0].sparsity.shape[1]
+    work_float = args[0].sparsity.shape[1]
+    sparsity = sp.csr_matrix(np.sum(args[0].sparsity, axis=0))
+    return LinOpCoeffData(linop, args, var,
+                          work_int = work_int,
+                          work_float = work_float,
+                          sparsity = sparsity,
+                          macro_name = 'sum_entries_coeffs')

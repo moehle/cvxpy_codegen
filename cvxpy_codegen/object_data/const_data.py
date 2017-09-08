@@ -38,7 +38,8 @@ class ConstData(ExprData):
         self.colidx = self.value.indices
         self.nzval = self.value.data
         self.nnz = self.value.nnz
-        self.var_ids = [CONST_ID]
+        self.var_ids = {}
+        self.has_offset = True
         self.mem_name = self.name
         self.cname = self.storage.name
 

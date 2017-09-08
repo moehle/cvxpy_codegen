@@ -40,8 +40,10 @@ class LinOpData(ExprData):
         self.args = arg_data
         self.coeffs = dict()
         self.var_ids = set().union(*[a.var_ids for a in arg_data])
-        self.has_offset = True if CONST_ID in self.var_ids else False
-        self.var_ids.discard(CONST_ID)
+        if any([a.has_offset for a in arg_data]):
+            self.has_offset = True 
+        else:
+            self.has_offset = False
 
         # Get the coefficient for each variable.
         for vid in self.var_ids:
@@ -59,12 +61,17 @@ class LinOpData(ExprData):
         if self.has_offset:
             offset_args = []
             for arg in self.args:
-                if CONST_ID in arg.var_ids:
+                if arg.has_offset:
                     if isinstance(arg, LinOpData):
                         offset_args += [arg.offset_expr]
                     else:
                         offset_args += [arg]
             self.offset_expr = get_atom_data_from_linop(self, offset_args)
+
+
+    def get_data(self):
+        return self.data
+
 
 
     def force_copy(self):
@@ -81,7 +88,7 @@ class LinOpData(ExprData):
                 start = sym_data.var_offsets[vid]
                 coeff_width = coeff.sparsity.shape[1]
                 pad_left = start
-                pad_right = sym_data.x_length - coeff_width
+                pad_right = sym_data.x_length - coeff_width - pad_left
                 mat += sp.hstack([sp.csc_matrix((coeff_height, pad_left), dtype=bool),
                                   coeff.sparsity,
                                   sp.csc_matrix((coeff_height, pad_right), dtype=bool)])

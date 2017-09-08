@@ -21,6 +21,14 @@
 {% import "atoms/linops.c.jinja" as lo with context %}
 {% import "atoms/atoms.c.jinja" as atoms with context %}
 #include "codegen.h"
+#include <stdio.h>
+
+{# TODO debug #}
+
+
+{{ u.print_linopcoeff_declare() }}
+
+{{ u.print_csrmat_declare() }}
 
 
 {# This is the storage needed to process the expression trees
@@ -47,6 +55,14 @@
     double obj_vec[{{ x_length }}];
     double obj_offset;
 
+    /* Storage for the parameters. */
+    {% for p in named_params %}
+    CsrMatrix {{ p.name }};
+    long    {{ p.name }}_rowptr[{{ p.size[0]+1 }}];
+    long    {{ p.name }}_colidx[{{ p.sparsity.nnz }}];
+    double *{{ p.name }}_nzval;
+
+    {% endfor %}
     {% if expressions %}
     /* Storage for intermediate results from expression evaluation (if any): */
     {% for expr in expressions %}
@@ -72,7 +88,7 @@
     {% for c in linop_coeffs %}
     {% if not c.inplace or c.make_copy %}
     LinopCoeff {{ c.name }};
-    long {{ c.name }}_rowptr[{{ c.size[0]+1 }}];
+    long {{ c.name }}_rowptr[{{ c.sparsity.shape[0]+1 }}];
     long {{ c.name }}_colidx[{{ c.sparsity.nnz }}];
     double {{ c.name }}_nzval[{{ c.sparsity.nnz }}];
     {% endif %}
@@ -81,7 +97,7 @@
     /* Storage for coefficients corresponding to variables: */
     {% for v in vars %}
     LinopCoeff {{ v.name }};
-    long   {{ v.name }}_rowptr[{{ v.size[0]+1 }}];
+    long   {{ v.name }}_rowptr[{{ v.sparsity.nnz+1 }}];
     long   {{ v.name }}_colidx[{{ v.sparsity.nnz }}];
     double {{ v.name }}_nzval[{{ v.sparsity.nnz }}];
 
@@ -127,19 +143,20 @@ long leq_rowidx{{ u.print_vec(leq_coeff.indices) }};
  */
 
 void add_matrix(long hshift, long vshift,
-                   CscMatrix *A, LinopCoeff *B);
-void reset_colptr(long m, long *Ap);
+                CscMatrix *A, LinopCoeff *B);
+void reset_colptr(long n, long *Ap);
 void init_var_coeff(long m_var, long n_var, LinopCoeff *A);
 void cscrow2vec(CscMatrix A, double *vec);
 void csr_vectorize(CsrMatrix *A, double *x, long offset);
+void init_dense_sparsity(CsrMatrix A);
+{{ u.copy_declare() }} {# TODO add logic to python for including this or not #}
+{{ u.copy_linop_declare() }} {# TODO add logic to python for including this or not #}
 {% for linop_name in unique_linops %}
   {{- lo.declare(linop_name) }}
 {% endfor %}
-{% for expr_name in unique_exprs %}
+{% for expr_name in unique_atoms %}
   {{- atoms.declare(expr_name) }}
 {% endfor %}
-{{ u.copy_declare() }} {# TODO add logic to python for including this or not #}
-{{ u.copy_linop_declare() }} {# TODO add logic to python for including this or not #}
 
 
 
@@ -170,6 +187,7 @@ void expr_handler_init(Work *work){
     work->obj_coeff.m = {{ obj_coeff.shape[0] }};
     work->obj_coeff.n = {{ obj_coeff.shape[1] }};
     work->obj_coeff.nnz = {{ obj_coeff.nnz }};
+    work->obj_offset = 0;
 
     {% for e in expressions %}
     {% if not e.inplace or e.make_copy %}
@@ -255,12 +273,14 @@ void fill_matrices(Params *params, Work *work){
   /* Evaluate expressions. */
   {% for expr in expressions %}
   {{ atoms.eval(expr) -}}
+  {# {{ u.print_csrmat_eval(expr) }}#}
 
   {% endfor %}
 
   /* Evaluate linear operator coefficients. */
   {% for coeff in linop_coeffs %}
   {{ lo.eval(coeff) -}}
+  {#{{ u.print_linopcoeff_eval(coeff) }}#}
 
   {% endfor %}
   /* Construct equality constraint. */
@@ -275,7 +295,7 @@ void fill_matrices(Params *params, Work *work){
                 work->eq_offset, {{ c.vert_offset}});
   {% endif %}
   {% endfor %}
-  reset_colptr({{  eq_coeff.nnz }},  eq_colptr);
+  reset_colptr({{  eq_coeff.shape[1] }},  eq_colptr);
 
   /* Construct iequality constraint. */
   {% for c in leq_constr %}
@@ -289,7 +309,7 @@ void fill_matrices(Params *params, Work *work){
                 work->leq_offset, {{ c.vert_offset}});
   {% endif %}
   {% endfor %}
-  reset_colptr({{ leq_coeff.nnz }}, leq_colptr);
+  reset_colptr({{ leq_coeff.shape[1] }}, leq_colptr);
 
   /* Construct objective. */
   {% for coeff in objective.coeffs.values() %}
@@ -299,7 +319,7 @@ void fill_matrices(Params *params, Work *work){
   work->obj_offset = work->{{ objective.offset_expr.storage.name }}.x[0];
   {% endif %}
   {% endfor %}
-  reset_colptr({{ obj_coeff.nnz }}, obj_colptr);
+  reset_colptr({{ obj_coeff.shape[1] }}, obj_colptr);
   cscrow2vec(work->obj_coeff, work->obj_vec);
 
 }
@@ -352,9 +372,9 @@ void add_matrix(long hshift, long vshift,
 
 
 
-void reset_colptr(long m, long *Ap){
+void reset_colptr(long n, long *Ap){
   int i;
-  for (i=m; i>0; i--){
+  for (i=n; i>0; i--){
     Ap[i] = Ap[i-1];
   }
   Ap[0] = 0; 
@@ -398,7 +418,7 @@ void init_dense_sparsity(CsrMatrix A){
 {% endfor %}
 
 /* These are all the atom definitions. */
-{% for expr_name in unique_exprs %}
+{% for expr_name in unique_atoms %}
   {{- atoms.define(expr_name) }}
 {% endfor %}
 
@@ -407,3 +427,7 @@ void init_dense_sparsity(CsrMatrix A){
 {{ u.copy_linop_define() }}
 
 {{ u.copy_define() }} // todo add logic to python for this
+
+{{ u.print_linopcoeff_define() }}
+
+{{ u.print_csrmat_define() }}

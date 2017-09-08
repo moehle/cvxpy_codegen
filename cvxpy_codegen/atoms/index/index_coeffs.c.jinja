@@ -19,8 +19,8 @@ void lo_index(long m,
 
   int i, j, idx, p, p2, pZ=0, iZ=0;
   Zp[0] = 0;
-  for (i=start0; i<stop0; i+=step0){
-    for (j=start1; j<stop1; j+=step1){
+  for (j=start1; j<stop1; j+=step1){
+    for (i=start0; i<stop0; i+=step0){
       Zp[iZ+1] = Zp[iZ];
       idx = i + j * m;
       p2 = Ap[idx+1];
@@ -37,7 +37,7 @@ void lo_index(long m,
 
 
 {% macro index_coeffs_eval(expr) %}
-lo_index({{ expr.size[0] }}l, 
+lo_index({{ expr.args[0].size[0] }},
          {{- expr.data['start0'] }},
          {{- expr.data['stop0'] }},
          {{- expr.data['step0'] }},

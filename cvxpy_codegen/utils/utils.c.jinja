@@ -75,6 +75,11 @@ void copy_linop(LinopCoeff *A, LinopCoeff *Z){
     }
   }
   Z->p[m] = A->p[m];
+  Z->m = A->m;
+  Z->n = A->n;
+  Z->m_var = A->m_var;
+  Z->n_var = A->n_var;
+  Z->nnz = A->nnz;
 }
 {% endmacro %}
 
@@ -104,3 +109,63 @@ copy_linop(&work->{{ expr.args[expr.copy_arg].name }}, &work->{{ expr.name }});
 {%- endfor -%}
 {{- vec[-1] }}}
 {%- endmacro -%}
+
+
+
+{% macro print_linopcoeff_declare() %}
+void print_linopcoeff(LinopCoeff *A);
+{% endmacro %}
+
+{% macro print_linopcoeff_eval(expr) %}
+printf("LINOPCOEFF {{expr.storage.name}}\n");
+printf("  type: {{expr.macro_name}}\n");
+print_linopcoeff(&work->{{expr.storage.name}});
+{% endmacro %}
+
+{% macro print_linopcoeff_define() %}
+void print_linopcoeff(LinopCoeff *A){
+  long i, p, m=A->m;
+  printf("  m = %ld\n", m);
+  printf("  n = %ld\n", A->n);
+  printf("  m_var = %ld\n", A->m_var);
+  printf("  n_var = %ld\n", A->n_var);
+  printf("  nnz = %ld\n", A->p[m]);
+  printf("  Ap: \n");
+  for(i=0; i<m; i++){
+    printf("  Ap[%ld] = %ld\n", i, A->p[i]);
+    for(p=A->p[i]; p<A->p[i+1]; p++){
+      printf("    p, (i, j), x = %ld, (%ld, %ld), %f\n", p, i, A->j[p], A->x[p]);
+    }
+  }
+  printf("\n\n");
+}
+{% endmacro %}
+
+
+
+{% macro print_csrmat_declare() %}
+void print_csrmat(CsrMatrix *A);
+{% endmacro %}
+
+{% macro print_csrmat_eval(expr) %}
+printf("CSR MATRIX {{expr.storage.name}}\n");
+printf("  type: {{expr.macro_name}}\n");
+print_csrmat(&work->{{expr.storage.name}});
+{% endmacro %}
+
+{% macro print_csrmat_define() %}
+void print_csrmat(CsrMatrix *A){
+  long i, p, m=A->m;
+  printf("  m = %ld\n", m);
+  printf("  n = %ld\n", A->n);
+  printf("  nnz = %ld\n", A->p[m]);
+  printf("  Ap: \n");
+  for(i=0; i<m; i++){
+    printf("  Ap[%ld] = %ld\n", i, A->p[i]);
+    for(p=A->p[i]; p<A->p[i+1]; p++){
+      printf("    p, (i, j), x = %ld, (%ld, %ld), %f\n", p, i, A->j[p], A->x[p]);
+    }
+  }
+  printf("\n\n");
+}
+{% endmacro %}
