@@ -31,11 +31,7 @@ int main(){
     params.{{ p.name }} = {{ p.value }};
       {% elif p.is_column -%}
         {% for i in range(p.shape[0]) %}
-    params.{{ p.name }}[{{ i }}] = {{ p.value[i,0] }};
-        {% endfor %}
-      {%- elif p.is_row -%}
-        {% for j in range(p.shape[1]) %}
-    params.{{ p.name }}[{{ j }}] = {{ p.value[0,j] }};
+    params.{{ p.name }}[{{ i }}] = {{ p.value[i] }};
         {% endfor %}
       {%- else -%}
         {% for i in range(p.shape[0]) %}

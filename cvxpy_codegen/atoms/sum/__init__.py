@@ -17,5 +17,5 @@ You should have received a copy of the GNU General Public License
 along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from cvxpy_codegen.atoms.sum_entries.sum_entries \
-        import atomdata_sum_entries, coeffdata_sum_entries
+from cvxpy_codegen.atoms.sum.sum \
+        import atomdata_sum, coeffdata_sum

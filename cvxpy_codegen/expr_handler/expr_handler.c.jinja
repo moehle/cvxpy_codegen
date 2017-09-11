@@ -220,7 +220,7 @@ void eval_exprs(Params *params, Work *work){
   /* Evaluate expressions. */
   {% for expr in expressions %}
   {{ atoms.eval(expr) -}}
-  {# {{ u.print_csrmat_eval(expr) }}#}
+  {#{{ u.print_csrmat_eval(expr) }}#}
 
   {% endfor %}
 

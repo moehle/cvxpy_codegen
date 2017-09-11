@@ -30,7 +30,7 @@ class ParamData(ExprData):
         if expr.value is None:
             self.value = np.squeeze(np.random.randn(*expr.shape))
         else:
-            self.value = expr.value
+            self.value = np.squeeze(expr.value)
         self.var_ids = []
         self.mem_name = self.name
         self.is_scalar = True if self.shape == (1,1) else False

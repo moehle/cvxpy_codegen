@@ -29,8 +29,8 @@ def codegen(prob, target_dir, dump=False):
     params = prob.parameters()
 
     # TODO: make nicer
-    SC = construct_solving_chain(prob, solver="ECOS")
-    for r in SC.reductions:
+    sc = construct_solving_chain(prob, solver="ECOS")
+    for r in sc.reductions:
         if isinstance(r, Dcp2Cone):
             prob, dcp2cone_inv_data = r.apply(prob)
         if isinstance(r, CvxAttr2Constr):

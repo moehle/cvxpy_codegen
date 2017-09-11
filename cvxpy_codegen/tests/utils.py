@@ -32,16 +32,43 @@ from cvxpy_codegen import codegen
 TARGET_DIR = os.path.join(os.getcwd(), 'cg_build')
 
 
+
+def convert_to_matrix(A):
+    if sp.issparse(A):
+        A = A.toarray()
+    if len(A.shape)==0:
+        A = np.expand_dims(A, 0)
+        return np.expand_dims(A, 1)
+    if len(A.shape)==1: # Vectors are assumed to be column vectors.
+        return np.expand_dims(A, 1)
+    if len(A.shape)==2:
+        return A
+    else:
+        RuntimeError("Shape is greater than 2")
+
+
+
 class CodegenTestCase(unittest.TestCase):
     EPS = 1e-5
 
 
+
+
     def assertAlmostEqualMatrices(self, A, B, eps=None):
+
+        if not(A is None):
+            if any([s == 0 for s in A.shape]):
+                A = None
+        if not(B is None):
+            if any([s == 0 for s in B.shape]):
+                B = None
+        if A is None and B is None:
+            return
+
+        A = convert_to_matrix(A)
+        B = convert_to_matrix(B)
+
         if any(A) or any(B):
-            print()
-            print(any(A))
-            print(any(B))
-            print("this")
             if eps == None:
                 eps = self.EPS
             D =  abs(A-B)

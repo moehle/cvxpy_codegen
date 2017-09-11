@@ -29,7 +29,7 @@ from cvxpy_codegen.atoms.mul import atomdata_mul
 from cvxpy_codegen.atoms.neg import atomdata_neg, coeffdata_neg
 from cvxpy_codegen.atoms.pos import atomdata_pos
 from cvxpy_codegen.atoms.reshape import atomdata_reshape, coeffdata_reshape
-#from cvxpy_codegen.atoms.sum_entries import atomdata_sum_entries, coeffdata_sum_entries
+from cvxpy_codegen.atoms.sum import atomdata_sum, coeffdata_sum
 from cvxpy_codegen.atoms.trace import atomdata_trace
 from cvxpy_codegen.atoms.transpose import atomdata_transpose, coeffdata_transpose
 from cvxpy_codegen.atoms.vstack import atomdata_vstack
@@ -61,7 +61,7 @@ from cvxpy.atoms.affine.hstack import hstack
 from cvxpy.atoms.affine.diag import diag_vec, diag_mat
 from cvxpy.atoms.affine.reshape import reshape
 from cvxpy.atoms.affine.index import index
-#from cvxpy.atoms.affine.sum_entries import sum_entries
+from cvxpy.atoms.affine.sum import Sum
 #from cvxpy.atoms.affine.mul_elemwise import mul_elemwise
 from cvxpy.atoms.affine.transpose import transpose
 from cvxpy.atoms import *
@@ -81,7 +81,7 @@ GET_ATOM_DATA = {MulExpression : atomdata_mul,
                  abs           : atomdata_abs,
                  trace         : atomdata_trace,
                  transpose     : atomdata_transpose,
-                 #sum_entries   : atomdata_sum_entries,
+                 Sum           : atomdata_sum,
                  #max_entries   : atomdata_max_entries
                  }
 
@@ -90,7 +90,7 @@ GET_ATOM_DATA = {MulExpression : atomdata_mul,
 #                  'index'       : coeffdata_index,
 #                  'neg'         : coeffdata_neg,
 #                  'reshape'     : coeffdata_reshape,
-#                  #'sum_entries' : coeffdata_sum_entries,
+#                  'sum_entries' : coeffdata_sum_entries,
 #                  'transpose'   : coeffdata_transpose}
 
 
@@ -98,7 +98,7 @@ GET_COEFF_DATA = {AddExpression : coeffdata_add,
                   index         : coeffdata_index,
                   NegExpression : coeffdata_neg,
                   reshape       : coeffdata_reshape,
-                  #'sum_entries' : coeffdata_sum_entries,
+                  Sum           : coeffdata_sum,
                   transpose     : coeffdata_transpose}
 
 
@@ -112,7 +112,6 @@ GET_COEFF_DATA = {AddExpression : coeffdata_add,
 
 def get_atom_data(expr, arg_data):
     if not type(expr) in GET_ATOM_DATA.keys():
-        print(expr)
         raise TypeError("Constant expressions involving "
                         "the %s atom not supported." % str(type(expr)))
     return GET_ATOM_DATA[type(expr)](expr, arg_data)

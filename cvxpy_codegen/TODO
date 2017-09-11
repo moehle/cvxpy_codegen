@@ -1,5 +1,7 @@
 TASKS
--get cvxpy 1.0 to work
+-figure out vectors and scalars
+-get SOCs to work
+-get exp cone to work
 -write more linops
   [x] neg
   [x] index

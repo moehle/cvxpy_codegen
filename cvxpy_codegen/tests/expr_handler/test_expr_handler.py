@@ -85,24 +85,24 @@ class TestLinopHandler(tu.CodegenTestCase):
     ###########################
 
     def test_abs(self):
-        #self._test_expr(cvx.abs(self.param_mn))
-        self._test_expr(cvx.abs(self.const_mn), printing=True)
-        #self._test_expr(cvx.abs(self.param_mn + self.const_mn))
-        #self._test_expr(cvx.abs(-self.param_mn))
+        self._test_expr(cvx.abs(self.param_mn))
+        self._test_expr(cvx.abs(self.const_mn))
+        self._test_expr(cvx.abs(self.param_mn + self.const_mn))
+        self._test_expr(cvx.abs(-self.param_mn))
 
-    #def test_add(self):
-    #    self._test_expr(self.param_mn + self.param_mn)
-    #    self._test_expr(self.param_mn - self.param_mn)
-    #    self._test_expr(self.param_n1 + self.const_n1)
-    #    self._test_expr(self.param_n1 - self.const_n1)
-    #    self._test_expr(self.param_mn + self.param_11)
-    #    self._test_expr(self.param_11 + self.const_mn)
-    #    self._test_expr(self.param_mn + self.param_11 + self.const_11)
-    #    self._test_expr(self.param_11 + self.param_11 + self.const_11)
-    #    self._test_expr(self.param_11 + self.param_11 + self.const_mn)
-    #    self._test_expr(self.param_11 + self.const_mn + self.const_mn)
-    #    self._test_expr(self.const_mn + self.const_mn + self.param_11)
-    #    self._test_expr(self.const_mn + self.const_11 + self.param_mn)
+    def test_add(self):
+        self._test_expr(self.param_mn + self.param_mn)
+        self._test_expr(self.param_mn - self.param_mn)
+        self._test_expr(self.param_n1 + self.const_n1)
+        self._test_expr(self.param_n1 - self.const_n1)
+        self._test_expr(self.param_mn + self.param_11)
+        self._test_expr(self.param_11 + self.const_mn)
+        self._test_expr(self.param_mn + self.param_11 + self.const_11)
+        self._test_expr(self.param_11 + self.param_11 + self.const_11)
+        self._test_expr(self.param_11 + self.param_11 + self.const_mn)
+        self._test_expr(self.param_11 + self.const_mn + self.const_mn)
+        self._test_expr(self.const_mn + self.const_mn + self.param_11)
+        self._test_expr(self.const_mn + self.const_11 + self.param_mn)
 
     #def test_diag_vec(self):
     #    self._test_expr(cvx.diag(self.param_n1))
@@ -118,11 +118,11 @@ class TestLinopHandler(tu.CodegenTestCase):
     ##    self._test_expr(cvx.hstack(self.param_nn, self.param_n1))
     ##    self._test_expr(cvx.hstack(self.param_np, self.const_n1, self.param_nn))
 
-    #def test_index(self):
-    #    self._test_expr(self.param_mn[0:8:2, 1:17:3])
-    #    self._test_expr(self.param_n1[0:8:2])
-    #    self._test_expr(self.param_1n[:5])
-    #    self._test_expr(self.param_1n[5:])
+    def test_index(self):
+        self._test_expr(self.param_mn[0:8:2, 1:17:3])
+        #self._test_expr(self.param_n1[0:8:2])
+        #self._test_expr(self.param_1n[:5])
+        #self._test_expr(self.param_1n[5:])
 
     #def test_max_entries(self):
     #    self._test_expr(cvx.max_entries(self.param_mn))
@@ -145,22 +145,22 @@ class TestLinopHandler(tu.CodegenTestCase):
     #    self._test_expr(cvx.mul_elemwise(self.param_11, self.param_11))
     #    self._test_expr(cvx.mul_elemwise(self.param_11, self.const_11))
 
-    #def test_neg(self):
-    #    self._test_expr(-self.param_mn)
-    #    self._test_expr(-self.param_n1)
+    def test_neg(self):
+        self._test_expr(-self.param_mn)
+        self._test_expr(-self.param_n1)
 
     #def test_reshape(self):
-    #    self._test_expr(cvx.reshape(self.param_mn, self.n, self.m))
-    #    self._test_expr(cvx.reshape(self.param_mn + self.const_mn, self.n, self.m))
-    #    self._test_expr(cvx.reshape(self.param_n1, 1, self.n))
+    #    self._test_expr(cvx.reshape(self.param_mn, (self.n, self.m)))
+    #    self._test_expr(cvx.reshape(self.param_mn + self.const_mn, (self.n, self.m)))
+    #    self._test_expr(cvx.reshape(self.param_n1, (1, self.n)))
 
     #def test_trace(self):
     #    self._test_expr(cvx.trace(self.param_nn))
     #    self._test_expr(cvx.trace(cvx.diag(self.param_n1)))
     #    self._test_expr(cvx.trace(self.param_11))
 
-    #def test_transpose(self):
-    #    self._test_expr(cvx.sum_entries(self.param_mn.T[1:3, 2:5]), printing=True)
+    def test_transpose(self):
+        self._test_expr(cvx.sum(self.param_mn.T[1:3, 2:5]))
 
     ##def test_vstack(self):
     ##    self._test_expr(cvx.vstack(self.param_n1, self.param_11, self.const_11))
@@ -176,106 +176,107 @@ class TestLinopHandler(tu.CodegenTestCase):
     # FUNCTIONS OF VARIABLES #
     ##########################
 
-    #def test_sum_entries(self):
-    #    self._test_expr(cvx.sum_entries(self.var_mn))
-    #    self._test_expr(cvx.sum_entries(self.var_mn + self.param_mn))
-    #    self._test_expr(cvx.sum_entries(self.var_mn + self.const_mn))
-    #    self._test_expr(self.var_11 + cvx.sum_entries(self.const_mn))
-    #    self._test_expr(self.param_11 + cvx.sum_entries(self.var_mn))
-    #
-    #def test_index(self):
-    #    self._test_expr(self.var_mn[2:8:2,2:4])
-    #    self._test_expr(self.var_n1[2:7:2])
-    #    self._test_expr(self.var_n1[2:4])
+    def test_sum(self):
+        self._test_expr(cvx.sum(self.var_mn))
+        self._test_expr(cvx.sum(self.var_mn + self.param_mn))
+        self._test_expr(cvx.sum(self.var_mn + self.const_mn))
+        self._test_expr(self.var_11 + cvx.sum(self.const_mn))
+        self._test_expr(self.param_11 + cvx.sum(self.var_mn))
 
-    #def test_neg(self):
-    #    self._test_expr(-self.var_mn)
-    #    self._test_expr(self.param_mn - self.var_mn)
-    #    self._test_expr(self.const_mn - self.var_mn)
-    #
-    #def test_transpose(self):
-    #     self._test_expr(self.var_mn.T[1:3, 2:5])
-    #     self._test_expr(self.var_n1.T[1:3])
-    #     self._test_expr((self.var_n1 + self.const_n1).T[1:3])
-    #     self._test_expr((self.var_mn.T + self.const_mn.T)[1:3, 2:5])
-    #
-    #def test_reshape(self):
-    #    self._test_expr(cvx.reshape(self.var_mn, self.n, self.m))
-    #    self._test_expr(cvx.reshape(
-    #            self.var_mn + self.const_mn, self.n, self.m)[1:3, 4:5])
-    #    self._test_expr(cvx.reshape(self.var_mn.T, self.n, self.m))
-    #    self._test_expr(cvx.reshape(self.var_mn, self.n, self.m).T)
-    #    self._test_expr(cvx.reshape(self.var_mn, self.n, self.m) + self.var_mn.T)
-    #    self._test_expr(cvx.reshape(self.var_n1, 1, self.n) + self.param_n1.T)
+    def test_index(self):
+        self._test_expr(self.var_mn[2:8:2,2:4])
+        self._test_expr(self.var_n1[2:7:2])
+        self._test_expr(self.var_n1[2:4])
+
+    def test_neg(self):
+        self._test_expr(-self.var_mn)
+        self._test_expr(self.param_mn - self.var_mn)
+        self._test_expr(self.const_mn - self.var_mn)
+    
+    def test_transpose(self):
+         self._test_expr(self.var_mn.T[1:3, 2:5])
+         #self._test_expr(self.var_n1.T[1:3]) # TODO requires vector behavior
+         #self._test_expr((self.var_n1 + self.const_n1).T[1:3])
+         self._test_expr((self.var_mn.T + self.const_mn.T)[1:3, 2:5])
+    
+    def test_reshape(self):
+        self._test_expr(cvx.reshape(self.var_mn, (self.n, self.m)))
+        self._test_expr(cvx.reshape(
+                self.var_mn + self.const_mn, (self.n, self.m))[1:3, 4:5])
+        self._test_expr(cvx.reshape(self.var_mn.T, (self.n, self.m)))
+        self._test_expr(cvx.reshape(self.var_mn, (self.n, self.m)).T)
+        self._test_expr(cvx.reshape(self.var_mn, (self.n, self.m)) + self.var_mn.T)
+        self._test_expr(cvx.reshape(self.var_n1, (1, self.n)) + self.const_n1.T)
+
     
     
     #def test_mul(self):
-    #    self._test_expr(cvx.sum_entries(self.var_mn * self.param_np))
-    #    self._test_expr(cvx.sum_entries(self.var_mn * self.const_np))
-    #    self._test_expr(cvx.sum_entries(self.param_mn * self.var_np))
-    #    self._test_expr(cvx.sum_entries(self.const_mn * self.var_np))
+    #    self._test_expr(cvx.sum(self.var_mn * self.param_np))
+    #    self._test_expr(cvx.sum(self.var_mn * self.const_np))
+    #    self._test_expr(cvx.sum(self.param_mn * self.var_np))
+    #    self._test_expr(cvx.sum(self.const_mn * self.var_np))
     #
     #def test_mul_elemwise(self):
-    #    self._test_expr(cvx.sum_entries(cvx.mul_elemwise(self.param_mn, self.var_mn)))
-    #    self._test_expr(cvx.sum_entries(cvx.mul_elemwise(self.const_mn, self.var_mn)))
+    #    self._test_expr(cvx.sum(cvx.mul_elemwise(self.param_mn, self.var_mn)))
+    #    self._test_expr(cvx.sum(cvx.mul_elemwise(self.const_mn, self.var_mn)))
     #
     #def test_mul_elem(self):
-    #    self._test_expr(cvx.sum_entries(self.const_np * self.var_11))
-    #    self._test_expr(cvx.sum_entries(self.var_11 * self.const_np))
-    #    self._test_expr(cvx.sum_entries(self.var_mn * self.const_11))
-    #    self._test_expr(cvx.sum_entries(self.var_11 * self.param_np))
-    #    self._test_expr(cvx.sum_entries(self.var_mn * self.param_11))
+    #    self._test_expr(cvx.sum(self.const_np * self.var_11))
+    #    self._test_expr(cvx.sum(self.var_11 * self.const_np))
+    #    self._test_expr(cvx.sum(self.var_mn * self.const_11))
+    #    self._test_expr(cvx.sum(self.var_11 * self.param_np))
+    #    self._test_expr(cvx.sum(self.var_mn * self.param_11))
     #
     #def test_div_elem(self):
-    #    self._test_expr(cvx.sum_entries(self.var_11 / self.const_11))
-    #    self._test_expr(cvx.sum_entries(self.var_mn / self.const_11))
-    #    self._test_expr(cvx.sum_entries(self.var_11 / self.param_11))
-    #    self._test_expr(cvx.sum_entries(self.var_mn / self.param_11))
+    #    self._test_expr(cvx.sum(self.var_11 / self.const_11))
+    #    self._test_expr(cvx.sum(self.var_mn / self.const_11))
+    #    self._test_expr(cvx.sum(self.var_11 / self.param_11))
+    #    self._test_expr(cvx.sum(self.var_mn / self.param_11))
 
     #def test_trace(self):
     #    self._test_expr(cvx.trace(self.var_nn))
     #    self._test_expr(cvx.trace(self.var_11))
     
     #def test_diff(self):
-    #    self._test_expr(cvx.sum_entries(cvx.diff(self.var_n1)))
-    #    self._test_expr(cvx.sum_entries(cvx.diff(self.var_mn)))
+    #    self._test_expr(cvx.sum(cvx.diff(self.var_n1)))
+    #    self._test_expr(cvx.sum(cvx.diff(self.var_mn)))
     #
     #def test_hstack(self):
-    #    self._test_expr(cvx.sum_entries(
+    #    self._test_expr(cvx.sum(
     #            cvx.hstack(self.var_n1, self.var_np, self.var_nn)))
-    #    self._test_expr(cvx.sum_entries(
+    #    self._test_expr(cvx.sum(
     #            cvx.hstack(self.var_n1, self.const_np, self.param_nn)))
     #
     #def test_vstack(self):
-    #    self._test_expr(cvx.sum_entries(
+    #    self._test_expr(cvx.sum(
     #            cvx.vstack(self.var_1n, self.var_mn, self.var_nn)))
-    #    self._test_expr(cvx.sum_entries(
+    #    self._test_expr(cvx.sum(
     #            cvx.vstack(self.var_1n, self.const_mn, self.param_nn)))
     
     #def test_transpose(self):
-    #    self._test_expr(cvx.sum_entries(self.var_mn.T))
+    #    self._test_expr(cvx.sum(self.var_mn.T))
     
     #def test_upper_tri(self):
-    #    self._test_expr(cvx.sum_entries(self.var_nn))
-    #    self._test_expr(cvx.sum_entries(self.var_nn + self.const_nn))
-    #    self._test_expr(cvx.sum_entries(self.var_nn + self.param_nn))
+    #    self._test_expr(cvx.sum(self.var_nn))
+    #    self._test_expr(cvx.sum(self.var_nn + self.const_nn))
+    #    self._test_expr(cvx.sum(self.var_nn + self.param_nn))
     
     
 
     # Test combinations of linop_handler and param_handler:
     
     #def test_combination(self):
-    #    self._test_expr(cvx.sum_entries((self.param_mn * self.param_nn) * self.var_n1))
-    #    self._test_expr(cvx.sum_entries((self.param_mn * self.const_nn) * self.var_n1))
-    #    self._test_expr(cvx.sum_entries(-(self.param_mn * self.param_nn) * self.var_n1))
-    #    self._test_expr(cvx.sum_entries(-(self.param_mn * self.const_nn) * self.var_n1))
+    #    self._test_expr(cvx.sum((self.param_mn * self.param_nn) * self.var_n1))
+    #    self._test_expr(cvx.sum((self.param_mn * self.const_nn) * self.var_n1))
+    #    self._test_expr(cvx.sum(-(self.param_mn * self.param_nn) * self.var_n1))
+    #    self._test_expr(cvx.sum(-(self.param_mn * self.const_nn) * self.var_n1))
 
 
 
 
     def _test_expr(self, expr, printing=False):
         expr = cvx.sum(expr) + self.var_11
-        #expr = cvx.sum_entries(expr)
+        #expr = cvx.sum(expr)
         prob = cvx.Problem(cvxpy.Minimize(expr))
         prob_data = prob.get_problem_data("ECOS")
         data = prob_data[0]
@@ -290,23 +291,8 @@ class TestLinopHandler(tu.CodegenTestCase):
         true_leq_coeff   = data[s.G]
         true_leq_offset  = data[s.H]
 
-        #SC = construct_solving_chain(prob, solver="ECOS")
-        #for r in SC.reductions:
-        #    prob, inv_data = r.apply(prob)
-        #        if isinstance(r, ECOS):
-        #            data, inv_data = r.apply(prob)
-        #            break
-
-
-
         # Do code generation
         template_vars = codegen(prob, target_dir, dump=True)
-        #vars = prob.variables()
-        #params = prob.parameters()
-        #obj, constraints = prob.canonical_form
-        #code_generator = CodeGenerator(obj, constraints, vars, params)
-        #code_generator.codegen(target_dir)
-        #template_vars = code_generator.template_vars
 
         # Set up test harness.
         render(target_dir, template_vars, HARNESS_C, 'harness.c')
@@ -317,14 +303,14 @@ class TestLinopHandler(tu.CodegenTestCase):
         test_eq_coeff  = sp.csc_matrix((test_data['eq_nzval'],
                                         test_data['eq_rowidx'],
                                         test_data['eq_colptr']),
-                                        shape = (test_data['eq_size0'],
-                                                 test_data['eq_size1']))
+                                        shape = (test_data['eq_shape0'],
+                                                 test_data['eq_shape1']))
         test_eq_offset = np.array(test_data['eq_offset'])
         test_leq_coeff = sp.csc_matrix((test_data['eq_nzval'],
                                         test_data['eq_rowidx'],
                                         test_data['eq_colptr']),
-                                        shape = (test_data['eq_size0'],
-                                                 test_data['eq_size1']))
+                                        shape = (test_data['eq_shape0'],
+                                                 test_data['eq_shape1']))
         test_leq_offset = np.array(test_data['leq_offset'])
 
         if printing:

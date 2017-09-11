@@ -33,17 +33,12 @@ def atomdata_index(expr, arg_data):
     if len(slices) == 1:
         slices = (slices[0], slice(0, 1, 1))
 
-    print(expr)
-
     start0 = 0 if slices[0].start==None else slices[0].start
     start1 = 0 if slices[1].start==None else slices[1].start
     stop0 = arg_data[0].sparsity.shape[0] if slices[0].stop==None else slices[0].stop
     stop1 = arg_data[0].sparsity.shape[1] if slices[1].stop==None else slices[1].stop
     step0 = 1 if slices[0].step==None else slices[0].step
     step1 = 1 if slices[1].step==None else slices[1].step
-
-    print(stop1)
-    print(arg_data[0].shape[1])
 
     if start0 < 0 or stop0 > arg_data[0].shape[0]:
         raise ValueError("First index out of bounds")

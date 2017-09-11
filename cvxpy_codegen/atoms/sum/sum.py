@@ -22,13 +22,13 @@ from cvxpy_codegen.object_data.linop_coeff_data import LinOpCoeffData
 import numpy as np
 import scipy.sparse as sp
 
-def atomdata_sum_entries(expr, arg_data):
+def atomdata_sum(expr, arg_data):
         return AtomData(expr, arg_data,
-                        macro_name = 'sum_entries')
+                        macro_name = 'sum')
 
 
 
-def coeffdata_sum_entries(linop, args, var):
+def coeffdata_sum(linop, args, var):
     work_int = args[0].sparsity.shape[1]
     work_float = args[0].sparsity.shape[1]
     sparsity = sp.csr_matrix(np.sum(args[0].sparsity, axis=0))
@@ -36,4 +36,4 @@ def coeffdata_sum_entries(linop, args, var):
                           work_int = work_int,
                           work_float = work_float,
                           sparsity = sparsity,
-                          macro_name = 'sum_entries_coeffs')
+                          macro_name = 'sum_coeffs')

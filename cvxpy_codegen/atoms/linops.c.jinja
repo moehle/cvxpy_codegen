@@ -11,9 +11,8 @@
 {% from "atoms/reshape/reshape_coeffs.c.jinja" 
       import reshape_coeffs_declare, reshape_coeffs_define, 
              reshape_coeffs_eval with context%}
-{% from "atoms/sum_entries/sum_entries_coeffs.c.jinja" 
-      import sum_entries_coeffs_declare, sum_entries_coeffs_define, 
-             sum_entries_coeffs_eval with context%}
+{% from "atoms/sum/sum_coeffs.c.jinja" 
+      import sum_coeffs_declare, sum_coeffs_define, sum_coeffs_eval with context%}
 {% from "atoms/transpose/transpose_coeffs.c.jinja" 
       import transpose_coeffs_declare, transpose_coeffs_define, 
              transpose_coeffs_eval with context%}

@@ -20,13 +20,13 @@
 {% import "utils/utils.c.jinja" as u with context %}
 
 
-{% macro sum_entries_declare() %}
-void sum_entries(CsrMatrix *A, CsrMatrix *Z);
+{% macro sum_declare() %}
+void sum(CsrMatrix *A, CsrMatrix *Z);
 {% endmacro %}
 
 
-{% macro sum_entries_define() %}
-void sum_entries(CsrMatrix *A, CsrMatrix *Z){
+{% macro sum_define() %}
+void sum(CsrMatrix *A, CsrMatrix *Z){
   long i, j, p, p2, m=A->m;
   Z->p[0] = 0;
   Z->p[1] = 1;
@@ -47,6 +47,6 @@ void sum_entries(CsrMatrix *A, CsrMatrix *Z){
 {% endmacro %}
 
 
-{% macro sum_entries_eval(expr) %}
-sum_entries(&work->{{expr.args[0].storage.name}}, &work->{{expr.storage.name}});
+{% macro sum_eval(expr) %}
+sum(&work->{{expr.args[0].storage.name}}, &work->{{expr.storage.name}});
 {% endmacro %}

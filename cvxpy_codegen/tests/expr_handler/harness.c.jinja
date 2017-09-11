@@ -61,17 +61,13 @@ int main(){
     {% for p in named_params %}
       {%- if p.is_scalar -%}
     params.{{ p.name }} = {{ p.value }};
-      {%- elif p.is_column -%}
-        {% for i in range(p.size[0]) %}
-    params.{{ p.name }}[{{ i }}] = {{ p.value[i,0] }}; {# TODO should have no 0 idx? #}
-        {% endfor %}
-      {%- elif p.is_row -%}
-        {% for j in range(p.size[1]) %}
-    params.{{ p.name }}[{{ j }}] = {{ p.value[0,j] }};
+      {%- elif p.is_column or p.is_row -%}
+        {% for i in range(p.shape[0]) %}
+    params.{{ p.name }}[{{ i }}] = {{ p.value[i] }};
         {% endfor %}
       {%- else -%}
-        {% for i in range(p.size[0]) %}
-          {% for j in range(p.size[1]) %}
+        {% for i in range(p.shape[0]) %}
+          {% for j in range(p.shape[1]) %}
     params.{{ p.name }}[{{ i }}][{{ j }}] = {{ p.value[i,j] }};
           {% endfor %}
         {% endfor %}
@@ -95,9 +91,9 @@ int main(){
 
       /* Equality constraint. */
       printf(",");
-      printf("\"eq_size0\":%d", {{ eq_dim }});
+      printf("\"eq_shape0\":%d", {{ eq_dim }});
       printf(",");
-      printf("\"eq_size1\":%d", {{ x_length }});
+      printf("\"eq_shape1\":%d", {{ x_length }});
 
       printf(",");
       printf("\"eq_colptr\":");
@@ -117,9 +113,9 @@ int main(){
 
       /* Inequality constraint. */
       printf(",");
-      printf("\"leq_size0\":%d", {{ leq_dim }});
+      printf("\"leq_shape0\":%d", {{ leq_dim }});
       printf(",");
-      printf("\"leq_size1\":%d", {{ x_length }});
+      printf("\"leq_shape1\":%d", {{ x_length }});
 
       printf(",");
       printf("\"leq_colptr\":");
