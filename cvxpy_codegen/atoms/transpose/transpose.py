@@ -29,7 +29,7 @@ def atomdata_transpose(expr, arg_data):
 
 
 def coeffdata_transpose(linop, args, var):
-    rows, cols = linop.size
+    rows, cols = linop.shape
     # Create a sparse matrix representing the transpose.
     val_arr = []
     row_arr = []

@@ -46,7 +46,7 @@ void diag_vec(long m,
 
 
 {% macro diag_vec_eval(expr) %}
-diag_vec({{ expr.args[0].size[0] }}l,
+diag_vec({{ expr.args[0].shape[0] }}l,
 {{- u.rowptr(expr.args[0]) }},
 {{- u.colidx(expr.args[0]) }},
 {{-  u.nzval(expr.args[0]) }},

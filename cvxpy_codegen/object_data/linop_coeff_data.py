@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from cvxpy_codegen.param.expr_data import ExprData
+from cvxpy_codegen.object_data.expr_data import ExprData
 
 
 class LinOpCoeffData(ExprData):
@@ -40,7 +40,7 @@ class LinOpCoeffData(ExprData):
         self.name = linop_data.name + '_var' + str(vid)
         self.type = 'coeff'
         self.vid = vid
-        self.size = linop_data.size
+        self.shape = linop_data.shape
         self.copy_arg = copy_arg
         has_const_or_param = any([a.type =='const' or
                                   a.type =='param' or

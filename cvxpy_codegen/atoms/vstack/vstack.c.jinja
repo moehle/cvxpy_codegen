@@ -57,7 +57,7 @@ void vstack(long mA, long mB,
 
 
 {% macro vstack_eval(expr) %}
-vstack({{ expr.args[0].size[0] }}l, {{ expr.args[1].size[0] }}l, 
+vstack({{ expr.args[0].shape[0] }}l, {{ expr.args[1].shape[0] }}l, 
 {{- u.rowptr(expr.args[0]) }},
 {{- u.colidx(expr.args[0]) }},
 {{-  u.nzval(expr.args[0]) }},

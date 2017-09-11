@@ -30,6 +30,11 @@ def atomdata_index(expr, arg_data):
     else:
         slices = expr.get_data()[0]
 
+    if len(slices) == 1:
+        slices = (slices[0], slice(0, 1, 1))
+
+    print(expr)
+
     start0 = 0 if slices[0].start==None else slices[0].start
     start1 = 0 if slices[1].start==None else slices[1].start
     stop0 = arg_data[0].sparsity.shape[0] if slices[0].stop==None else slices[0].stop
@@ -37,9 +42,12 @@ def atomdata_index(expr, arg_data):
     step0 = 1 if slices[0].step==None else slices[0].step
     step1 = 1 if slices[1].step==None else slices[1].step
 
-    if start0 < 0 or stop0 > arg_data[0].size[0]:
+    print(stop1)
+    print(arg_data[0].shape[1])
+
+    if start0 < 0 or stop0 > arg_data[0].shape[0]:
         raise ValueError("First index out of bounds")
-    if start1 < 0 or stop1 > arg_data[0].size[1]:
+    if start1 < 0 or stop1 > arg_data[0].shape[1]:
         raise ValueError("Second index out of bounds")
 
     data = {'start0' : start0,
@@ -60,9 +68,9 @@ def atomdata_index(expr, arg_data):
 
 
 def coeffdata_index(linop, args, var):
-    sz0, sz1 = args[0].size
-    slice0 = linop.data[0]
-    slice1 = linop.data[1]
+    sz0, sz1 = args[0].shape
+    slice0 = linop.data[0][0] # TODO is this right? why is data a tuple with tuple and float?
+    slice1 = linop.data[0][1]
     
     # Get index slice data.
     step0 = 1 if slice0.step==None else slice0.step

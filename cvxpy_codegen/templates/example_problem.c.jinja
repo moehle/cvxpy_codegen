@@ -30,16 +30,16 @@ int main(){
       {%- if p.is_scalar %}
     params.{{ p.name }} = {{ p.value }};
       {% elif p.is_column -%}
-        {% for i in range(p.size[0]) %}
+        {% for i in range(p.shape[0]) %}
     params.{{ p.name }}[{{ i }}] = {{ p.value[i,0] }};
         {% endfor %}
       {%- elif p.is_row -%}
-        {% for j in range(p.size[1]) %}
+        {% for j in range(p.shape[1]) %}
     params.{{ p.name }}[{{ j }}] = {{ p.value[0,j] }};
         {% endfor %}
       {%- else -%}
-        {% for i in range(p.size[0]) %}
-          {% for j in range(p.size[1]) %}
+        {% for i in range(p.shape[0]) %}
+          {% for j in range(p.shape[1]) %}
     params.{{ p.name }}[{{ i }}][{{ j }}] = {{ p.value[i,j] }};
           {% endfor %}
         {% endfor %}
@@ -58,8 +58,8 @@ int main(){
       {{ cprint_var(var) }}
       #}
       
-      {% for i in range(var.size[0]) %}
-        {% for j in range(var.size[1]) %}
+      {% for i in range(var.shape[0]) %}
+        {% for j in range(var.shape[1]) %}
     printf("{{ var.name() }}[{{ i }}][{{ j }}] = %f\n", vars.{{ var.name() }}[{{ i }}][{{ j }}]);
         {% endfor %}
       {% endfor %}

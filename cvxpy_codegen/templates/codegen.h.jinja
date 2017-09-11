@@ -19,11 +19,11 @@ typedef struct params_struct{
     double {{ p.name -}}
         {%- if p.is_scalar -%}
         {%- elif p.is_column -%}
-            [{{ p.size[0] }}]
+            [{{ p.shape[0] }}]
         {%- elif p.is_row -%}
-            [{{ p.size[1] }}]
+            [{{ p.shape[1] }}]
         {%- else -%}
-            [{{ p.size[0] }}][{{ p.size[1] }}]
+            [{{ p.shape[0] }}][{{ p.shape[1] }}]
         {%- endif -%};
     {% endfor %}
 } Params;
@@ -31,7 +31,7 @@ typedef struct params_struct{
 
 typedef struct vars_struct{
     {% for var in named_vars %}
-    double {{ var.name() }}[{{ var.size[0] }}][{{ var.size[1] }}];
+    double {{ var.name() }}[{{ var.shape[0] }}][{{ var.shape[1] }}];
     {% endfor %}
 } Vars;
 

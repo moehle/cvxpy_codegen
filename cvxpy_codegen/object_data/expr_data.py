@@ -26,14 +26,23 @@ class ExprData():
 
     def __init__(self, expr, arg_data=[], sparsity=None):
         if sparsity == None:
-            sparsity = sp.csr_matrix(np.full(expr.size, True, dtype=bool))
+            sparsity = sp.csr_matrix(np.full(expr.shape, True, dtype=bool))
         self.sparsity = sparsity
         self.args = arg_data
-        self.size = expr.size
-        self.length = expr.size[0] * expr.size[1]
+        shape = expr.shape
+        if len(shape) == 2:
+            self.shape = shape
+        elif len(shape) == 1:
+            self.shape = (shape[0], 1)
+        elif len(shape) == 0:
+            self.shape = (1, 1)
+        else:
+            raise Exception("Code generation only supports arrays"
+                            "with two or fewer dimensions.")
+        self.length = self.shape[0] * self.shape[1]
 
     def is_vector(self):
-        return (expr.size[0] == 1) or (expr.size[1] == 1)
+        return (expr.shape[0] == 1) or (expr.shape[1] == 1)
 
     def is_scalar(self):
-        return expr.size == (1,1)
+        return expr.shape == (1,1)

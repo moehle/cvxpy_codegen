@@ -50,7 +50,7 @@ void trace(long m,
 
 
 {% macro trace_eval(expr) %}
-trace({{ expr.args[0].size[0] }}l,
+trace({{ expr.args[0].shape[0] }}l,
 {{- u.rowptr(expr.args[0]) }},
 {{- u.colidx(expr.args[0]) }},
 {{-  u.nzval(expr.args[0]) }},

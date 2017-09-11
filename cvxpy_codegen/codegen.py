@@ -18,10 +18,29 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from cvxpy_codegen.code_generator import CodeGenerator
+from cvxpy.reductions.solvers.solving_chain import construct_solving_chain
+from cvxpy.reductions.dcp2cone.dcp2cone import Dcp2Cone
+from cvxpy.reductions.cvx_attr2constr import CvxAttr2Constr
 
 
-def codegen(prob, target_dir):
+def codegen(prob, target_dir, dump=False):
+
     vars = prob.variables()
     params = prob.parameters()
-    obj, constraints = prob.canonical_form
-    CodeGenerator(obj, constraints, vars, params).codegen(target_dir)
+
+    # TODO: make nicer
+    SC = construct_solving_chain(prob, solver="ECOS")
+    for r in SC.reductions:
+        if isinstance(r, Dcp2Cone):
+            prob, dcp2cone_inv_data = r.apply(prob)
+        if isinstance(r, CvxAttr2Constr):
+            prob, __ = r.apply(prob)
+    obj = prob.objective
+    constraints = prob.constraints
+
+    cg = CodeGenerator(obj, constraints, vars,
+                       params, dcp2cone_inv_data)
+    cg.codegen(target_dir)
+
+    if dump:
+        return cg.template_vars

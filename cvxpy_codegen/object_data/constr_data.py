@@ -24,11 +24,11 @@ CONSTR_COUNT = Counter()
 
 class ConstrData():
     
-    def __init__(self, constr, linop, vert_offset):
+    def __init__(self, constr, exprs, vert_offset):
         self.name = 'constr%d' % CONSTR_COUNT.get_count()
-        self.linop = linop
-        self.size = linop.size[0] * linop.size[1]
+        self.exprs = exprs
+        # self.shape = exprs[0].shape[0] * exprs[0].shape[1] # TODO generalize
         self.vert_offset = vert_offset
 
-    def get_matrix(self, sym_data):
-        return self.linop.get_matrix(sym_data)
+    def get_matrix(self, x_length, var_offsets):
+        return self.exprs[0].get_matrix(x_length, var_offsets) # TODO horribly wrong

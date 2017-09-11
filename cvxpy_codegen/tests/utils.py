@@ -37,12 +37,17 @@ class CodegenTestCase(unittest.TestCase):
 
 
     def assertAlmostEqualMatrices(self, A, B, eps=None):
-        if eps == None:
-            eps = self.EPS
-        D =  abs(A-B)
-        if sp.issparse(D):
-            D = D.toarray()
-        self.assertTrue(np.all(D <= eps))
+        if any(A) or any(B):
+            print()
+            print(any(A))
+            print(any(B))
+            print("this")
+            if eps == None:
+                eps = self.EPS
+            D =  abs(A-B)
+            if sp.issparse(D):
+                D = D.toarray()
+            self.assertTrue(np.all(D <= eps))
         
 
     def assertEqualMatrices(self, A, B, eps=None):

@@ -29,7 +29,7 @@ def atomdata_hstack(expr, arg_data):
         data = AtomData(expr, [data, arg],
                                macro_name = "hstack",
                                sparsity = sparsity,
-                               size = sparsity.shape)
+                               shape = sparsity.shape)
         data_list += [data]
 
     return data_list

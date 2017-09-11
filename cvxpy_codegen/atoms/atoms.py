@@ -23,13 +23,13 @@ from cvxpy_codegen.atoms.diag_vec import atomdata_diag_vec
 from cvxpy_codegen.atoms.diag_mat import atomdata_diag_mat
 from cvxpy_codegen.atoms.hstack import atomdata_hstack
 from cvxpy_codegen.atoms.index import atomdata_index, coeffdata_index
-from cvxpy_codegen.atoms.max_entries import atomdata_max_entries
+#from cvxpy_codegen.atoms.max_entries import atomdata_max_entries
 from cvxpy_codegen.atoms.mul import atomdata_mul
-from cvxpy_codegen.atoms.mul_elemwise import atomdata_mul_elemwise
+#from cvxpy_codegen.atoms.mul_elemwise import atomdata_mul_elemwise
 from cvxpy_codegen.atoms.neg import atomdata_neg, coeffdata_neg
 from cvxpy_codegen.atoms.pos import atomdata_pos
 from cvxpy_codegen.atoms.reshape import atomdata_reshape, coeffdata_reshape
-from cvxpy_codegen.atoms.sum_entries import atomdata_sum_entries, coeffdata_sum_entries
+#from cvxpy_codegen.atoms.sum_entries import atomdata_sum_entries, coeffdata_sum_entries
 from cvxpy_codegen.atoms.trace import atomdata_trace
 from cvxpy_codegen.atoms.transpose import atomdata_transpose, coeffdata_transpose
 from cvxpy_codegen.atoms.vstack import atomdata_vstack
@@ -43,9 +43,9 @@ import cvxpy_codegen.atoms.diag_vec
 import cvxpy_codegen.atoms.diag_mat
 import cvxpy_codegen.atoms.hstack
 import cvxpy_codegen.atoms.index
-import cvxpy_codegen.atoms.max_entries
+#import cvxpy_codegen.atoms.max_entries
 import cvxpy_codegen.atoms.mul
-import cvxpy_codegen.atoms.mul_elemwise
+#import cvxpy_codegen.atoms.mul_elemwise
 import cvxpy_codegen.atoms.neg
 import cvxpy_codegen.atoms.pos
 import cvxpy_codegen.atoms.reshape
@@ -61,8 +61,8 @@ from cvxpy.atoms.affine.hstack import hstack
 from cvxpy.atoms.affine.diag import diag_vec, diag_mat
 from cvxpy.atoms.affine.reshape import reshape
 from cvxpy.atoms.affine.index import index
-from cvxpy.atoms.affine.sum_entries import sum_entries
-from cvxpy.atoms.affine.mul_elemwise import mul_elemwise
+#from cvxpy.atoms.affine.sum_entries import sum_entries
+#from cvxpy.atoms.affine.mul_elemwise import mul_elemwise
 from cvxpy.atoms.affine.transpose import transpose
 from cvxpy.atoms import *
 
@@ -72,7 +72,7 @@ GET_ATOM_DATA = {MulExpression : atomdata_mul,
                  pos           : atomdata_pos,
                  vstack        : atomdata_vstack,
                  hstack        : atomdata_hstack,
-                 mul_elemwise  : atomdata_mul_elemwise,
+                 #mul_elemwise  : atomdata_mul_elemwise,
                  index         : atomdata_index,
                  diag_vec      : atomdata_diag_vec,
                  diag_mat      : atomdata_diag_mat,
@@ -81,28 +81,38 @@ GET_ATOM_DATA = {MulExpression : atomdata_mul,
                  abs           : atomdata_abs,
                  trace         : atomdata_trace,
                  transpose     : atomdata_transpose,
-                 sum_entries   : atomdata_sum_entries,
-                 max_entries   : atomdata_max_entries }
+                 #sum_entries   : atomdata_sum_entries,
+                 #max_entries   : atomdata_max_entries
+                 }
 
 
-GET_COEFF_DATA = {'sum'         : coeffdata_add,
-                  'index'       : coeffdata_index,
-                  'neg'         : coeffdata_neg,
-                  'reshape'     : coeffdata_reshape,
-                  'sum_entries' : coeffdata_sum_entries,
-                  'transpose'   : coeffdata_transpose}
+#GET_COEFF_DATA = {'sum'         : coeffdata_add,
+#                  'index'       : coeffdata_index,
+#                  'neg'         : coeffdata_neg,
+#                  'reshape'     : coeffdata_reshape,
+#                  #'sum_entries' : coeffdata_sum_entries,
+#                  'transpose'   : coeffdata_transpose}
 
 
-GET_ATOM_DATA_FROM_LINOP = {'sum'         : atomdata_add,
-                            'index'       : atomdata_index,
-                            'neg'         : atomdata_neg,
-                            'reshape'     : atomdata_reshape,
-                            'sum_entries' : atomdata_sum_entries,
-                            'transpose'   : atomdata_transpose}
+GET_COEFF_DATA = {AddExpression : coeffdata_add,
+                  index         : coeffdata_index,
+                  NegExpression : coeffdata_neg,
+                  reshape       : coeffdata_reshape,
+                  #'sum_entries' : coeffdata_sum_entries,
+                  transpose     : coeffdata_transpose}
+
+
+#GET_ATOM_DATA_FROM_LINOP = {'sum'         : atomdata_add,
+#                            'index'       : atomdata_index,
+#                            'neg'         : atomdata_neg,
+#                            'reshape'     : atomdata_reshape,
+#                            #'sum_entries' : atomdata_sum_entries,
+#                            'transpose'   : atomdata_transpose}
 
 
 def get_atom_data(expr, arg_data):
     if not type(expr) in GET_ATOM_DATA.keys():
+        print(expr)
         raise TypeError("Constant expressions involving "
                         "the %s atom not supported." % str(type(expr)))
     return GET_ATOM_DATA[type(expr)](expr, arg_data)

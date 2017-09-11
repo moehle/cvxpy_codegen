@@ -30,15 +30,15 @@ def atomdata_reshape(expr, arg_data):
     ## TODO remove for cvxpy 1.0:
     #print(expr)
     #if isinstance(expr, LinOpData):
-    #    m_new, n_new = expr.size
+    #    m_new, n_new = expr.shape
     #else:
     #    m_new, n_new = expr.get_data()
 
-    m_new, n_new = expr.size
+    m_new, n_new = expr.shape
 
     
-    m = arg_data[0].size[0]
-    n = arg_data[0].size[1]
+    m = arg_data[0].shape[0]
+    n = arg_data[0].shape[1]
 
     sparsity = reshape(arg_data[0].sparsity, m_new, n_new)
 

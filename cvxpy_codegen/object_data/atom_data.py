@@ -26,12 +26,12 @@ class AtomData(ExprData):
     def __init__(self, expr, arg_data, 
                  sparsity=None, inplace=False, macro_name=None,
                  work_int=0, work_float=0, work_varargs=0,
-                 size=None, data=None, copy_arg=0):
+                 shape=None, data=None, copy_arg=0):
         ExprData.__init__(self, expr, arg_data=arg_data, sparsity=sparsity)
         self.type = 'expr'
         self.name = 'expr%d' % EXPR_COUNT.get_count()
-        if size is not None:
-           self.size = size
+        #if shape is not None:
+        #   self.shape = shape
         self.macro_name = macro_name
         self.inplace = inplace
         self.copy_arg = copy_arg # If self.make_copy is True, copy this argument.

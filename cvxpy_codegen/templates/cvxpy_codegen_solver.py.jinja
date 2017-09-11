@@ -7,8 +7,8 @@ def cg_solve({%- for p in named_params -%}
 
     {% for p in named_params %}
     {{ p.name }} = numpy.ascontiguousarray(numpy.asmatrix({{ p.name }}), dtype=float)
-    if {{p.name}}.shape != {{p.size}}:
-        raise TypeError("Parameter {{p.name}} should have shape {{p.size}}, but has shape %s" % str({{p.name}}.shape))
+    if {{p.name}}.shape != {{p.shape}}:
+        raise TypeError("Parameter {{p.name}} should have shape {{p.shape}}, but has shape %s" % str({{p.name}}.shape))
     {% endfor %}
 
     vars_dict, stats_dict = _intf.solve({% for p in named_params -%}

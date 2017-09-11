@@ -19,7 +19,7 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 
 from cvxpy_codegen.expr_handler import ExprHandler
 from cvxpy_codegen.templates.template_handler import TemplateHandler
-from cvxpy.problems.problem_data.sym_data import SymData
+#from cvxpy.problems.problem_data.sym_data import SymData
 from cvxpy_codegen.solvers.solver_intfs import SOLVER_INTFS
 from cvxpy_codegen.utils.utils import make_target_dir
 import cvxpy.settings as s
@@ -42,27 +42,40 @@ def cprint_var(var):
 class CodeGenerator:
     
 
-    def __init__(self, objective, constraints, vars, params, solver=None):
+    def __init__(self, objective, constraints, vars, params,
+                 inv_data, solver=None):
         if vars == []:
             raise TypeError("Problem has no variables.")
+
+        self.objective = objective.expr
+        self.constraints = constraints
+        self.inv_data = inv_data
+        self.named_vars = self.get_named_vars(vars) # TODO need?
+        self.params = self.get_named_params(params)
+
+        offset = 0
+        self.var_offsets = {}
+        for var in vars:
+            self.var_offsets.update({var.id : offset})
+            offset += var.size
+        self.x_length = offset
+
+        # New expression handler.
+        self.expr_handler = ExprHandler()
 
         if solver == None:
             solver = 'ecos'
         elif not (solver in SOLVER_INTFS.keys):
             raise TypeError("Unknown solver %s." % str(solver))
-        self.solver = SOLVER_INTFS[solver]()
-
-        self.objective = objective
-        self.constraints = constraints
-        self.sym_data = SymData(self.objective, self.constraints, self.solver.CVXPY_SOLVER)
-        self.named_vars = self.get_named_vars(vars)
-        self.params = self.get_named_params(params)
+        self.solver = SOLVER_INTFS[solver](self.expr_handler, self.x_length, self.var_offsets)
 
         # TODO rm params, so all params hanlded by the param_handler:
         self.template_vars = {'named_vars' : self.named_vars,
                               'params' : self.params,
-                              'cprint_var' : cprint_var}
-
+                              'cprint_var' : cprint_var,
+                              'var_offsets' : self.var_offsets,
+                              #'id2var' : self.id2var,
+                              'x_length' : self.x_length}
 
 
     @staticmethod
@@ -96,24 +109,18 @@ class CodeGenerator:
         make_target_dir(target_dir)
 
         # Add solver to template variables.
-        self.template_vars.update({'solver' : self.solver})
-        self.template_vars.update({'solver_name' : self.solver.name})
-        self.template_vars.update({'sym_data' : self.sym_data})
-
-        # Get objective and linear constraint lists.
-        objective = self.sym_data.objective
-        eq_constr, leq_constr, __ \
-                 = self.solver.CVXPY_SOLVER.split_constr(self.sym_data.constr_map)
-
-        # Get template vars for the expr tree processor, then render.
-        expr_handler = ExprHandler(self.sym_data, objective, eq_constr, leq_constr)
-        self.template_vars.update(expr_handler.get_template_vars())
-        expr_handler.render(target_dir)
+        self.template_vars.update({'solver' : self.solver}) # TODO add back in
+        self.template_vars.update({'solver_name' : self.solver.name}) # TODO add back in
 
         # Get template variables from solver, then render.
+        self.solver.process_problem(self.objective, self.constraints)
         self.template_vars.update(self.solver.get_template_vars(
-                self.sym_data, self.template_vars))
+                self.inv_data, self.template_vars))
         self.solver.render(target_dir)
+
+        # Get template vars for the expr tree processor, then render.
+        self.template_vars.update(self.expr_handler.get_template_vars())
+        self.expr_handler.render(target_dir)
 
         # Get template variables to render template
         template_handler = TemplateHandler(target_dir)

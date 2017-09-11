@@ -68,7 +68,7 @@ void mul(long m, long n, long *w, double *x,
 
 
 {% macro mul_eval(expr) %}
-mul({{ expr.size[0] }}l, {{ expr.size[1] }}l, work->work_int, work->work_double,
+mul({{ expr.shape[0] }}l, {{ expr.shape[1] }}l, work->work_int, work->work_double,
 {{- u.rowptr(expr.args[0]) }},
 {{- u.colidx(expr.args[0]) }},
 {{-  u.nzval(expr.args[0]) }},

@@ -55,7 +55,7 @@ void hstack(long m, long n,
 
 
 {% macro hstack_eval(expr) %}
-hstack({{ expr.args[0].size[0] }}l, {{ expr.args[0].size[1] }}l,
+hstack({{ expr.args[0].shape[0] }}l, {{ expr.args[0].shape[1] }}l,
 {{- u.rowptr(expr.args[0]) }},
 {{- u.colidx(expr.args[0]) }},
 {{-  u.nzval(expr.args[0]) }},

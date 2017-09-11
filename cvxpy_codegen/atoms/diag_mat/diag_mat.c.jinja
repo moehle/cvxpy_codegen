@@ -53,7 +53,7 @@ void diag_mat(long m,
 
 
 {% macro diag_mat_eval(expr) %}
-diag_mat({{ expr.args[0].size[0] }}l,
+diag_mat({{ expr.args[0].shape[0] }}l,
 {{- u.rowptr(expr.args[0]) }},
 {{- u.colidx(expr.args[0]) }},
 {{-  u.nzval(expr.args[0]) }},

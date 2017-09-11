@@ -35,5 +35,5 @@ void reshape_coeffs(LinopCoeff *A, long m, long n){
 
 {% macro reshape_coeffs_eval(expr) %}
 reshape_coeffs(&work->{{ expr.storage.name }},
-               {{ expr.size[0] }}, {{ expr.size[1] }});
+               {{ expr.shape[0] }}, {{ expr.shape[1] }});
 {% endmacro %}

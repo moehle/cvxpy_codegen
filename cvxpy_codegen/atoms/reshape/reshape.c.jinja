@@ -68,7 +68,7 @@ void reshape(long m, long m_new,
 
 
 {% macro reshape_eval(expr) %}
-reshape({{ expr.args[0].size[0] }}l, {{ expr.data[0] }}l,
+reshape({{ expr.args[0].shape[0] }}l, {{ expr.data[0] }}l,
 {{- u.rowptr(expr.args[0]) }},
 {{- u.colidx(expr.args[0]) }},
 {{-  u.nzval(expr.args[0]) }},

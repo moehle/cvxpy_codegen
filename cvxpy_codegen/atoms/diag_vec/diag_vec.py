@@ -23,8 +23,8 @@ import scipy.sparse as sp
 # Note: From CVXPY, we can only get column vectors.
 def atomdata_diag_vec(expr, arg_data):
     
-    m = arg_data[0].size[0]
-    n = arg_data[0].size[1]
+    m = arg_data[0].shape[0]
+    n = arg_data[0].shape[1]
 
     sp_mat = sp.coo_matrix(arg_data[0].sparsity)
     data = sp_mat.data

@@ -31,12 +31,12 @@ def atomdata_add(expr, arg_data):
     else:
         if any([a.sparsity.shape==(1,1) for a in arg_data]):
             sparsity = None
-            work_int    = expr.size[1]
-            work_float  = expr.size[1]
+            work_int    = arg_data[0].shape[1]
+            work_float  = arg_data[0].shape[1]
         else:
             sparsity = sum([a.sparsity for a in arg_data])
-            work_int    = sparsity.shape[1]
-            work_float  = sparsity.shape[1]
+            work_int    = arg_data[0].shape[1]
+            work_float  = arg_data[0].shape[1]
         work_varargs    = len(arg_data) # This is a varargs atom.
         return AtomData(expr, arg_data,
                         sparsity = sparsity,

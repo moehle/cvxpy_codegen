@@ -37,7 +37,7 @@ void lo_index(long m,
 
 
 {% macro index_coeffs_eval(expr) %}
-lo_index({{ expr.args[0].size[0] }},
+lo_index({{ expr.args[0].shape[0] }},
          {{- expr.data['start0'] }},
          {{- expr.data['stop0'] }},
          {{- expr.data['step0'] }},

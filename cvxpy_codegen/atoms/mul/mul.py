@@ -20,13 +20,13 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 from cvxpy_codegen.object_data.atom_data import AtomData
 
 def atomdata_mul(expr, arg_data):
-    if arg_data[0].size == (1,1):
+    if arg_data[0].shape == (1,1):
         return AtomData(expr, arg_data,
                         inplace = True,
                         copy_arg = 1,
                         macro_name = "scalar_mul",
                         sparsity = arg_data[1].sparsity)
-    if arg_data[1].size == (1,1):
+    if arg_data[1].shape == (1,1):
         return AtomData(expr, arg_data,
                         inplace = True,
                         copy_arg = 0,

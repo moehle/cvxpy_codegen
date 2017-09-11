@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from cvxpy_codegen.atoms import get_coeff_data, get_atom_data_from_linop
+from cvxpy_codegen.atoms import get_atom_data, get_coeff_data
 from cvxpy_codegen.object_data.expr_data import ExprData
 from cvxpy_codegen.object_data.const_data import CONST_ID
 from cvxpy_codegen.utils.utils import spzeros # TODO rm
@@ -34,9 +34,9 @@ class LinOpData(ExprData):
     def __init__(self, expr, arg_data):
         ExprData.__init__(self, expr, arg_data)
         self.type = 'linop'
-        self.opname = expr.type
+        self.opname = type(expr)
         self.name = 'linop%d' % LINOP_COUNT.get_count()
-        self.data = expr.data
+        self.data = expr.get_data()
         self.args = arg_data
         self.coeffs = dict()
         self.var_ids = set().union(*[a.var_ids for a in arg_data])
@@ -66,7 +66,7 @@ class LinOpData(ExprData):
                         offset_args += [arg.offset_expr]
                     else:
                         offset_args += [arg]
-            self.offset_expr = get_atom_data_from_linop(self, offset_args)
+            self.offset_expr = get_atom_data(expr, offset_args)
 
 
     def get_data(self):
@@ -79,16 +79,15 @@ class LinOpData(ExprData):
             c.force_copy()
 
 
-    def get_matrix(self, sym_data):
-        coeff_height = self.size[0] * self.size[1]
-        mat = spzeros(coeff_height, sym_data.x_length, dtype=bool)
-        mat = sp.csc_matrix((coeff_height, sym_data.x_length), dtype=bool)
+    def get_matrix(self, x_length, var_offsets):
+        coeff_height = self.shape[0] * self.shape[1]
+        mat = sp.csc_matrix((coeff_height, x_length), dtype=bool)
         for vid, coeff in self.coeffs.items():
             if not (vid == CONST_ID):
-                start = sym_data.var_offsets[vid]
+                start = var_offsets[vid]
                 coeff_width = coeff.sparsity.shape[1]
                 pad_left = start
-                pad_right = sym_data.x_length - coeff_width - pad_left
+                pad_right = x_length - coeff_width - pad_left
                 mat += sp.hstack([sp.csc_matrix((coeff_height, pad_left), dtype=bool),
                                   coeff.sparsity,
                                   sp.csc_matrix((coeff_height, pad_right), dtype=bool)])

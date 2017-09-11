@@ -42,7 +42,7 @@ static PyObject *solve_wrapper(PyObject *self, PyObject *args){
   /* Space for variables to be returned. */
   {% if named_vars %}
   int nd;
-  npy_intp size[2];
+  npy_intp shape[2];
   {% endif  %}
   {% for v in named_vars %}
   PyArrayObject *{{ v.name() }};
@@ -65,8 +65,8 @@ static PyObject *solve_wrapper(PyObject *self, PyObject *args){
 
   /* Copy parameter values into the parameter structure. */
   {% for p in named_params %}
-  // memcpy(params.{{ p.name }}, {{ p.name }}->data, {{ p.size[0]*p.size[1] }}*sizeof(double));
-  memcpy(params.{{ p.name }}, PyArray_DATA({{ p.name }}), {{ p.size[0]*p.size[1] }}*sizeof(double));
+  // memcpy(params.{{ p.name }}, {{ p.name }}->data, {{ p.shape[0]*p.shape[1] }}*sizeof(double));
+  memcpy(params.{{ p.name }}, PyArray_DATA({{ p.name }}), {{ p.shape[0]*p.shape[1] }}*sizeof(double));
   {% endfor %}
 
 
@@ -78,12 +78,12 @@ static PyObject *solve_wrapper(PyObject *self, PyObject *args){
   /* Convert the variables from the structure into Numpy arrays. */
   {% for v in named_vars %}
   nd = 2;
-  {% for i, sz in enumerate(v.size) %}
+  {% for i, sz in enumerate(v.shape) %}
   size[{{i}}] = {{sz}};
   {% endfor %}
-  {{ v.name() }} = (PyArrayObject*) PyArray_SimpleNew(nd, size, NPY_DOUBLE);
-  // memcpy({{ v.name() }}->data, vars.{{ v.name() }}[0], {{ v.size[0]*v.size[1] }}*sizeof(double));
-  memcpy(PyArray_DATA({{ v.name() }}), vars.{{ v.name() }}[0], {{ v.size[0]*v.size[1] }}*sizeof(double));
+  {{ v.name() }} = (PyArrayObject*) PyArray_SimpleNew(nd, shape, NPY_DOUBLE);
+  // memcpy({{ v.name() }}->data, vars.{{ v.name() }}[0], {{ v.shape[0]*v.shape[1] }}*sizeof(double));
+  memcpy(PyArray_DATA({{ v.name() }}), vars.{{ v.name() }}[0], {{ v.shape[0]*v.shape[1] }}*sizeof(double));
   {% endfor %}
 
 

@@ -28,14 +28,14 @@ class ParamData(ExprData):
         self.type = 'param'
         self.name = expr.name()
         if expr.value is None:
-            self.value = np.squeeze(np.random.randn(*expr.size))
+            self.value = np.squeeze(np.random.randn(*expr.shape))
         else:
             self.value = expr.value
         self.var_ids = []
         self.mem_name = self.name
-        self.is_scalar = True if self.size == (1,1) else False
-        self.is_column = True if self.size[1] == 1 else False
-        self.is_row    = True if self.size[0] == 1 else False # TODO add tests for these
+        self.is_scalar = True if self.shape == (1,1) else False
+        self.is_column = True if self.shape[1] == 1 else False
+        self.is_row    = True if self.shape[0] == 1 else False # TODO add tests for these
         self.cname = self.name
         self.has_offset = True
         

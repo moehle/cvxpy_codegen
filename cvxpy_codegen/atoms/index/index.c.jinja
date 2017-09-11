@@ -58,7 +58,7 @@ void indexatom(long m,
 
 
 {% macro index_eval(expr) %}
-indexatom({{ expr.args[0].size[0] }}l,
+indexatom({{ expr.args[0].shape[0] }}l,
 {{- expr.data['start0'] }}l,
 {{- expr.data['stop0'] }}l,
 {{- expr.data['step0'] }}l,

@@ -56,7 +56,7 @@ void transpose(long m, long n,
 
 
 {% macro transpose_eval(expr) %}
-transpose({{ expr.size[0] }}, {{ expr.size[1] }},
+transpose({{ expr.shape[0] }}, {{ expr.shape[1] }},
           {{ u.rowptr(expr.args[0]) }}, {{ u.colidx(expr.args[0]) }}, {{ u.nzval(expr.args[0]) }},
           {{ u.rowptr(expr) }}, {{ u.colidx(expr) }}, {{ u.nzval(expr) }});
 {% endmacro %}

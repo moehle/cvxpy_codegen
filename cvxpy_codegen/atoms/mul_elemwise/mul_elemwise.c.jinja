@@ -60,7 +60,7 @@ void mul_elemwise(long m, long *w, double *x,
 
 
 {% macro mul_elemwise_eval(expr) %}
-mul_elemwise({{ expr.size[0] }}l, work->work_int, work->work_double,
+mul_elemwise({{ expr.shape[0] }}l, work->work_int, work->work_double,
 {{- u.rowptr(expr.args[0]) }},
 {{- u.colidx(expr.args[0]) }},
 {{-  u.nzval(expr.args[0]) }},
