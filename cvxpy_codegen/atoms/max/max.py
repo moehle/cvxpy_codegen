@@ -19,9 +19,6 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 
 from cvxpy_codegen.object_data.atom_data import AtomData
 
-def atomdata_mul_elemwise(expr, arg_data):
+def atomdata_max(expr, arg_data, arg_pos):
     return AtomData(expr, arg_data,
-                    macro_name = "mul_elemwise",
-                    sparsity = arg_data[0].sparsity.multiply(arg_data[1].sparsity),
-                    work_int = arg_data[0].sparsity.shape[1],
-                    work_float = arg_data[0].sparsity.shape[1])
+                    macro_name = "max")

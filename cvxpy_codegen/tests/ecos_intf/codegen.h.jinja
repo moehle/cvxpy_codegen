@@ -20,18 +20,17 @@
 {% import "utils/utils.c.jinja" as u with context %}
 {% from 'expr_handler/expr_handler.c.jinja'
         import expr_handler_workspace with context %}
+{% from 'solvers/'+solver_name+"_intf.c.jinja" import solver_workspace with context %}
 
 
 typedef struct params_struct{
     {% for p in named_params %}
     double {{ p.name -}}
-        {%- if p.is_scalar -%}
-        {%- elif p.is_column -%}
-            [{{ p.size[0] }}]
-        {%- elif p.is_row -%}
-            [{{ p.size[1] }}]
+        {%- if p.is_scalar() -%}
+        {%- elif p.is_vector() -%}
+            [{{ p.shape[0] }}]
         {%- else -%}
-            [{{ p.size[0] }}][{{ p.size[1] }}]
+            [{{ p.shape[0] }}][{{ p.shape[1] }}]
         {%- endif -%};
     {% endfor %}
 } Params;
@@ -72,6 +71,8 @@ typedef struct linop_coeff{
 typedef struct work_struct{
 
     {{ expr_handler_workspace() }}
+
+    {{ solver_workspace(include_solver=False) }}
 
     /* Storage for integer and double workspaces. */
     long work_int[{{ work_int }}];

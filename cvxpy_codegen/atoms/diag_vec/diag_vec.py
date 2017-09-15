@@ -21,7 +21,7 @@ from cvxpy_codegen.object_data.atom_data import AtomData
 import scipy.sparse as sp
 
 # Note: From CVXPY, we can only get column vectors.
-def atomdata_diag_vec(expr, arg_data):
+def atomdata_diag_vec(expr, arg_data, arg_pos):
     
     m = arg_data[0].shape[0]
     n = arg_data[0].shape[1]

@@ -45,7 +45,7 @@ static PyObject *solve_wrapper(PyObject *self, PyObject *args){
   npy_intp shape[2];
   {% endif  %}
   {% for v in named_vars %}
-  PyArrayObject *{{ v.name() }};
+  PyArrayObject *{{ v.name }};
   {% endfor %}
   PyObject *return_dict;
 
@@ -81,9 +81,9 @@ static PyObject *solve_wrapper(PyObject *self, PyObject *args){
   {% for i, sz in enumerate(v.shape) %}
   size[{{i}}] = {{sz}};
   {% endfor %}
-  {{ v.name() }} = (PyArrayObject*) PyArray_SimpleNew(nd, shape, NPY_DOUBLE);
-  // memcpy({{ v.name() }}->data, vars.{{ v.name() }}[0], {{ v.shape[0]*v.shape[1] }}*sizeof(double));
-  memcpy(PyArray_DATA({{ v.name() }}), vars.{{ v.name() }}[0], {{ v.shape[0]*v.shape[1] }}*sizeof(double));
+  {{ v.name }} = (PyArrayObject*) PyArray_SimpleNew(nd, shape, NPY_DOUBLE);
+  // memcpy({{ v.name }}->data, vars.{{ v.name }}[0], {{ v.shape[0]*v.shape[1] }}*sizeof(double));
+  memcpy(PyArray_DATA({{ v.name }}), vars.{{ v.name }}[0], {{ v.shape[0]*v.shape[1] }}*sizeof(double));
   {% endfor %}
 
 
@@ -98,13 +98,13 @@ static PyObject *solve_wrapper(PyObject *self, PyObject *args){
   },{s:i,s:d})";
   return_dict = Py_BuildValue(dict_string,
   {% for v in named_vars %}
-  "{{ v.name() }}", {{ v.name() }},
+  "{{ v.name }}", {{ v.name }},
   {% endfor %}
   status_str, work.status, objective_str, work.optval);
 
   /* Release reference to the Numpy arrays. */
   {% for v in named_vars %}
-  Py_DECREF({{ v.name() }});
+  Py_DECREF({{ v.name }});
   {% endfor %}
 
   return return_dict;

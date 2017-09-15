@@ -1,15 +1,14 @@
 TASKS
--figure out vectors and scalars
--get SOCs to work
--get exp cone to work
 -write more linops
   [x] neg
   [x] index
   [x] sum_entries
   [x] sum
   [x] transpose
-  [x] reshape  // has problems with copy
+  [x] reshape
+  [x] vstack
   [ ] mul
+  [ ] hstack
   [ ] rmul
   [ ] promote
   [ ] div
@@ -20,16 +19,14 @@ TASKS
   [ ] upper_tri
   [ ] conv
   [ ] kron
-  [ ] hstack
-  [ ] vstack
+-add arg_pos to atom coeff functions
 -rm references to u.nzval, etc.
   -convert things to LinopCoeff
   -convert things to CsrMatrix
 -rm references to spzeros
--write varargs atoms for param_handler
-  -hstack
-  -vstack
 -move constants to separate file
--quadratic problems
+-osqp interface
 -make variable printing / parameter reading work better
+-get exp cone to work
 -remove -g flag from Makefile
+-make harness.c.jinja match for expr_handler and ecos_intf testers

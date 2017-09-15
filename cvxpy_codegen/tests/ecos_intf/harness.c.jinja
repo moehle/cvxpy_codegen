@@ -47,8 +47,10 @@ void json_vector_double(double *x, long len){
 }
 
 
+void solver_init(Work *work);
 void expr_handler_init(Work *work);
-void fill_matrices(Params *params, Work *work);
+void eval_exprs(Params *params, Work *work);
+void fill_matrices(Work *work);
 
 
 int main(){
@@ -57,19 +59,15 @@ int main(){
     Work work;
 
     {% for p in named_params %}
-      {%- if p.is_scalar -%}
+      {%- if p.is_scalar() -%}
     params.{{ p.name }} = {{ p.value }};
-      {%- elif p.is_column -%}
-        {% for i in range(p.size[0]) %}
-    params.{{ p.name }}[{{ i }}] = {{ p.value[i,0] }}; {# TODO should have no 0 idx? #}
-        {% endfor %}
-      {%- elif p.is_row -%}
-        {% for j in range(p.size[1]) %}
-    params.{{ p.name }}[{{ j }}] = {{ p.value[0,j] }};
+      {%- elif p.is_vector() -%}
+        {% for i in range(p.shape[0]) %}
+    params.{{ p.name }}[{{ i }}] = {{ p.value[i] }};
         {% endfor %}
       {%- else -%}
-        {% for i in range(p.size[0]) %}
-          {% for j in range(p.size[1]) %}
+        {% for i in range(p.shape[0]) %}
+          {% for j in range(p.shape[1]) %}
     params.{{ p.name }}[{{ i }}][{{ j }}] = {{ p.value[i,j] }};
           {% endfor %}
         {% endfor %}
@@ -78,13 +76,14 @@ int main(){
 
 
     expr_handler_init(&work);
-
-    fill_matrices(&params, &work);
+    solver_init(&work);
+    eval_exprs(&params, &work);
+    fill_matrices(&work);
 
 
     printf("{");
 
-      /* Objective constraint. */
+      /* Objective. */
       printf("\"obj_coeff\":");
       json_vector_double(work.obj_vec, {{ x_length }});
       printf(",");
@@ -92,13 +91,13 @@ int main(){
 
       /* Equality constraint. */
       printf(",");
-      printf("\"eq_size0\":%d", {{ eq_dim }});
+      printf("\"eq_shape0\":%d", {{ eq_coeff.shape[0] }});
       printf(",");
-      printf("\"eq_size1\":%d", {{ x_length }});
+      printf("\"eq_shape1\":%d", {{ eq_coeff.shape[1] }});
 
       printf(",");
       printf("\"eq_colptr\":");
-      json_vector_long(work.eq_coeff.p, {{ x_length+1 }});
+      json_vector_long(work.eq_coeff.p, {{ eq_coeff.shape[1]+1 }});
 
       printf(",");
       printf("\"eq_rowidx\":");
@@ -110,17 +109,17 @@ int main(){
 
       printf(",");
       printf("\"eq_offset\":");
-      json_vector_double(work.eq_offset, {{ eq_dim }});
+      json_vector_double(work.eq_offset, {{ eq_coeff.shape[0] }});
 
       /* Inequality constraint. */
       printf(",");
-      printf("\"leq_size0\":%d", {{ leq_dim }});
+      printf("\"leq_shape0\":%d", {{ leq_coeff.shape[0] }});
       printf(",");
-      printf("\"leq_size1\":%d", {{ x_length }});
+      printf("\"leq_shape1\":%d", {{ leq_coeff.shape[1] }});
 
       printf(",");
       printf("\"leq_colptr\":");
-      json_vector_long(work.leq_coeff.p, {{ x_length+1 }});
+      json_vector_long(work.leq_coeff.p, {{ leq_coeff.shape[1]+1 }});
 
       printf(",");
       printf("\"leq_rowidx\":");
@@ -132,7 +131,7 @@ int main(){
 
       printf(",");
       printf("\"leq_offset\":");
-      json_vector_double(work.leq_offset, {{ leq_dim }});
+      json_vector_double(work.leq_offset, {{ leq_coeff.shape[0] }});
 
     printf("}");
 

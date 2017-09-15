@@ -22,7 +22,8 @@ from cvxpy_codegen.object_data.linop_coeff_data import LinOpCoeffData
 import numpy as np
 import scipy.sparse as sp
 
-def atomdata_sum(expr, arg_data):
+def atomdata_sum(expr, arg_data, arg_pos):
+        # TODO this could be wrong, for var + const_mn + param_mn
         return AtomData(expr, arg_data,
                         macro_name = 'sum')
 

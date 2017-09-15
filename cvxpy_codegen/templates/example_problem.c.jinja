@@ -27,9 +27,9 @@ int main(){
     Vars vars;
 
     {% for p in named_params %}
-      {%- if p.is_scalar %}
+      {%- if p.is_scalar() %}
     params.{{ p.name }} = {{ p.value }};
-      {% elif p.is_column -%}
+      {% elif p.is_vector() -%}
         {% for i in range(p.shape[0]) %}
     params.{{ p.name }}[{{ i }}] = {{ p.value[i] }};
         {% endfor %}
@@ -49,10 +49,8 @@ int main(){
 
     printf("Optimal value: %f\n", work.optval);
 
+    {# TODO
     {% for var in named_vars %}
-      {#
-      {{ cprint_var(var) }}
-      #}
       
       {% for i in range(var.shape[0]) %}
         {% for j in range(var.shape[1]) %}
@@ -60,6 +58,7 @@ int main(){
         {% endfor %}
       {% endfor %}
     {% endfor %}
+    #}
 
 
     return(0);

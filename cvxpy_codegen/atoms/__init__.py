@@ -17,4 +17,4 @@ You should have received a copy of the GNU General Public License
 along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from cvxpy_codegen.atoms.atoms import get_atom_data, get_coeff_data, get_atom_data_from_linop
+from cvxpy_codegen.atoms.atoms import get_atom_data, get_coeff_data

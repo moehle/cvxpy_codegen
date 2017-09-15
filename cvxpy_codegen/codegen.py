@@ -23,10 +23,7 @@ from cvxpy.reductions.dcp2cone.dcp2cone import Dcp2Cone
 from cvxpy.reductions.cvx_attr2constr import CvxAttr2Constr
 
 
-def codegen(prob, target_dir, dump=False):
-
-    vars = prob.variables()
-    params = prob.parameters()
+def codegen(prob, target_dir, **kwargs):
 
     # TODO: make nicer
     sc = construct_solving_chain(prob, solver="ECOS")
@@ -38,9 +35,5 @@ def codegen(prob, target_dir, dump=False):
     obj = prob.objective
     constraints = prob.constraints
 
-    cg = CodeGenerator(obj, constraints, vars,
-                       params, dcp2cone_inv_data)
-    cg.codegen(target_dir)
-
-    if dump:
-        return cg.template_vars
+    cg = CodeGenerator(obj, constraints)
+    return cg.codegen(target_dir, **kwargs)

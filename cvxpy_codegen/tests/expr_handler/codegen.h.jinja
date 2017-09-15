@@ -26,11 +26,9 @@
 typedef struct params_struct{
     {% for p in named_params %}
     double {{ p.name -}}
-        {%- if p.is_scalar -%}
-        {%- elif p.is_column -%}
+        {%- if p.is_scalar() -%}
+        {%- elif p.is_vector() -%}
             [{{ p.shape[0] }}]
-        {%- elif p.is_row -%}
-            [{{ p.shape[1] }}]
         {%- else -%}
             [{{ p.shape[0] }}][{{ p.shape[1] }}]
         {%- endif -%};

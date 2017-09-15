@@ -29,11 +29,13 @@ CONST_ID = "CONST_ID"
 class ConstData(ExprData):
     def __init__(self, expr):
         value = expr.data if isinstance(expr, LinOp) else expr.value
-        sparsity = sp.csr_matrix(value, dtype=bool)
-        ExprData.__init__(self, expr, sparsity=sparsity)
+        ExprData.__init__(self, expr)
         self.type = 'const'
         self.name = 'const%d' % CONST_COUNT.get_count()
         self.value = sp.csr_matrix(value)
+        if self.ndims == 1: # By default, scipy stores vectors as rows.
+            self.value = sp.csr_matrix(self.value.T)
+        sparsity = sp.csr_matrix(self.value, dtype=bool)
         self.rowptr = self.value.indptr
         self.colidx = self.value.indices
         self.nzval = self.value.data
@@ -42,7 +44,13 @@ class ConstData(ExprData):
         self.has_offset = True
         self.mem_name = self.name
         self.cname = self.storage.name
+        self.coeffs = {}
 
     @property
     def storage(self):
         return self
+
+    def get_matrix(self, x_length, var_offsets):
+        coeff_height = self.shape[0] * self.shape[1]
+        mat = sp.csc_matrix((coeff_height, x_length), dtype=bool)
+        return mat

@@ -40,6 +40,7 @@ class ExprHandler():
     def __init__(self):
 
         # A list of all variables (not just the named ones).
+        self.named_vars = []
         self.vars = []
         self.var_ids = []
         
@@ -86,11 +87,17 @@ class ExprHandler():
         work_varargs = max([data.work_varargs for data in self.expressions] + [0])
         work_coeffs  = max([c.work_coeffs for c in self.linop_coeffs] + [0])
 
-        # Recover the sparsity patterns of the coefficient matrices.
-        #obj_coeff, eq_coeff, leq_coeff = self.get_sparsity()
+        # Get the named variables.
+        self.named_vars = [v for v in self.vars if v.is_named]
+        if not self.named_vars:
+            raise TypeError("Problem has no variables.")
+
+        # Get variable vector information.
+        x_length, var_offsets = self.get_sym_data()
 
         # Fill out the variables needed to render the C template.
         self.template_vars.update({'vars': self.vars,
+                                   'named_vars': self.named_vars,
                                    'constants': self.constants,
                                    'named_params': self.named_params,
                                    'callback_params': self.callback_params,
@@ -102,9 +109,22 @@ class ExprHandler():
                                    'work_float': work_float,
                                    'work_varargs': work_varargs,
                                    'work_coeffs': work_coeffs,
+                                   'x_length': x_length,
+                                   'var_offsets': var_offsets,
                                    'CONST_ID' : CONST_ID })
 
         return self.template_vars
+
+
+    def get_sym_data(self):
+        offset = 0
+        var_offsets = {}
+        #for var in self.named_vars:
+        for var in self.vars:
+            var_offsets.update({var.id : offset})
+            offset += var.length
+        x_length = offset
+        return x_length, var_offsets
 
 
 
@@ -165,7 +185,8 @@ class ExprHandler():
                     arg_data = []
                     for arg in expr.args:
                         arg_data += [self.process_expression(arg)]
-                    data = get_atom_data(expr, arg_data)
+                    arg_pos = range(len(arg_data)) # args are in order.
+                    data = get_atom_data(expr, arg_data, arg_pos)
                     self.expressions += [data]
                     self.expr_ids += [id(expr)]
                     if data.macro_name not in self.unique_atoms:

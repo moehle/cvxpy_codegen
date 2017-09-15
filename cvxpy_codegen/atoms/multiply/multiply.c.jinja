@@ -20,17 +20,17 @@
 {% import "utils/utils.c.jinja" as u with context %}
 
 
-{% macro mul_elemwise_declare() %}
-void mul_elemwise(long m, long *w, double *x,
+{% macro multiply_declare() %}
+void multiply(long m, long *w, double *x,
          long *Ap, long *Aj, double *Ax,
          long *Bp, long *Bj, double *Bx,
          long *Zp, long *Zj, double *Zx);
 {% endmacro %}
 
 
-{% macro mul_elemwise_define() %}
+{% macro multiply_define() %}
 /* Computes Z = A.*B. */
-void mul_elemwise(long m, long *w, double *x,
+void multiply(long m, long *w, double *x,
                   long *Ap, long *Aj, double *Ax,
                   long *Bp, long *Bj, double *Bx,
                   long *Zp, long *Zj, double *Zx){
@@ -59,8 +59,8 @@ void mul_elemwise(long m, long *w, double *x,
 {% endmacro %}
 
 
-{% macro mul_elemwise_eval(expr) %}
-mul_elemwise({{ expr.shape[0] }}l, work->work_int, work->work_double,
+{% macro multiply_eval(expr) %}
+multiply({{ expr.shape[0] }}l, work->work_int, work->work_double,
 {{- u.rowptr(expr.args[0]) }},
 {{- u.colidx(expr.args[0]) }},
 {{-  u.nzval(expr.args[0]) }},

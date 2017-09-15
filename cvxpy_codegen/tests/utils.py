@@ -64,17 +64,18 @@ class CodegenTestCase(unittest.TestCase):
                 B = None
         if A is None and B is None:
             return
+        if A is None or B is None:
+            self.assertTrue(False)
 
         A = convert_to_matrix(A)
         B = convert_to_matrix(B)
 
-        if any(A) or any(B):
-            if eps == None:
-                eps = self.EPS
-            D =  abs(A-B)
-            if sp.issparse(D):
-                D = D.toarray()
-            self.assertTrue(np.all(D <= eps))
+        if eps == None:
+            eps = self.EPS
+        D =  abs(A-B)
+        if sp.issparse(D):
+            D = D.toarray()
+        self.assertTrue(np.all(D <= eps))
         
 
     def assertEqualMatrices(self, A, B, eps=None):

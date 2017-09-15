@@ -20,6 +20,7 @@ package_data={'cvxpy_codegen.expr_handler'        : ['expr_handler.c.jinja'],
               'cvxpy_codegen.linop_sym'           : ['linop_sym.c.jinja'],
               'cvxpy_codegen.solvers'             : ['*.jinja'] + ecos_sources,
               'cvxpy_codegen.tests.expr_handler'  : ['*.jinja'],
+              'cvxpy_codegen.tests.ecos_intf'     : ['*.jinja'],
               'cvxpy_codegen.utils'               : ['utils.c.jinja'],
               'cvxpy_codegen.templates'           : ['*.jinja']}
 package_data.update({d : ['*.jinja'] for d in atom_dirs})
@@ -40,6 +41,7 @@ setup(
               'cvxpy_codegen.templates',
               'cvxpy_codegen.tests',
               'cvxpy_codegen.tests.expr_handler',
+              'cvxpy_codegen.tests.ecos_intf',
               'cvxpy_codegen.utils']
               + atom_dirs,
     package_dir={'cvxpy_codegen': 'cvxpy_codegen'},

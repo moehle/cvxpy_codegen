@@ -109,8 +109,8 @@ void add(long n_args, CsrMatrix *C, CsrMatrix *Z, long *w, double *x){
 
 {% macro add_eval(expr) %}
 {% for i, c in enumerate(expr.args) %}
-work->work_varargs[{{ i }}] = work->{{ c.name }};
+work->work_varargs[{{ i }}] = work->{{ c.storage.name }};
 {% endfor %}
-add({{ len(expr.args) }}, work->work_varargs, &work->{{ expr.name }},
+add({{ len(expr.args) }}, work->work_varargs, &work->{{ expr.storage.name }},
 work->work_int, work->work_double);
 {% endmacro %}

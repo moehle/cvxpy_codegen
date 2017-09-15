@@ -67,7 +67,7 @@ void recover_vars(Work *work, Vars *vars){
     {% for var in named_vars %}
     for(i=0; i<{{ var.shape[0] }}; i++){
         for(j=0; j<{{ var.shape[1] }}; j++){
-            vars->{{ var.name() }}[i][j] = *(work->primal_var + {{ var_offsets[var.id] }} + i + {{var.shape[0]}}*j);
+            vars->{{ var.name }}[i][j] = *(work->primal_var + {{ var_offsets[var.id] }} + i + {{var.shape[0]}}*j);
         }
     }
     {% endfor %}

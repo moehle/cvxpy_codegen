@@ -208,8 +208,8 @@ void eval_exprs(Params *params, Work *work){
   {# TODO Cut out the nzval pointer work struct, reduce this part: #}
   {% for p in named_params %}
   {{u.nzval(p)}} = &(params->{{ p.name -}}
-      {%- if p.is_scalar -%}
-      {%- elif p.is_column or p.is_row -%}
+      {%- if p.is_scalar() -%}
+      {%- elif p.is_vector() -%}
           [0]
       {%- else -%}
           [0][0]

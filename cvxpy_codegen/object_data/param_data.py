@@ -28,21 +28,24 @@ class ParamData(ExprData):
         self.type = 'param'
         self.name = expr.name()
         if expr.value is None:
-            self.value = np.squeeze(np.random.randn(*expr.shape))
+            self.value = np.random.randn(*expr.shape)
         else:
-            self.value = np.squeeze(expr.value)
+            self.value = expr.value
         self.var_ids = []
         self.mem_name = self.name
-        self.is_scalar = True if self.shape == (1,1) else False
-        self.is_column = True if self.shape[1] == 1 else False
-        self.is_row    = True if self.shape[0] == 1 else False # TODO add tests for these
         self.cname = self.name
         self.has_offset = True
+        self.coeffs = {}
         
     @property
     def storage(self):
         return self
 
+    # Combine with ConstData and CbParamData
+    def get_matrix(self, x_length, var_offsets):
+        coeff_height = self.shape[0] * self.shape[1]
+        mat = sp.csc_matrix((coeff_height, x_length), dtype=bool)
+        return mat
 
 
 class CbParamData(ExprData):
@@ -57,7 +60,13 @@ class CbParamData(ExprData):
         self.mem_name = arg_data[0].name
         self.cname = self.storage.name
         self.has_offset = True
+        self.coeffs = {}
 
     @property
     def storage(self):
         return self.args[0].storage
+
+    def get_matrix(self, x_length, var_offsets):
+        coeff_height = self.shape[0] * self.shape[1]
+        mat = sp.csc_matrix((coeff_height, x_length), dtype=bool)
+        return mat

@@ -30,8 +30,8 @@ class AtomData(ExprData):
         ExprData.__init__(self, expr, arg_data=arg_data, sparsity=sparsity)
         self.type = 'expr'
         self.name = 'expr%d' % EXPR_COUNT.get_count()
-        #if shape is not None:
-        #   self.shape = shape
+        if shape is not None: # Override the shape. # TODO remove?
+           self.shape = shape
         self.macro_name = macro_name
         self.inplace = inplace
         self.copy_arg = copy_arg # If self.make_copy is True, copy this argument.
@@ -46,6 +46,9 @@ class AtomData(ExprData):
             self.make_copy = False
         self.data = data
         self.cname = self.storage.name
+        self.var_ids = []
+        self.has_offset=True
+        self.coeffs = {} # TODO true
 
     @property
     def storage(self):

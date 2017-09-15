@@ -18,6 +18,7 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from cvxpy_codegen.utils.utils import Counter
+import scipy.sparse as sp
 
 CONSTR_COUNT = Counter()
 
@@ -29,6 +30,27 @@ class ConstrData():
         self.exprs = exprs
         # self.shape = exprs[0].shape[0] * exprs[0].shape[1] # TODO generalize
         self.vert_offset = vert_offset
+        self.constr = constr
 
     def get_matrix(self, x_length, var_offsets):
         return self.exprs[0].get_matrix(x_length, var_offsets) # TODO horribly wrong
+
+
+class ZeroData(ConstrData):
+    def __init__(self, constr, exprs, vert_offset):
+        ConstrData.__init__(self, constr, exprs, vert_offset)
+
+
+class NonPosData(ConstrData):
+    def __init__(self, constr, exprs, vert_offset):
+        ConstrData.__init__(self, constr, exprs, vert_offset)
+
+
+class SocData(ConstrData):
+    def __init__(self, constr, exprs, vert_offset):
+        ConstrData.__init__(self, constr, exprs, vert_offset)
+
+
+class ExpConeData(ConstrData):
+    def __init__(self, constr, exprs, vert_offset):
+        ConstrData.__init__(self, constr, exprs, vert_offset)

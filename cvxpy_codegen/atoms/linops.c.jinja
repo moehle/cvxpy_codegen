@@ -16,6 +16,9 @@
 {% from "atoms/transpose/transpose_coeffs.c.jinja" 
       import transpose_coeffs_declare, transpose_coeffs_define, 
              transpose_coeffs_eval with context%}
+{% from "atoms/vstack/vstack_coeffs.c.jinja" 
+      import vstack_coeffs_declare, vstack_coeffs_define,
+             vstack_coeffs_eval with context%}
 
 
 {% macro declare(macro_name) %}

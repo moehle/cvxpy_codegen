@@ -32,17 +32,18 @@ import cvxpy.settings as s
 from cvxpy.problems.solvers.ecos_intf import ECOS
 import cvxpy
 from cvxpy.problems.problem_data.sym_data import SymData
-from cvxpy_codegen.code_generator import CodeGenerator
+from cvxpy_codegen import codegen
+from cvxpy.constraints import NonPos, SOC
 
 ECOS = ECOS()
 
-HARNESS_C = 'tests/expr_handler/harness.c.jinja'
-CODEGEN_H = 'tests/expr_handler/codegen.h.jinja'
+HARNESS_C = 'tests/ecos_intf/harness.c.jinja'
+CODEGEN_H = 'tests/ecos_intf/codegen.h.jinja'
 target_dir = tu.TARGET_DIR
 
 
 
-class TestLinopHandler(tu.CodegenTestCase):
+class TestEcosIntf(tu.CodegenTestCase):
 
     # Define some Parameters and Constants to build tests with.
     def setUp(self):
@@ -50,55 +51,82 @@ class TestLinopHandler(tu.CodegenTestCase):
         m = 8
         n = 12
         p = 10
+        m = 3
+        n = 5
+        p = 4
         self.m = m
         self.n = n
         self.p = p
+        self.var_mn = cvx.Variable((m, n), name='var_mn')
+        self.var_np = cvx.Variable((n, p), name='var_np')
+        self.var_mp = cvx.Variable((m, p), name='var_mp')
+        self.var_pn = cvx.Variable((p, n), name='var_pn')
+        self.var_nn = cvx.Variable((n, n), name='var_nn')
         self.var_n1 = cvx.Variable((n, 1), name='var_n1')
+        self.var_1n = cvx.Variable((1, n), name='var_1n')
+        self.var_11 = cvx.Variable((1, 1), name='var_11')
+        self.var_n  = cvx.Variable((n,  ), name='var_n' )
+        self.var    = cvx.Variable((    ), name='var'   )
+        self.param_mn = cvx.Parameter((m, n), name='param_mn', value=np.random.randn(m, n))
+        self.param_np = cvx.Parameter((n, p), name='param_np', value=np.random.randn(n, p))
+        self.param_mp = cvx.Parameter((m, p), name='param_mp', value=np.random.randn(m, p))
+        self.param_pn = cvx.Parameter((p, n), name='param_pn', value=np.random.randn(p, n))
+        self.param_nn = cvx.Parameter((n, n), name='param_nn', value=np.random.randn(n, n))
+        self.param_n1 = cvx.Parameter((n, 1), name='param_n1', value=np.random.randn(n, 1))
+        self.param_1n = cvx.Parameter((1, n), name='param_1n', value=np.random.randn(1, n))
+        self.param_11 = cvx.Parameter((1, 1), name='param_11', value=np.random.randn(1, 1))
+        self.param_n  = cvx.Parameter((n,  ), name='param_n',  value=np.random.randn(n))
+        self.param    = cvx.Parameter((    ), name='param',    value=np.random.randn())
         self.const_mn = np.random.randn(m, n)
+        self.const_np = np.random.randn(n, p)
+        self.const_mp = np.random.randn(m, p)
+        self.const_pn = np.random.randn(p, n)
+        self.const_nn = np.random.randn(n, n)
+        self.const_n1 = np.random.randn(n, 1)
         self.const_m1 = np.random.randn(m, 1)
-        self.ones_n1 = np.ones((n, 1))
+        self.const_1n = np.random.randn(1, n)
+        self.const_11 = np.random.randn(1, 1)
+        self.const_n  = np.random.randn(n,  )
+        self.const    = np.random.randn(    )
+
+
+
+    def test_nonpos(self):
+        self._test_constrs([NonPos(-self.var_n1)])
+        self._test_constrs([NonPos(self.var_n)])
+        self._test_constrs([NonPos(self.var_n1 + self.const_n1)])
+
+
+    def test_soc(self):
+        self._test_constrs([SOC(cvx.sum(self.var_n), -self.var_n)])
+        self._test_constrs([SOC(cvx.sum(self.var_n), self.const_n+self.var_n)])
+        self._test_constrs([SOC(self.var_n, self.var_mn)])
+        self._test_constrs([SOC(self.param_n, self.var_mn + self.param_mn)])
+        self._test_constrs([SOC(self.var-self.const, -self.var_n)])
+
+        #self._test_constrs([SOC(-self.var_n[3], -self.var_n)]) # dies
 
 
 
 
-    ###########################
-    # FUNCTIONS OF PARAMETERS #
-    ###########################
 
-    def test(self):
-        aff_expr = self.const_mn * self.var_n1 + self.const_m1
-        c = NonPos(aff_expr)
-        
-        constrs = [c]
-        objective = self.ones_n1 * x + self.const_11
-        _test_prob(obj, constrs, printing=True)
-
-
-
-
-
-
-    def _test_prob(self, obj, constrs, printing=False):
-        prob = cvx.Problem(cvxpy.Minimize(obj), constrs)
-
-        SC = construct_solving_chain(prob, solver="ECOS")
-        for r in SC.reductions:
-            if isinstance(r, ECOS_reduction):
-                data, inv_data = r.apply(prob)
-        true_obj_coeff  = data[s.C]
-        true_obj_offset = data[s.OFFSET]
-        true_eq_coeff   = data[s.A]
-        true_eq_offset  = data[s.B]
-        true_leq_coeff  = data[s.G]
-        true_leq_offset = data[s.H]
+    def _test_constrs(self, constrs, printing=False):
+        prob = cvx.Problem(cvxpy.Minimize(0), constrs)
+        prob_data = prob.get_problem_data("ECOS")
+        data = prob_data[0]
+        inverses = prob_data[2]
+        for inv in inverses:
+            if hasattr(inv, 'r'):
+                true_obj_offset = inv.r
+        true_obj_coeff   = data[s.C]
+        true_obj_offset += data[s.OFFSET]
+        true_eq_coeff    = data[s.A]
+        true_eq_offset   = data[s.B]
+        true_leq_coeff   = data[s.G]
+        true_leq_offset  = data[s.H]
 
         # Do code generation
-        vars = prob.variables()
-        params = prob.parameters()
-        obj, constraints = prob.canonical_form
-        code_generator = CodeGenerator(obj, constraints, vars, params)
-        code_generator.codegen(target_dir)
-        template_vars = code_generator.template_vars
+        template_vars = codegen(prob, target_dir, dump=True, include_solver=False)
 
         # Set up test harness.
         render(target_dir, template_vars, HARNESS_C, 'harness.c')
@@ -109,41 +137,47 @@ class TestLinopHandler(tu.CodegenTestCase):
         test_eq_coeff  = sp.csc_matrix((test_data['eq_nzval'],
                                         test_data['eq_rowidx'],
                                         test_data['eq_colptr']),
-                                        shape = (test_data['eq_size0'],
-                                                 test_data['eq_size1']))
+                                        shape = (test_data['eq_shape0'],
+                                                 test_data['eq_shape1']))
         test_eq_offset = np.array(test_data['eq_offset'])
-        test_leq_coeff = sp.csc_matrix((test_data['eq_nzval'],
-                                        test_data['eq_rowidx'],
-                                        test_data['eq_colptr']),
-                                        shape = (test_data['eq_size0'],
-                                                 test_data['eq_size1']))
+        test_leq_coeff = sp.csc_matrix((test_data['leq_nzval'],
+                                        test_data['leq_rowidx'],
+                                        test_data['leq_colptr']),
+                                        shape = (test_data['leq_shape0'],
+                                                 test_data['leq_shape1']))
         test_leq_offset = np.array(test_data['leq_offset'])
 
         if printing:
-            print('\nTest objective coeff  :\n',   test_obj_coeff)
-            print('\nTrue objective coeff  :\n',   true_obj_coeff)
+            print '\nTest objective coeff:\n',   test_obj_coeff
+            print '\nTrue objective coeff:\n',   true_obj_coeff
 
-            print('\nTest objective offset :\n',   test_obj_offset)
-            print('\nTrue objective offset :\n',   true_obj_offset)
+            print '\nTest objective offset:\n',  test_obj_offset
+            print '\nTrue objective offset:\n',  true_obj_offset
 
-            print('\nTest equality offset :\n',    test_eq_coeff)
-            print('\nTrue equality offset :\n',    true_eq_coeff)
+            print '\nTest equality coeff:\n',    test_eq_coeff
+            print '\nTrue equality coeff:\n',    true_eq_coeff
 
-            print('\nTest equality offset :\n',    test_eq_offset)
-            print('\nTrue equality offset :\n',    true_eq_offset)
+            print '\nTest equality offset:\n',   test_eq_offset
+            print '\nTrue equality offset:\n',   true_eq_offset
 
-            print('\nTest inequality offset :\n',  test_leq_coeff)
-            print('\nTrue inequality offset :\n',  true_leq_coeff)
+            print '\nTest inequality coeff:\n',  test_leq_coeff
+            print '\nTrue inequality coeff:\n',  true_leq_coeff
 
-            print('\nTest inequality offset :\n',  test_leq_offset)
-            print('\nTrue inequality offset :\n',  true_leq_offset)
+            print '\nTest inequality offset:\n', test_leq_offset
+            print '\nTrue inequality offset:\n', true_leq_offset
 
-        self.assertAlmostEqualMatrices(true_obj_coeff,  test_obj_coeff)
-        self.assertAlmostEqualMatrices(true_obj_offset, test_obj_offset)
-        self.assertAlmostEqualMatrices(true_eq_coeff,   test_eq_coeff)
-        self.assertAlmostEqualMatrices(true_eq_offset,  test_eq_offset)
-        self.assertAlmostEqualMatrices(true_leq_coeff,  test_leq_coeff)
-        self.assertAlmostEqualMatrices(true_leq_offset, test_leq_offset)
+        if not true_obj_coeff is None:
+            self.assertAlmostEqualMatrices(true_obj_coeff,  test_obj_coeff)
+        if not true_obj_offset is None:
+            self.assertAlmostEqualMatrices(true_obj_offset, test_obj_offset)
+        if not true_eq_coeff is None:
+            self.assertAlmostEqualMatrices(true_eq_coeff,   test_eq_coeff)
+        if not test_eq_offset is None:
+            self.assertAlmostEqualMatrices(true_eq_offset,  test_eq_offset)
+        if not test_leq_coeff is None:
+            self.assertAlmostEqualMatrices(true_leq_coeff,  test_leq_coeff)
+        if not test_leq_offset is None:
+            self.assertAlmostEqualMatrices(true_leq_offset, test_leq_offset)
 
 
 
@@ -151,7 +185,8 @@ class TestLinopHandler(tu.CodegenTestCase):
         prev_path = os.getcwd()
         os.chdir(target_dir)
         output = subprocess.check_output(
-                     ['gcc', 'harness.c', 'expr_handler.c', '-o' 'main'],
+                     ['gcc', 'harness.c', 'expr_handler.c', 'solver_intf.c',
+                      '-g', '-o' 'main'],
                      stderr=subprocess.STDOUT)
         exec_output = subprocess.check_output(['./main'], stderr=subprocess.STDOUT)
         os.chdir(prev_path)

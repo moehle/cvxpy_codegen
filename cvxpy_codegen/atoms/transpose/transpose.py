@@ -21,7 +21,7 @@ from cvxpy_codegen.object_data.atom_data import AtomData
 from cvxpy_codegen.object_data.linop_coeff_data import LinOpCoeffData
 import scipy.sparse as sp
 
-def atomdata_transpose(expr, arg_data):
+def atomdata_transpose(expr, arg_data, arg_pos):
     sparsity = sp.csr_matrix(arg_data[0].sparsity.T)
     return AtomData(expr, arg_data,
                     sparsity = sparsity,

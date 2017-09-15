@@ -20,7 +20,7 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 from cvxpy_codegen.object_data.atom_data import AtomData
 from cvxpy_codegen.object_data.linop_coeff_data import LinOpCoeffData
 
-def atomdata_add(expr, arg_data):
+def atomdata_add(expr, arg_data, arg_pos):
 
     if len(arg_data) == 1:
         return AtomData(expr, arg_data,
@@ -31,12 +31,12 @@ def atomdata_add(expr, arg_data):
     else:
         if any([a.sparsity.shape==(1,1) for a in arg_data]):
             sparsity = None
-            work_int    = expr.shape[1]
-            work_float  = expr.shape[1]
+            work_int    = max([a.shape[1] for a in arg_data])
+            work_float  = max([a.shape[1] for a in arg_data])
         else:
             sparsity = sum([a.sparsity for a in arg_data])
-            work_int    = expr.shape[1]
-            work_float  = expr.shape[1]
+            work_int    = max([a.shape[1] for a in arg_data])
+            work_float  = max([a.shape[1] for a in arg_data])
         work_varargs    = len(arg_data) # This is a varargs atom.
         return AtomData(expr, arg_data,
                         sparsity = sparsity,

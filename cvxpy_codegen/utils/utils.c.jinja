@@ -137,6 +137,7 @@ void print_linopcoeff(LinopCoeff *A){
       printf("    p, (i, j), x = %ld, (%ld, %ld), %f\n", p, i, A->j[p], A->x[p]);
     }
   }
+  printf("  Ap[%ld] = %ld\n", m, A->p[m]);
   printf("\n\n");
 }
 {% endmacro %}
@@ -166,6 +167,7 @@ void print_csrmat(CsrMatrix *A){
       printf("    p, (i, j), x = %ld, (%ld, %ld), %f\n", p, i, A->j[p], A->x[p]);
     }
   }
+  printf("  Ap[%ld] = %ld\n", m, A->p[m]);
   printf("\n\n");
 }
 {% endmacro %}

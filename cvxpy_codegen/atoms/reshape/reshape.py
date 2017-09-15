@@ -25,29 +25,26 @@ import numpy as np
 # TODO remove for cvxpy 1.0:
 from cvxpy.lin_ops.lin_op import LinOp
 
-def atomdata_reshape(expr, arg_data):
+def atomdata_reshape(expr, arg_data, arg_pos):
 
-    ## TODO remove for cvxpy 1.0:
-    #print(expr)
-    #if isinstance(expr, LinOpData):
-    #    m_new, n_new = expr.shape
-    #else:
-    #    m_new, n_new = expr.get_data()
+    if len(expr.shape) == 2:
+        shape = expr.shape
+    elif len(expr.shape) == 1:
+        shape = (expr.shape[0], 1)
+    elif len(expr.shape) == 0:
+        shape = (1,1)
+    else:
+        raise Exception("Cannot reshape to array"
+                        "with more than two dimensions.")
 
-    m_new, n_new = expr.shape
-
-    
-    m = arg_data[0].shape[0]
-    n = arg_data[0].shape[1]
-
-    sparsity = reshape(arg_data[0].sparsity, m_new, n_new)
+    sparsity = reshape(arg_data[0].sparsity, shape[0], shape[1])
 
     return AtomData(expr, arg_data,
                     macro_name = 'reshape',
                     sparsity = sparsity,
-                    work_int = m_new,
-                    work_float = m_new,
-                    data = (m_new, n_new))
+                    work_int = shape[0],
+                    work_float = shape[0],
+                    data = shape)
 
 
 

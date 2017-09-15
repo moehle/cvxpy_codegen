@@ -22,16 +22,22 @@ from cvxpy_codegen.object_data.linop_coeff_data import LinOpCoeffData
 import scipy.sparse as sp
 import numpy as np
 
-def atomdata_index(expr, arg_data):
+def atomdata_index(expr, arg_data, arg_pos):
 
-    # TODO rm for cvxpy 1.0
-    if hasattr(expr, 'data'):
-        slices = expr.data
-    else:
-        slices = expr.get_data()[0]
+    # Define behavior for each case.
+    slices = expr.get_data()[0]
+    if arg_data[0].is_scalar():
+        raise Exception("Indexing scalars not allowed.")
 
-    if len(slices) == 1:
+    if arg_data[0].is_vector():
+        if not len(slices) == 1:
+            raise Exception("Vectors cannot be multiply indexed.")
         slices = (slices[0], slice(0, 1, 1))
+
+    if arg_data[0].is_matrix():
+        if len(slices) == 1:
+            slices = (slices[0], slice(0, None, 1))
+
 
     start0 = 0 if slices[0].start==None else slices[0].start
     start1 = 0 if slices[1].start==None else slices[1].start

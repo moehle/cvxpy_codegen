@@ -20,7 +20,7 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 from cvxpy_codegen.object_data.atom_data import AtomData
 from cvxpy_codegen.object_data.linop_coeff_data import LinOpCoeffData
 
-def atomdata_neg(expr, arg_data):
+def atomdata_neg(expr, arg_data, arg_pos):
     return AtomData(expr, arg_data,
                    macro_name = "neg",
                    sparsity = arg_data[0].sparsity,

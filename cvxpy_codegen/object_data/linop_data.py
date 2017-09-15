@@ -58,15 +58,19 @@ class LinOpData(ExprData):
             self.coeffs.update({vid : coeff})
 
         # Get the expression for the offset vector.
+        arg_count = 0
+        arg_pos = [] # Store the argument positions.
         if self.has_offset:
             offset_args = []
             for arg in self.args:
                 if arg.has_offset:
+                    arg_pos += [arg_count]
                     if isinstance(arg, LinOpData):
                         offset_args += [arg.offset_expr]
                     else:
                         offset_args += [arg]
-            self.offset_expr = get_atom_data(expr, offset_args)
+                arg_count += 1
+            self.offset_expr = get_atom_data(expr, offset_args, arg_pos)
 
 
     def get_data(self):
@@ -88,6 +92,21 @@ class LinOpData(ExprData):
                 coeff_width = coeff.sparsity.shape[1]
                 pad_left = start
                 pad_right = x_length - coeff_width - pad_left
+                #print sp.csc_matrix((coeff_height, pad_left), dtype=bool).shape
+                #print coeff.sparsity.shape
+                #print sp.csc_matrix((coeff_height, pad_right), dtype=bool).shape
+
+                #print coeff.shape
+                #print coeff.sparsity.shape
+                #print coeff.args[0].macro_name
+                #print coeff.args[0].shape
+                #print coeff.args[0].sparsity.shape
+                #print coeff.args[0].args[0].macro_name
+                #print coeff.args[0].args[0].shape
+                #print coeff.args[0].args[0].sparsity.shape
+                #print coeff.args[0].args[0].args[0].macro_name
+                #print coeff.args[0].args[0].args[0].shape
+                #print coeff.args[0].args[0].args[0].sparsity.shape
                 mat += sp.hstack([sp.csc_matrix((coeff_height, pad_left), dtype=bool),
                                   coeff.sparsity,
                                   sp.csc_matrix((coeff_height, pad_right), dtype=bool)])

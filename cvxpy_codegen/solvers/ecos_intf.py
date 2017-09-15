@@ -28,8 +28,9 @@ import ecos
 from cvxpy.reductions.solvers.solver import group_constraints
 from cvxpy.constraints import SOC, ExpCone, NonPos, Zero
 from cvxpy_codegen.expr_handler.expr_handler import ExprHandler
-from cvxpy_codegen.object_data.constr_data import ConstrData
+from cvxpy_codegen.object_data.constr_data import NonPosData, SocData, ExpConeData, ZeroData
 import scipy.sparse as sp
+from cvxpy import vstack, reshape
 
 
 class EcosIntf(EmbeddedSolverIntf):
@@ -79,11 +80,11 @@ class EcosIntf(EmbeddedSolverIntf):
     template_vars = { 'solver_sources'          : SOURCES,
                       'solver_include_dirs'     : INCLUDE_DIRS,
                       'solver_define_macros'    : DEFINE_MACROS,
-                      'solver_template'         : SOLVER_TEMPLATE } 
+                      'solver_template'         : SOLVER_TEMPLATE,
+                      'solver_name'             : name } 
 
     
-    def __init__(self, expr_handler, x_length, var_offsets):
-        a = 5 # TODO
+    def __init__(self, expr_handler, include_solver=True):
         self.expr_handler = expr_handler
         self.eq_constrs = []
         self.leq_constrs = []
@@ -93,16 +94,15 @@ class EcosIntf(EmbeddedSolverIntf):
         self.n_exp = 0
         self.soc_sizes = []
         self.cone_dim = 0
-        self.x_length = x_length
-        self.var_offsets = var_offsets
+        self.template_vars.update({'include_solver' : include_solver})
 
 
 
-
-    def get_template_vars(self, sym_data, other_tvs):
+    def get_template_vars(self):
 
         # Recover the sparsity patterns of the coefficient matrices.
-        obj_coeff, eq_coeff, leq_coeff = self.get_sparsity()
+        x_length, var_offsets = self.expr_handler.get_sym_data()
+        obj_coeff, eq_coeff, leq_coeff = self.get_sparsity(x_length, var_offsets)
 
         # TODO rename many of these:
         self.template_vars.update({
@@ -116,12 +116,11 @@ class EcosIntf(EmbeddedSolverIntf):
                 'eq_dim'       : self.n_eq,
                 'soc_dims'     : self.soc_sizes,
                 'exp_cones'    : self.n_exp,
-                'x_length'     : self.x_length,
                 'cone_dim'     : self.cone_dim,
                 'leq_nnz'      : self.leq_nnz,
                 'eq_nnz'       : self.eq_nnz,
-                'var_offsets'  : self.var_offsets, # TODO duplicate, in code_generator
-                'x_length'     : self.x_length}) # TODO duplicate, in code_generator
+                'var_offsets'  : var_offsets,
+                'x_length'     : x_length})
 
         return self.template_vars
 
@@ -160,7 +159,7 @@ class EcosIntf(EmbeddedSolverIntf):
             exprs = []
             for a in constr.args:
                 exprs += [self.expr_handler.expr_handler.process_expression(a)]
-            self.eq_constrs += [ConstrData(constr, exprs, vert_offset=vert_offset)]
+            self.eq_constrs += [ZeroData(constr, exprs, vert_offset=vert_offset)]
             vert_offset += sum(constr.cone_sizes)
         self.n_eq = vert_offset
 
@@ -168,22 +167,29 @@ class EcosIntf(EmbeddedSolverIntf):
         neq_constrs = constr_map[NonPos] + constr_map[SOC] + constr_map[ExpCone]
         vert_offset = 0
         for constr in neq_constrs:
-            exprs = []
-            for a in constr.args:
-                exprs += [self.expr_handler.process_expression(a)]
-            self.leq_constrs += [ConstrData(constr, exprs, vert_offset=vert_offset)]
             if isinstance(constr, NonPos):
+                expr = self.expr_handler.process_expression(constr.args[0])
+                self.leq_constrs += [NonPosData(constr, [expr], 
+                                     vert_offset=vert_offset)]
                 self.n_leq += constr.size
                 vert_offset += constr.size
             elif isinstance(constr, SOC):
-                self.n_soc += len(constr.cone_sizes)
-                vert_offset += sum(constr.cone_sizes)
-                soc_sizes += constr.cone_sizes
-                raise Exception("Exp cone not implemented")
+                expr = self.get_soc_expr(constr)
+                expr = self.expr_handler.process_expression(expr)
+                self.leq_constrs += [SocData(constr, [expr],
+                                     vert_offset=vert_offset)]
+                self.n_soc += len(constr.cone_sizes())
+                self.soc_sizes += constr.cone_sizes()
+                vert_offset += sum(constr.cone_sizes())
             elif isinstance(constr, ExpCone):
-                #self.n_exp += constr.sizesize
-                #vert_offset += constr.size
                 raise Exception("Exp cone not implemented")
+                exprs = []
+                for a in constr.args:
+                    exprs += [self.expr_handler.process_expression(a)]
+                self.leq_constrs += [ExpConeData(constr, exprs,
+                                     vert_offset=vert_offset)]
+                self.n_exp += constr.sizesize
+                vert_offset += constr.size
             else:
                 raise Exception("Unknown constraint type")
 
@@ -197,25 +203,43 @@ class EcosIntf(EmbeddedSolverIntf):
         constr_data = []
         vert_offset = 0
         return constr_data
+    
+
+    def get_soc_expr(self, c):
+        T = c.args[0]
+        X = c.args[1]
+        if c.axis == 1:
+            X = X.T
+        if len(X.shape) == 0:
+            reshape(X, (1, 1))
+        elif len(X.shape) == 1:
+            X = reshape(X, (X.shape[0], 1))
+        n, n_cones = X.shape
+        T = reshape(T, (1, n_cones))
+        return -reshape(vstack([T,X]), ((n+1)*n_cones,))
+ 
+
 
 
 
     # Gets the sparsity patterns of the objective and constraint coefficients.
     # (This tells us how much memory to allocate in C).
-    def get_sparsity(self):
+    def get_sparsity(self, x_length, var_offsets):
 
         # Get Boolean sparse matrix for the objective.
-        obj_coeff = self.obj.get_matrix(self.x_length, self.var_offsets) 
+        obj_coeff = self.obj.get_matrix(x_length, var_offsets) 
         
         # Get Boolean sparse matrix for the equality constraints.
-        eq_coeff = sp.csc_matrix((0,self.x_length), dtype=bool)
+        eq_coeff = sp.csc_matrix((0, x_length), dtype=bool)
         for c in self.eq_constrs:
-            eq_coeff = sp.vstack([eq_coeff, c.get_matrix(self.x_length, self.var_offsets)])
+            eq_coeff = sp.vstack([eq_coeff,
+                    c.get_matrix(x_length, var_offsets)])
 
         # Get Boolean sparse matrix for the inequality constraints.
-        leq_coeff = sp.csc_matrix((0,self.x_length), dtype=bool)
+        leq_coeff = sp.csc_matrix((0, x_length), dtype=bool)
         for c in self.leq_constrs:
-            leq_coeff = sp.vstack([leq_coeff, c.get_matrix(self.x_length, self.var_offsets)])
+            leq_coeff = sp.vstack([leq_coeff,
+                    c.get_matrix(x_length, var_offsets)])
 
         self.leq_nnz = leq_coeff.nnz
         self.eq_nnz = eq_coeff.nnz
@@ -223,7 +247,3 @@ class EcosIntf(EmbeddedSolverIntf):
         return (sp.csc_matrix(obj_coeff),
                 sp.csc_matrix(eq_coeff),
                 sp.csc_matrix(leq_coeff))
-
-
-
-

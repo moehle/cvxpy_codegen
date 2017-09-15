@@ -19,7 +19,7 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 
 from cvxpy_codegen.object_data.atom_data import AtomData
 
-def atomdata_abs(expr, arg_data):
+def atomdata_abs(expr, arg_data, arg_pos):
     return AtomData(expr, arg_data,
                     macro_name = "abs",
                     sparsity = arg_data[0].sparsity,

@@ -25,24 +25,28 @@ from cvxpy.lin_ops.lin_op import LinOp # TODO what is this?
 class ExprData():
 
     def __init__(self, expr, arg_data=[], sparsity=None):
-        if sparsity == None:
-            sparsity = sp.csr_matrix(np.full(expr.shape, True, dtype=bool))
-        self.sparsity = sparsity
         self.args = arg_data
-        shape = expr.shape
-        if len(shape) == 2:
-            self.shape = shape
-        elif len(shape) == 1:
-            self.shape = (shape[0], 1)
-        elif len(shape) == 0:
-            self.shape = (1, 1)
+        self.ndims = len(expr.shape)
+        if self.ndims == 2:
+            self.shape = expr.shape
+        elif self.ndims == 1:
+            self.shape = (expr.shape[0], 1)
+        elif self.ndims == 0:
+            self.shape = (1,1)
         else:
             raise Exception("Code generation only supports arrays"
                             "with two or fewer dimensions.")
+        if sparsity == None:
+            sparsity = sp.csr_matrix(np.full(self.shape, True, dtype=bool))
+        self.sparsity = sparsity
         self.length = self.shape[0] * self.shape[1]
 
-    def is_vector(self):
-        return (expr.shape[0] == 1) or (expr.shape[1] == 1)
-
     def is_scalar(self):
-        return expr.shape == (1,1)
+        return self.ndims == 0
+
+    def is_vector(self):
+        return self.ndims == 1
+
+    def is_matrix(self):
+        return self.ndims == 2
+

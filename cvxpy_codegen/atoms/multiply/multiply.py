@@ -17,4 +17,11 @@ You should have received a copy of the GNU General Public License
 along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from cvxpy_codegen.atoms.mul_elemwise.mul_elemwise import atomdata_mul_elemwise
+from cvxpy_codegen.object_data.atom_data import AtomData
+
+def atomdata_multiply(expr, arg_data, arg_pos):
+    return AtomData(expr, arg_data,
+                    macro_name = "multiply",
+                    sparsity = arg_data[0].sparsity.multiply(arg_data[1].sparsity),
+                    work_int = arg_data[0].sparsity.shape[1],
+                    work_float = arg_data[0].sparsity.shape[1])
