@@ -22,6 +22,5 @@ from cvxpy_codegen.object_data.atom_data import AtomData
 from cvxpy_codegen.object_data.const_data import ConstData, CONST_ID
 from cvxpy_codegen.object_data.constr_data import ConstrData
 from cvxpy_codegen.object_data.param_data import ParamData, CbParamData
-#from cvxpy_codegen.object_data.linop_data import LinopData #TODO causes circular import
-from cvxpy_codegen.object_data.linop_coeff_data import LinOpCoeffData
+from cvxpy_codegen.object_data.coeff_data import CoeffData
 from cvxpy_codegen.object_data.var_data import VarData

@@ -20,7 +20,6 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 from cvxpy_codegen.object_data.expr_data import ExprData
 from cvxpy_codegen.utils.utils import Counter
 import scipy.sparse as sp
-from cvxpy.lin_ops.lin_op import LinOp
 
 CONST_COUNT = Counter()
 CONST_ID = "CONST_ID"
@@ -28,11 +27,10 @@ CONST_ID = "CONST_ID"
 
 class ConstData(ExprData):
     def __init__(self, expr):
-        value = expr.data if isinstance(expr, LinOp) else expr.value
         ExprData.__init__(self, expr)
         self.type = 'const'
         self.name = 'const%d' % CONST_COUNT.get_count()
-        self.value = sp.csr_matrix(value)
+        self.value = sp.csr_matrix(expr.value)
         if self.ndims == 1: # By default, scipy stores vectors as rows.
             self.value = sp.csr_matrix(self.value.T)
         sparsity = sp.csr_matrix(self.value, dtype=bool)

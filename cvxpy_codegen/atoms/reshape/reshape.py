@@ -17,42 +17,43 @@ You should have received a copy of the GNU General Public License
 along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from cvxpy_codegen.object_data.atom_data import AtomData
-from cvxpy_codegen.object_data.linop_coeff_data import LinOpCoeffData
+from cvxpy_codegen.object_data.const_expr_data import ConstExprData
+from cvxpy_codegen.object_data.coeff_data import CoeffData
+from cvxpy_codegen.object_data.aff_atom_data import AffAtomData
 import scipy.sparse as sp
 import numpy as np
 
-# TODO remove for cvxpy 1.0:
-from cvxpy.lin_ops.lin_op import LinOp
 
-def atomdata_reshape(expr, arg_data, arg_pos):
+class ReshapeData(AffAtomData):
 
-    if len(expr.shape) == 2:
-        shape = expr.shape
-    elif len(expr.shape) == 1:
-        shape = (expr.shape[0], 1)
-    elif len(expr.shape) == 0:
-        shape = (1,1)
-    else:
-        raise Exception("Cannot reshape to array"
-                        "with more than two dimensions.")
+    def get_atom_data(self, expr, arg_data, arg_pos):
 
-    sparsity = reshape(arg_data[0].sparsity, shape[0], shape[1])
+        if len(expr.shape) == 2:
+            shape = expr.shape
+        elif len(expr.shape) == 1:
+            shape = (expr.shape[0], 1)
+        elif len(expr.shape) == 0:
+            shape = (1,1)
+        else:
+            raise Exception("Cannot reshape to array"
+                            "with more than two dimensions.")
 
-    return AtomData(expr, arg_data,
-                    macro_name = 'reshape',
-                    sparsity = sparsity,
-                    work_int = shape[0],
-                    work_float = shape[0],
-                    data = shape)
+        sparsity = reshape(arg_data[0].sparsity, shape[0], shape[1])
+
+        return ConstExprData(expr, arg_data,
+                             macro_name = 'reshape',
+                             sparsity = sparsity,
+                             work_int = shape[0],
+                             work_float = shape[0],
+                             data = shape)
 
 
 
-def coeffdata_reshape(linop, args, var):
-    return LinOpCoeffData(linop, args, var,
-                          sparsity = args[0].sparsity,
-                          inplace = True,
-                          macro_name = 'reshape_coeffs')
+    def get_coeff_data(self, args, var):
+        return CoeffData(self, args, var,
+                         sparsity = args[0].sparsity,
+                         inplace = True,
+                         macro_name = 'reshape_coeffs')
 
 
 

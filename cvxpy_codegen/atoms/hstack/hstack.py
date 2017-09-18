@@ -17,13 +17,17 @@ You should have received a copy of the GNU General Public License
 along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from cvxpy_codegen.object_data.atom_data import AtomData
+from cvxpy_codegen.object_data.const_expr_data import ConstExprData
+from cvxpy_codegen.object_data.coeff_data import CoeffData
+from cvxpy_codegen.object_data.aff_atom_data import AffAtomData
 import scipy.sparse as sp
 
-def atomdata_hstack(expr, arg_data, arg_pos):
-    work_varargs = len(arg_data) # This is a varargs atom.
-    sparsity = sp.hstack([a.sparsity for a in arg_data])
-    return AtomData(expr, arg_data,
-                    macro_name = "hstack",
-                    sparsity = sparsity,
-                    work_varargs = work_varargs)
+class HStackData(AffAtomData):
+
+    def get_atom_data(self, expr, arg_data, arg_pos):
+        work_varargs = len(arg_data) # This is a varargs atom.
+        sparsity = sp.hstack([a.sparsity for a in arg_data])
+        return ConstExprData(expr, arg_data,
+                             macro_name = "hstack",
+                             sparsity = sparsity,
+                             work_varargs = work_varargs)

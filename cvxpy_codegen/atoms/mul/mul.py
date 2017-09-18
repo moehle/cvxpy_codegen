@@ -17,24 +17,36 @@ You should have received a copy of the GNU General Public License
 along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from cvxpy_codegen.object_data.atom_data import AtomData
+from cvxpy_codegen.object_data.const_expr_data import ConstExprData
+from cvxpy_codegen.object_data.coeff_data import CoeffData
+from cvxpy_codegen.object_data.bilin_atom_data import BilinAtomData
+import scipy.sparse as sp
 
-def atomdata_mul(expr, arg_data, arg_pos):
-    if arg_data[0].shape == (1,1):
-        return AtomData(expr, arg_data,
-                        inplace = True,
-                        copy_arg = 1,
-                        macro_name = "scalar_mul",
-                        sparsity = arg_data[1].sparsity)
-    if arg_data[1].shape == (1,1):
-        return AtomData(expr, arg_data,
-                        inplace = True,
-                        copy_arg = 0,
-                        macro_name = "scalar_rmul",
-                        sparsity = arg_data[0].sparsity)
-    else:
-        return AtomData(expr, arg_data,
-                        macro_name = "mul",
-                        sparsity = arg_data[0].sparsity * arg_data[1].sparsity,
-                        work_int = arg_data[0].sparsity.shape[1],
-                        work_float = arg_data[0].sparsity.shape[1])
+
+class MulData(BilinAtomData):
+
+    def get_atom_data(self, expr, arg_data):
+        return ConstExprData(expr, arg_data,
+                             macro_name = "mul",
+                             sparsity = arg_data[0].sparsity * arg_data[1].sparsity,
+                             work_int = arg_data[0].sparsity.shape[1],
+                             work_float = arg_data[0].sparsity.shape[1])
+
+
+
+    def get_coeff_data(self, args, var):
+        n  = self.sparsity.shape[1]
+
+        if args[1].var_ids:
+            lhs = sp.kron(sp.eye(n), args[0].sparsity)
+            sparsity = lhs * args[1].sparsity
+        else:
+            raise Exception("Right multiplication not supported.")
+
+        work_int    = args[1].sparsity.shape[1]
+        work_float  = args[1].sparsity.shape[1]
+        return CoeffData(self, args, var,
+                         sparsity = sparsity,
+                         work_int = work_int,
+                         work_float = work_float,
+                         macro_name = 'mul_coeffs')

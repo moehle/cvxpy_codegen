@@ -7,7 +7,7 @@ TASKS
   [x] transpose
   [x] reshape
   [x] vstack
-  [ ] mul
+  [x] mul
   [ ] hstack
   [ ] rmul
   [ ] promote
@@ -19,7 +19,6 @@ TASKS
   [ ] upper_tri
   [ ] conv
   [ ] kron
--add arg_pos to atom coeff functions
 -rm references to u.nzval, etc.
   -convert things to LinopCoeff
   -convert things to CsrMatrix

@@ -19,10 +19,9 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
 import scipy.sparse as sp
-from cvxpy.lin_ops.lin_op import LinOp # TODO what is this?
 
 
-class ExprData():
+class ExprData(object):
 
     def __init__(self, expr, arg_data=[], sparsity=None):
         self.args = arg_data

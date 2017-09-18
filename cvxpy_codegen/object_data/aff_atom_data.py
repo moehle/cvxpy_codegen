@@ -17,47 +17,37 @@ You should have received a copy of the GNU General Public License
 along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from cvxpy_codegen.atoms import get_atom_data, get_coeff_data
 from cvxpy_codegen.object_data.expr_data import ExprData
 from cvxpy_codegen.object_data.const_data import CONST_ID
-from cvxpy_codegen.utils.utils import spzeros # TODO rm
 import scipy.sparse as sp
-from cvxpy_codegen.object_data.linop_coeff_data import LinOpCoeffData
-from cvxpy_codegen.utils.utils import Counter
-
-LINOP_COUNT = Counter()
+from cvxpy_codegen.object_data.coeff_data import CoeffData
+from cvxpy_codegen.object_data.atom_data import AtomData
 
 
 
 
-class LinOpData(ExprData):
+class AffAtomData(AtomData, object):
     def __init__(self, expr, arg_data):
-        ExprData.__init__(self, expr, arg_data)
-        self.type = 'linop'
-        self.opname = type(expr)
-        self.name = 'linop%d' % LINOP_COUNT.get_count()
-        self.data = expr.get_data()
-        self.args = arg_data
-        self.coeffs = dict()
-        self.var_ids = set().union(*[a.var_ids for a in arg_data])
-        if any([a.has_offset for a in arg_data]):
-            self.has_offset = True 
-        else:
-            self.has_offset = False
+        super(AffAtomData, self).__init__(expr, arg_data)
 
-        # Get the coefficient for each variable.
+
+    # Get the coefficient for each variable.
+    def get_coeffs(self):
         for vid in self.var_ids:
             coeff_args = []
             for arg in self.args:
                 if vid in arg.var_ids:
-                    if isinstance(arg, LinOpData):
+                    if isinstance(arg, AtomData):
                         coeff_args += [arg.coeffs[vid]]
                     else:
                         coeff_args += [arg]
-            coeff = get_coeff_data(self, coeff_args, vid) 
+            coeff = self.get_coeff_data(coeff_args, vid)
             self.coeffs.update({vid : coeff})
+        return self.coeffs
 
-        # Get the expression for the offset vector.
+
+    # Get the expression for the offset vector.
+    def get_offset_expr(self):
         arg_count = 0
         arg_pos = [] # Store the argument positions.
         if self.has_offset:
@@ -65,17 +55,17 @@ class LinOpData(ExprData):
             for arg in self.args:
                 if arg.has_offset:
                     arg_pos += [arg_count]
-                    if isinstance(arg, LinOpData):
+                    if isinstance(arg, AtomData):
                         offset_args += [arg.offset_expr]
                     else:
                         offset_args += [arg]
                 arg_count += 1
-            self.offset_expr = get_atom_data(expr, offset_args, arg_pos)
+            self.offset_expr = self.get_atom_data(self.expr, offset_args, arg_pos)
+        return self.offset_expr
 
 
     def get_data(self):
         return self.data
-
 
 
     def force_copy(self):
@@ -92,21 +82,6 @@ class LinOpData(ExprData):
                 coeff_width = coeff.sparsity.shape[1]
                 pad_left = start
                 pad_right = x_length - coeff_width - pad_left
-                #print sp.csc_matrix((coeff_height, pad_left), dtype=bool).shape
-                #print coeff.sparsity.shape
-                #print sp.csc_matrix((coeff_height, pad_right), dtype=bool).shape
-
-                #print coeff.shape
-                #print coeff.sparsity.shape
-                #print coeff.args[0].macro_name
-                #print coeff.args[0].shape
-                #print coeff.args[0].sparsity.shape
-                #print coeff.args[0].args[0].macro_name
-                #print coeff.args[0].args[0].shape
-                #print coeff.args[0].args[0].sparsity.shape
-                #print coeff.args[0].args[0].args[0].macro_name
-                #print coeff.args[0].args[0].args[0].shape
-                #print coeff.args[0].args[0].args[0].sparsity.shape
                 mat += sp.hstack([sp.csc_matrix((coeff_height, pad_left), dtype=bool),
                                   coeff.sparsity,
                                   sp.csc_matrix((coeff_height, pad_right), dtype=bool)])

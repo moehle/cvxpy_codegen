@@ -20,8 +20,8 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 from cvxpy_codegen.object_data.expr_data import ExprData
 
 
-class LinOpCoeffData(ExprData):
-    def __init__(self, linop_data, arg_data, vid,
+class CoeffData(ExprData):
+    def __init__(self, atom_data, arg_data, vid,
                  sparsity=None,
                  inplace=False,
                  macro_name=None,
@@ -30,17 +30,17 @@ class LinOpCoeffData(ExprData):
                  work_coeffs=0,
                  data=None,
                  copy_arg=0):
-        ExprData.__init__(self, linop_data, arg_data, sparsity=sparsity)
+        ExprData.__init__(self, atom_data, arg_data, sparsity=sparsity)
         self.inplace = inplace
         self.macro_name = macro_name
         self.work_int = work_int
         self.work_float = work_float
         self.work_coeffs = work_coeffs
         self.data = data
-        self.name = linop_data.name + '_var' + str(vid)
+        self.name = atom_data.name + '_var' + str(vid)
         self.type = 'coeff'
         self.vid = vid
-        self.shape = linop_data.shape
+        self.shape = atom_data.shape
         self.copy_arg = copy_arg
         has_const_or_param = any([a.type =='const' or
                                   a.type =='param' or

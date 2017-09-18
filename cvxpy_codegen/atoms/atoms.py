@@ -17,40 +17,10 @@ You should have received a copy of the GNU General Public License
 along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from cvxpy_codegen.atoms.abs import atomdata_abs
-from cvxpy_codegen.atoms.add import atomdata_add, coeffdata_add
-from cvxpy_codegen.atoms.diag_vec import atomdata_diag_vec
-from cvxpy_codegen.atoms.diag_mat import atomdata_diag_mat
-from cvxpy_codegen.atoms.hstack import atomdata_hstack
-from cvxpy_codegen.atoms.index import atomdata_index, coeffdata_index
-from cvxpy_codegen.atoms.max import atomdata_max
-from cvxpy_codegen.atoms.mul import atomdata_mul
-from cvxpy_codegen.atoms.multiply import atomdata_multiply
-from cvxpy_codegen.atoms.neg import atomdata_neg, coeffdata_neg
-from cvxpy_codegen.atoms.pos import atomdata_pos
-from cvxpy_codegen.atoms.reshape import atomdata_reshape, coeffdata_reshape
-from cvxpy_codegen.atoms.sum import atomdata_sum, coeffdata_sum
-from cvxpy_codegen.atoms.trace import atomdata_trace
-from cvxpy_codegen.atoms.transpose import atomdata_transpose, coeffdata_transpose
-from cvxpy_codegen.atoms.vstack import atomdata_vstack, coeffdata_vstack
 
+from cvxpy_codegen.object_data.atom_data import AtomData
+from cvxpy_codegen.object_data.aff_atom_data import AffAtomData
 
-# Each atom module must have a "atomdata_XXX" function.
-# Modules for affine atoms must also have a "atomdata_XXX_coeffs" function.
-import cvxpy_codegen.atoms.abs
-import cvxpy_codegen.atoms.add
-import cvxpy_codegen.atoms.diag_vec
-import cvxpy_codegen.atoms.diag_mat
-import cvxpy_codegen.atoms.hstack
-import cvxpy_codegen.atoms.index
-#import cvxpy_codegen.atoms.max
-import cvxpy_codegen.atoms.mul
-import cvxpy_codegen.atoms.multiply
-import cvxpy_codegen.atoms.neg
-import cvxpy_codegen.atoms.pos
-import cvxpy_codegen.atoms.reshape
-import cvxpy_codegen.atoms.trace
-import cvxpy_codegen.atoms.vstack
 
 from cvxpy.atoms.affine.binary_operators import MulExpression
 from cvxpy.atoms.affine.unary_operators import NegExpression
@@ -67,42 +37,45 @@ from cvxpy.atoms.affine.transpose import transpose
 from cvxpy.atoms import *
 
 
-GET_ATOM_DATA = {MulExpression : atomdata_mul,
-                 AddExpression : atomdata_add,
-                 pos           : atomdata_pos,
-                 Vstack        : atomdata_vstack,
-                 Hstack        : atomdata_hstack,
-                 multiply  : atomdata_multiply,
-                 index         : atomdata_index,
-                 diag_vec      : atomdata_diag_vec,
-                 diag_mat      : atomdata_diag_mat,
-                 NegExpression : atomdata_neg,
-                 reshape       : atomdata_reshape,
-                 abs           : atomdata_abs,
-                 trace         : atomdata_trace,
-                 transpose     : atomdata_transpose,
-                 Sum           : atomdata_sum,
-                 max           : atomdata_max }
+from cvxpy_codegen.atoms.abs.abs import AbsData
+from cvxpy_codegen.atoms.add.add import AddData
+from cvxpy_codegen.atoms.diag_vec.diag_vec import DiagVecData
+from cvxpy_codegen.atoms.hstack.hstack import HStackData
+from cvxpy_codegen.atoms.index.index import IndexData
+from cvxpy_codegen.atoms.kron.kron import KronData
+from cvxpy_codegen.atoms.multiply.multiply import MultiplyData
+from cvxpy_codegen.atoms.mul.mul import MulData
+from cvxpy_codegen.atoms.max.max import MaxData
+from cvxpy_codegen.atoms.neg.neg import NegData
+from cvxpy_codegen.atoms.pos.pos import PosData
+from cvxpy_codegen.atoms.reshape.reshape import ReshapeData
+from cvxpy_codegen.atoms.sum.sum import SumData
+from cvxpy_codegen.atoms.trace.trace import TraceData
+from cvxpy_codegen.atoms.transpose.transpose import TransposeData
+from cvxpy_codegen.atoms.vstack.vstack import VStackData
 
 
-GET_COEFF_DATA = {AddExpression : coeffdata_add,
-                  index         : coeffdata_index,
-                  NegExpression : coeffdata_neg,
-                  reshape       : coeffdata_reshape,
-                  Sum           : coeffdata_sum,
-                  transpose     : coeffdata_transpose,
-                  Vstack        : coeffdata_vstack}
+
+GET_EXPR_DATA = {AddExpression : AddData,
+                 MulExpression : MulData,
+                 pos           : PosData,
+                 Vstack        : VStackData,
+                 Hstack        : HStackData,
+                 multiply      : MultiplyData,
+                 index         : IndexData,
+                 diag_vec      : DiagVecData,
+                 #diag_mat      : OldLinOpData,
+                 NegExpression : NegData,
+                 reshape       : ReshapeData,
+                 abs           : AbsData,
+                 trace         : TraceData,
+                 transpose     : TransposeData,
+                 Sum           : SumData,
+                 max           : MaxData }
 
 
-def get_atom_data(expr, arg_data, arg_pos):
-    if not type(expr) in GET_ATOM_DATA.keys():
-        raise TypeError("Constant expressions involving "
+def get_expr_data(expr, arg_data):
+    if not type(expr) in GET_EXPR_DATA.keys():
+        raise TypeError("Expressions involving "
                         "the %s atom not supported." % str(type(expr)))
-    return GET_ATOM_DATA[type(expr)](expr, arg_data, arg_pos)
-
-
-def get_coeff_data(linop_data, arg_data, vid):
-    if not linop_data.opname in GET_COEFF_DATA.keys():
-        raise TypeError("Evaluating linear coefficients for "
-                        "atom %s not supported." % str(linop_data.opname))
-    return GET_COEFF_DATA[linop_data.opname](linop_data, arg_data, vid)
+    return GET_EXPR_DATA[type(expr)](expr, arg_data)

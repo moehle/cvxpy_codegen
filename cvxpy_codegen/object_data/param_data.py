@@ -36,6 +36,7 @@ class ParamData(ExprData):
         self.cname = self.name
         self.has_offset = True
         self.coeffs = {}
+        self.offset_expr = self
         
     @property
     def storage(self):
@@ -64,7 +65,7 @@ class CbParamData(ExprData):
 
     @property
     def storage(self):
-        return self.args[0].storage
+        return self.args[0].offset_expr.storage
 
     def get_matrix(self, x_length, var_offsets):
         coeff_height = self.shape[0] * self.shape[1]

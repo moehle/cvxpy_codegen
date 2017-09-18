@@ -17,10 +17,14 @@ You should have received a copy of the GNU General Public License
 along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+from cvxpy_codegen.object_data.const_expr_data import ConstExprData
 from cvxpy_codegen.object_data.atom_data import AtomData
 
-def atomdata_abs(expr, arg_data, arg_pos):
-    return AtomData(expr, arg_data,
-                    macro_name = "abs",
-                    sparsity = arg_data[0].sparsity,
-                    inplace = True)
+
+class AbsData(AtomData):
+
+    def get_atom_data(self, expr, arg_data, arg_pos):
+        return ConstExprData(expr, arg_data,
+                             macro_name = "abs",
+                             sparsity = arg_data[0].sparsity,
+                             inplace = True)

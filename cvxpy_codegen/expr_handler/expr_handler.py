@@ -17,15 +17,14 @@ You should have received a copy of the GNU General Public License
 along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from cvxpy_codegen.object_data import ParamData, ConstData, CbParamData, CONST_ID, LinOpCoeffData, VarData
-from cvxpy_codegen.object_data.linop_data import LinOpData
+from cvxpy_codegen.object_data import ParamData, ConstData, CbParamData, CONST_ID, CoeffData, VarData
+from cvxpy_codegen.object_data.atom_data import AtomData
 from cvxpy_codegen.object_data.constr_data import ConstrData
 import scipy.sparse as sp
 from cvxpy_codegen.utils.utils import render
-from cvxpy_codegen.atoms import get_atom_data
+from cvxpy_codegen.atoms.atoms import get_expr_data
 
 from cvxpy.lin_ops.lin_op import SCALAR_CONST, DENSE_CONST, SPARSE_CONST, PARAM, VARIABLE
-from cvxpy.lin_ops.lin_op import LinOp
 from cvxpy.expressions.constants.callback_param import CallbackParam
 from cvxpy.expressions.constants.parameter import Parameter
 from cvxpy.expressions.constants.constant import Constant
@@ -131,68 +130,34 @@ class ExprHandler():
     # Recursively process a linear operator,
     # collecting data according to the operator type.
     def process_expression(self, expr):
-        if isinstance(expr, LinOp):
-            expr_type = expr.type 
-            expr_data = expr.data
-            is_linop = True
-        else:
-            expr_type = None
-            expr_data = None
-            is_linop = False
+        expr_type = None
+        expr_data = None
+        is_linop = False
 
-
-        if isinstance(expr, CallbackParam) or \
-                  (expr_type == PARAM and isinstance(expr_data, CallbackParam)):
-            if is_linop:
-                expr = expr_data
+        if isinstance(expr, CallbackParam):
             data_arg = self.process_expression(expr.atom)
             data = CbParamData(expr, [data_arg])
             if expr.id not in self.cbparam_ids: # Check if already there.
                 self.callback_params += [data]
                 self.cbparam_ids += [expr.id]
 
-        elif isinstance(expr, Parameter) or \
-                  (expr_type == PARAM and isinstance(expr_data, Parameter)):
-            if is_linop:
-                expr = expr_data
+        elif isinstance(expr, Parameter):
             data = ParamData(expr)
             if expr.id not in self.param_ids: # Check if already there.
                 self.named_params += [data]
                 self.param_ids += [expr.id]
 
-        elif isinstance(expr, Constant) or \
-                  expr_type in [SCALAR_CONST, DENSE_CONST, SPARSE_CONST]:
+        elif isinstance(expr, Constant):
             data = ConstData(expr)
             self.constants += [data]
 
-        elif isinstance(expr, Variable) or \
-                  expr_type == VARIABLE:
+        elif isinstance(expr, Variable):
             data = VarData(expr)
             if expr.id not in self.var_ids: # Check if already there.
                 self.vars += [data]
                 self.var_ids += [expr.id]
 
-        elif isinstance(expr, Atom) and not expr.variables():
-            if not expr.parameters():
-                data = ConstData(Constant(expr.value))
-                self.constants += [data]
-            else: # Recurse on arguments:
-                if id(expr) in self.expr_ids: # Check if already there.
-                    idx = self.expr_ids.index(id(expr))
-                    self.expressions[idx].force_copy()
-                    data = self.expressions[idx]
-                else:
-                    arg_data = []
-                    for arg in expr.args:
-                        arg_data += [self.process_expression(arg)]
-                    arg_pos = range(len(arg_data)) # args are in order.
-                    data = get_atom_data(expr, arg_data, arg_pos)
-                    self.expressions += [data]
-                    self.expr_ids += [id(expr)]
-                    if data.macro_name not in self.unique_atoms:
-                        self.unique_atoms += [data.macro_name]
-
-        elif isinstance(expr, Atom) and expr.variables():
+        elif isinstance(expr, Atom):
             if id(expr) in self.linop_ids: # Check if already there.
                 idx = self.linop_ids.index(id(expr))
                 self.linops[idx].force_copy()
@@ -201,12 +166,13 @@ class ExprHandler():
                 arg_data = []
                 for arg in expr.args: # Recurse on args.
                     arg_data += [self.process_expression(arg)]
-                data = LinOpData(expr, arg_data)
-                self.linop_coeffs += data.coeffs.values() # Coefficients of variables.
+                data = get_expr_data(expr, arg_data)
+                self.linop_coeffs += data.get_coeffs().values()
                 if data.has_offset:
-                    self.expressions += [data.offset_expr] # Expressions of constants.
-                    if data.offset_expr.macro_name not in self.unique_atoms:
-                        self.unique_atoms += [data.offset_expr.macro_name]
+                    offset_expr = data.get_offset_expr()
+                    self.expressions += [offset_expr]
+                    if offset_expr.macro_name not in self.unique_atoms:
+                        self.unique_atoms += [offset_expr.macro_name]
 
                 self.linops += [data]
                 for coeff in data.coeffs.values():

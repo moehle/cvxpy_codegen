@@ -187,7 +187,8 @@ void expr_handler_init(Work *work){
 
     init_dense_sparsity(work->{{ p.name }});
     {% endfor %}
-
+    
+    {#
     {% for cbp in callback_params %}
     work->{{ cbp.cbp_name }}.p = work->{{ cbp.cbp_name }}_colptr;
     work->{{ cbp.cbp_name }}.i = work->{{ cbp.cbp_name }}_rowidx;
@@ -197,6 +198,7 @@ void expr_handler_init(Work *work){
     work->{{ cbp.cbp_name }}.nnz = {{ cbp.sparsity.nnz }};
 
     {% endfor %}
+    #}
 
 }
 
