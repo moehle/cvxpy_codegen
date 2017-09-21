@@ -33,7 +33,7 @@ from cvxpy.problems.solvers.ecos_intf import ECOS
 import cvxpy
 from cvxpy.problems.problem_data.sym_data import SymData
 from cvxpy_codegen import codegen
-from cvxpy.constraints import NonPos, SOC
+from cvxpy.constraints import NonPos, SOC, Zero
 
 ECOS = ECOS()
 
@@ -97,14 +97,18 @@ class TestEcosIntf(tu.CodegenTestCase):
         self._test_constrs([NonPos(self.var_n1 + self.const_n1)])
 
 
+    def test_nonpos(self):
+        self._test_constrs([Zero(-self.var_n1)])
+        self._test_constrs([Zero(self.var_n)])
+        self._test_constrs([Zero(self.var_n1 + self.const_n1)])
+
+
     def test_soc(self):
         self._test_constrs([SOC(cvx.sum(self.var_n), -self.var_n)])
         self._test_constrs([SOC(cvx.sum(self.var_n), self.const_n+self.var_n)])
         self._test_constrs([SOC(self.var_n, self.var_mn)])
         self._test_constrs([SOC(self.param_n, self.var_mn + self.param_mn)])
         self._test_constrs([SOC(self.var-self.const, -self.var_n)])
-
-        #self._test_constrs([SOC(-self.var_n[3], -self.var_n)]) # dies
 
 
 

@@ -218,6 +218,8 @@ void eval_exprs(Params *params, Work *work){
       {%- endif -%});
   work->{{ p.name }}.x = work->{{ p.name }}_nzval;
 
+  {#{{ u.print_csrmat_eval(p) }}#}
+
   {% endfor %}
   /* Evaluate expressions. */
   {% for expr in expressions %}

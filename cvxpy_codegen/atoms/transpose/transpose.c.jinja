@@ -47,9 +47,7 @@ void transpose(long m, long n,
             Atp[i]++;
         }
     }
-    for (j=m; j>0; j--){
-        Atp[j] = Atp[j-1];
-    }
+    for (j=m; j>0; j--) Atp[j] = Atp[j-1];
     Atp[0] = 0;
 }
 {% endmacro %}

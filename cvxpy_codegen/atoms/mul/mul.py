@@ -25,13 +25,12 @@ import scipy.sparse as sp
 
 class MulData(BilinAtomData):
 
-    def get_atom_data(self, expr, arg_data):
+    def get_atom_data(self, expr, arg_data, arg_pos):
         return ConstExprData(expr, arg_data,
                              macro_name = "mul",
                              sparsity = arg_data[0].sparsity * arg_data[1].sparsity,
                              work_int = arg_data[0].sparsity.shape[1],
                              work_float = arg_data[0].sparsity.shape[1])
-
 
 
     def get_coeff_data(self, args, var):
@@ -43,10 +42,6 @@ class MulData(BilinAtomData):
         else:
             raise Exception("Right multiplication not supported.")
 
-        work_int    = args[1].sparsity.shape[1]
-        work_float  = args[1].sparsity.shape[1]
         return CoeffData(self, args, var,
                          sparsity = sparsity,
-                         work_int = work_int,
-                         work_float = work_float,
                          macro_name = 'mul_coeffs')

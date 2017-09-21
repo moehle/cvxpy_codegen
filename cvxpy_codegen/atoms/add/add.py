@@ -26,7 +26,9 @@ class AddData(AffAtomData):
 
     def get_atom_data(self, expr, arg_data, arg_pos):
     
-        if len(arg_data) == 1:
+        if len(arg_data) == 1 and arg_data[0].shape != (1,1):
+        #if False:
+        #if len(arg_data) == 1:
             return ConstExprData(expr, arg_data,
                                  inplace = True,
                                  sparsity = arg_data[0].sparsity,
@@ -51,7 +53,7 @@ class AddData(AffAtomData):
 
 
     def get_coeff_data(self, args, var):
-        if len(args) == 1:
+        if len(args) == 1 and args[0].shape == self.shape:
             return CoeffData(self, args, var,
                                   inplace = True,
                                   sparsity = args[0].sparsity,

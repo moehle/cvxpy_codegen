@@ -33,7 +33,7 @@ class ConstData(ExprData):
         self.value = sp.csr_matrix(expr.value)
         if self.ndims == 1: # By default, scipy stores vectors as rows.
             self.value = sp.csr_matrix(self.value.T)
-        sparsity = sp.csr_matrix(self.value, dtype=bool)
+        self.sparsity = sp.csr_matrix(self.value, dtype=bool)
         self.rowptr = self.value.indptr
         self.colidx = self.value.indices
         self.nzval = self.value.data
@@ -43,6 +43,7 @@ class ConstData(ExprData):
         self.mem_name = self.name
         self.cname = self.storage.name
         self.coeffs = {}
+
 
     @property
     def storage(self):

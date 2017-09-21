@@ -40,6 +40,7 @@ class CoeffData(ExprData):
         self.name = atom_data.name + '_var' + str(vid)
         self.type = 'coeff'
         self.vid = vid
+        self.var_ids = [vid]
         self.shape = atom_data.shape
         self.copy_arg = copy_arg
         has_const_or_param = any([a.type =='const' or

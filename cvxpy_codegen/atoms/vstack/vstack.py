@@ -88,7 +88,8 @@ class VStackData(AffAtomData):
                 #print(m)
                 #print(sparsity[m_var*j+o:m_var*j+o+m,:].shape)
                 #print(a.sparsity[j*m : (j+1)*m, :].shape)
-                sparsity[m_var*j+o:m_var*j+o+m,:] = a.sparsity[j*m : (j+1)*m, :]
+                a_sparsity = sp.lil_matrix(a.sparsity)[j*m : (j+1)*m, :]
+                sparsity[m_var*j+o:m_var*j+o+m,:] = a_sparsity
             #sparsity = sp.vstack([sparsity] + mats)
 
         work_coeffs = len(args) # This is a varargs self.

@@ -27,7 +27,7 @@ void sum_coeffs(LinopCoeff *A, LinopCoeff *Z, long *w, double *x);
 
 {% macro sum_coeffs_define() %}
 void sum_coeffs(LinopCoeff *A, LinopCoeff *Z, long *w, double *x){
-  long i, j, k, p, p2, q=0, m=A->m, n=A->n;
+  long i, j, p, p2, q=0, m=A->m, n=A->n;
 
   Z->p[0] = 0;
   Z->p[1] = 0;

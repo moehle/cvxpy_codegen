@@ -21,6 +21,7 @@
 #include "codegen.h"
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include "numpy/arrayobject.h"
+#include <stdio.h>
 
 
 static PyObject *solve_wrapper(PyObject *self, PyObject *args){
@@ -79,7 +80,7 @@ static PyObject *solve_wrapper(PyObject *self, PyObject *args){
   {% for v in named_vars %}
   nd = 2;
   {% for i, sz in enumerate(v.shape) %}
-  size[{{i}}] = {{sz}};
+  shape[{{i}}] = {{sz}};
   {% endfor %}
   {{ v.name }} = (PyArrayObject*) PyArray_SimpleNew(nd, shape, NPY_DOUBLE);
   // memcpy({{ v.name }}->data, vars.{{ v.name }}[0], {{ v.shape[0]*v.shape[1] }}*sizeof(double));
@@ -114,7 +115,8 @@ static PyObject *solve_wrapper(PyObject *self, PyObject *args){
 
 
 static PyMethodDef CvxpyCodegenSolverMethods[] = {
-  { "solve", solve_wrapper, METH_VARARGS, "Solves the specified optimization problem." },
+  { "solve", solve_wrapper, METH_VARARGS,
+    "Solves the specified optimization problem." },
   { NULL, NULL, 0, NULL }
 };
 

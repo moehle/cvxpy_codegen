@@ -18,11 +18,13 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from cvxpy_codegen.object_data.const_expr_data import ConstExprData
-#from cvxpy_codegen.object_data.aff_atom_data import BiLinAtomData
-from cvxpy_codegen.object_data.atom_data import AtomData
+from cvxpy_codegen.object_data.coeff_data import CoeffData
+from cvxpy_codegen.object_data.bilin_atom_data import BilinAtomData
+import scipy.sparse as sp
+import numpy as np
 
 
-class MultiplyData(AtomData):
+class MultiplyData(BilinAtomData):
 
     def get_atom_data(self, expr, arg_data, arg_pos):
         return ConstExprData(expr, arg_data,
@@ -30,3 +32,23 @@ class MultiplyData(AtomData):
                              sparsity = arg_data[0].sparsity.multiply(arg_data[1].sparsity),
                              work_int = arg_data[0].sparsity.shape[1],
                              work_float = arg_data[0].sparsity.shape[1])
+
+
+    def get_coeff_data(self, args, var):
+        if args[0].var_ids:
+            coeff_arg = 1
+            var_arg = 0
+        elif args[1].var_ids:
+            coeff_arg = 0
+            var_arg = 1
+        lhs = np.diag(args[coeff_arg].sparsity.toarray().flatten())
+        sparsity = sp.csr_matrix(lhs * args[var_arg].sparsity, dtype='bool')
+
+        work_int    = args[1].sparsity.shape[1]
+        work_float  = args[1].sparsity.shape[1]
+        return CoeffData(self, args, var,
+                         sparsity = sparsity,
+                         work_int = work_int,
+                         work_float = work_float,
+                         data = {'coeff_arg' : coeff_arg, 'var_arg' : var_arg},
+                         macro_name = 'multiply_coeffs')

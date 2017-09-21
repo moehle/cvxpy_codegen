@@ -41,30 +41,31 @@ class BilinAtomData(AtomData, object):
             self.var_arg = None
             self.has_offset = True
              
-        if self.args[self.var_arg].has_offset:
-            self.has_offset = True
+        if self.var_arg:
+            if self.args[self.var_arg].has_offset:
+                self.has_offset = True
 
 
     # Get the coefficient for each variable.
     def get_coeffs(self):
-        coeff_args = [None, None]
-        for vid in self.args[self.var_arg].var_ids:
-            coeff_args[self.const_arg] = self.args[self.const_arg]
-            if isinstance(self.args[self.var_arg], AtomData):
-                coeff_args[self.var_arg] = self.args[self.var_arg].coeffs[vid]
-            else:
-                coeff_args[self.var_arg] = self.args[self.var_arg]
-            coeff = self.get_coeff_data(coeff_args, vid) 
-            self.coeffs.update({vid : coeff})
+        if not self.var_arg is None:
+            coeff_args = [None, None]
+            for vid in self.args[self.var_arg].var_ids:
+                coeff_args[self.const_arg] = self.args[self.const_arg]
+                if isinstance(self.args[self.var_arg], AtomData):
+                    coeff_args[self.var_arg] = self.args[self.var_arg].coeffs[vid]
+                else:
+                    coeff_args[self.var_arg] = self.args[self.var_arg]
+                coeff = self.get_coeff_data(coeff_args, vid) 
+                self.coeffs.update({vid : coeff})
         return self.coeffs
 
 
     # Get the expression for the offset vector.
     def get_offset_expr(self):
-        if not self.var_ids:
+        if not self.var_arg:
             super(BilinAtomData, self).get_offset_expr()
-
-        if self.has_offset:
+        elif self.has_offset:
             offset_args = [None, None]
             offset_args[self.const_arg] = self.args[self.const_arg]
             offset_args[self.var_arg] = self.args[self.var_arg].offset_expr

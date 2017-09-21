@@ -73,9 +73,24 @@ class IndexData(AffAtomData):
 
 
     def get_coeff_data(self, args, var):
+
+        # Define behavior for each case.
+        slices = self.get_data()[0]
+        if args[0].is_scalar():
+            raise Exception("Indexing scalars not allowed.")
+
+        if args[0].is_vector():
+            if not len(slices) == 1:
+                raise Exception("Vectors cannot be multiply indexed.")
+            slices = (slices[0], slice(0, 1, 1))
+
+        if args[0].is_matrix():
+            if len(slices) == 1:
+                slices = (slices[0], slice(0, None, 1))
+
         sz0, sz1 = args[0].shape
-        slice0 = self.data[0][0] # TODO is this right? why is data a tuple with tuple and float?
-        slice1 = self.data[0][1]
+        slice0 = slices[0]
+        slice1 = slices[1]
         
         # Get index slice data.
         step0 = 1 if slice0.step==None else slice0.step

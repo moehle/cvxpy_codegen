@@ -18,8 +18,8 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from cvxpy_codegen.object_data.const_expr_data import ConstExprData
-import scipy.sparse as sp
 from cvxpy_codegen.object_data.aff_atom_data import AffAtomData
+import scipy.sparse as sp
 
 
 # Note: From CVXPY, we can only get column vectors.

@@ -1,0 +1,68 @@
+/*
+ *  Copyright 2017 Nicholas Moehle
+ *  
+ *  This file is part of CVXPY-CODEGEN.
+ *  
+ *  CVXPY-CODEGEN is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *  
+ *  CVXPY-CODEGEN is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License
+ *  along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+{% import "utils/utils.c.jinja" as u with context %}
+
+
+{% macro multiply_coeffs_declare() %}
+void multiply_coeffs(CsrMatrix *A, LinopCoeff *B, LinopCoeff *Z);
+{% endmacro %}
+
+
+{% macro multiply_coeffs_define() %}
+void multiply_coeffs(CsrMatrix *A, LinopCoeff *B, LinopCoeff *Z){
+
+  long i, j, iB, p, p2, q, q2, m=Z->m, m_var=Z->m_var;
+  double x;
+
+  for (i=0; i<=m; i++) Z->p[i] = 0;
+  for(i=0; i<m_var; i++){
+    p2 = A->p[i+1];
+    for(p=A->p[i]; p<p2; p++){
+      j = A->j[p];
+      iB = j*m_var + i;
+      Z->p[iB+1] +=  B->p[iB+1] - B->p[iB];
+    }
+  }
+  for (i=0; i<m; i++) Z->p[i+1] += Z->p[i];
+  for(i=0; i<m_var; i++){
+    p2 = A->p[i+1];
+    for(p=A->p[i]; p<p2; p++){
+      j = A->j[p];
+      x = A->x[p];
+      iB = j*m_var + i;
+      q2 = B->p[iB+1];
+      for(q=B->p[iB]; q<B->p[iB+1]; q++){
+        Z->x[Z->p[iB]] = B->x[q] * x;
+        Z->j[Z->p[iB]] = B->j[q];
+        Z->p[iB]++;
+      }
+    }
+  }
+  for (i=m; i>0; i--) Z->p[i] = Z->p[i-1];
+  Z->p[0] = 0;
+}
+{% endmacro %}
+
+
+{% macro multiply_coeffs_eval(expr) %}
+multiply_coeffs(&work->{{ expr.args[expr.data['coeff_arg']].storage.name }},
+                &work->{{ expr.args[expr.data['var_arg']].storage.name }},
+                &work->{{ expr.storage.name }});
+{% endmacro %}

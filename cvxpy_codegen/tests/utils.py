@@ -111,7 +111,7 @@ class CodegenTestCase(unittest.TestCase):
         except subprocess.CalledProcessError as exc:
             output = exc.output
             exit_code = exc.returncode
-            sys.stdout.buffer.write(output)
+            sys.stdout.write(output)
         return exit_code
 
 

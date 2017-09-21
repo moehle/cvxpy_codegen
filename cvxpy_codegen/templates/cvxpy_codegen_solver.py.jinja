@@ -6,9 +6,29 @@ def cg_solve({%- for p in named_params -%}
               {%- endfor %}):
 
     {% for p in named_params %}
-    {{ p.name }} = numpy.ascontiguousarray(numpy.asmatrix({{ p.name }}), dtype=float)
+    {% if p.is_scalar() %}
+    if {{p.name}}.shape != ():
+        raise TypeError("Parameter {{p.name}} should have shape (),"
+                        "but has shape %s" % str({{p.name}}.shape))
+
+    {% elif p.is_vector() %}
+    if {{p.name}}.shape != ({{p.shape[0]}},):
+        raise TypeError("Parameter {{p.name}} should have shape ({{p.shape[0]}}),"
+                        "but has shape %s" % str({{p.name}}.shape))
+
+    {% else %}
     if {{p.name}}.shape != {{p.shape}}:
-        raise TypeError("Parameter {{p.name}} should have shape {{p.shape}}, but has shape %s" % str({{p.name}}.shape))
+        raise TypeError("Parameter {{p.name}} should have shape {{p.shape}},"
+                        "but has shape %s" % str({{p.name}}.shape))
+
+    {% endif %}
+
+    {{ p.name }} = numpy.asmatrix({{ p.name }})
+    {% if p.is_vector() %}
+    {{ p.name }} = {{ p.name }}.T
+    {% endif %}
+
+    {{ p.name }} = numpy.ascontiguousarray({{ p.name }}, dtype=float)
     {% endfor %}
 
     vars_dict, stats_dict = _intf.solve({% for p in named_params -%}

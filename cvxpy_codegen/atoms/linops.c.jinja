@@ -8,8 +8,12 @@
       import index_coeffs_declare, index_coeffs_define, index_coeffs_eval with context%}
 {% from "atoms/mul/mul_coeffs.c.jinja"
       import mul_coeffs_declare, mul_coeffs_define, mul_coeffs_eval with context%}
+{% from "atoms/multiply/multiply_coeffs.c.jinja"
+      import multiply_coeffs_declare, multiply_coeffs_define, multiply_coeffs_eval with context%}
 {% from "atoms/neg/neg_coeffs.c.jinja"
       import neg_coeffs_declare, neg_coeffs_define, neg_coeffs_eval with context%}
+{% from "atoms/promote/promote_coeffs.c.jinja"
+      import promote_coeffs_declare, promote_coeffs_define, promote_coeffs_eval with context%}
 {% from "atoms/reshape/reshape_coeffs.c.jinja" 
       import reshape_coeffs_declare, reshape_coeffs_define, 
              reshape_coeffs_eval with context%}

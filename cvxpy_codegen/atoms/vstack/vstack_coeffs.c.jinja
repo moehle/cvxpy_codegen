@@ -27,7 +27,7 @@ void vstack_coeffs(long n_args, LinopCoeff *C, LinopCoeff *Z, long *offsets);
 
 {% macro vstack_coeffs_define() %}
 void vstack_coeffs(long n_args, LinopCoeff *C, LinopCoeff *Z, long *offsets){
-  long i, jZ, k, p, p2, q=0, iZ=0, count=0;
+  long i, jZ, k, p, p2, iZ=0, count=0;
 
   Z->p[iZ++] = 0;
   for (jZ=0; jZ<Z->n_var; jZ++){

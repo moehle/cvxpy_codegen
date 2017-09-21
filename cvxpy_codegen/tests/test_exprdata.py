@@ -23,7 +23,7 @@ import cvxpy_codegen as cg
 import numpy as np
 import scipy.sparse as sp
 import numpy as np
-from cvxpy_codegen.param.expr_data import ParamData, CONST_ID
+from cvxpy_codegen.object_data.param_data import ParamData
  
 
 
@@ -34,7 +34,7 @@ class TestParamData(tu.CodegenTestCase):
     def test_param_data(self):
         n = 10
         m = 5
-        A = cg.Parameter(m,n, name='A')
+        A = cg.Parameter((m,n), name='A')
 
         A_paramdata = ParamData(A)
 
@@ -51,11 +51,11 @@ class TestParamData(tu.CodegenTestCase):
 
         # Other attributes
         self.assertEqual(A_paramdata.args, [])
-        self.assertEqual(A_paramdata.size, (m,n))
+        self.assertEqual(A_paramdata.shape, (m,n))
         self.assertEqual(A_paramdata.length, m*n)
         self.assertEqual(A_paramdata.type, 'param')
         self.assertEqual(A_paramdata.name, 'A')
-        self.assertEqual(A_paramdata.var_ids, [CONST_ID])
+        self.assertEqual(A_paramdata.var_ids, [])
         self.assertEqual(A_paramdata.mem_name, 'A')
 
 

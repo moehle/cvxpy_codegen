@@ -158,9 +158,9 @@ class EcosIntf(EmbeddedSolverIntf):
         for constr in eq_constrs:
             exprs = []
             for a in constr.args:
-                exprs += [self.expr_handler.expr_handler.process_expression(a)]
+                exprs += [self.expr_handler.process_expression(a)]
             self.eq_constrs += [ZeroData(constr, exprs, vert_offset=vert_offset)]
-            vert_offset += sum(constr.cone_sizes)
+            vert_offset += constr.size
         self.n_eq = vert_offset
 
         # Process conic constraints.

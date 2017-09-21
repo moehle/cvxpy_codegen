@@ -19,7 +19,8 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
 import cvxpy_codegen.tests.utils as tu
-import cvxpy_codegen as cg
+import cvxpy as cvx
+from cvxpy_codegen import codegen
 import numpy as np
 
 MODULE = 'cvxpy_codegen.tests.test_stats'
@@ -29,10 +30,10 @@ class TestStats(tu.CodegenTestCase):
     class_name = 'TestStats'
 
     def test_infeas(self, atom=None):
-        x = cg.Variable()
+        x = cvx.Variable(name='x')
         constr = [x >= 1, x <= 0]
-        obj = 0
-        self.prob = cg.Problem(cg.Minimize(obj), constr)
+        obj = x
+        self.prob = cvx.Problem(cvx.Minimize(obj), constr)
         self._run_codegen_test(self.prob, MODULE, self.class_name, '_test_infeas')
 
     def _test_infeas(self):
@@ -44,10 +45,10 @@ class TestStats(tu.CodegenTestCase):
 
 
     def test_unbounded(self):
-        x = cg.Variable()
+        x = cvx.Variable(name='x')
         constr = [x <= 1]
         obj = x
-        self.prob = cg.Problem(cg.Minimize(obj), constr)
+        self.prob = cvx.Problem(cvx.Minimize(obj), constr)
         self._run_codegen_test(self.prob, MODULE, self.class_name, '_test_unbounded')
 
     def _test_unbounded(self):
@@ -59,10 +60,10 @@ class TestStats(tu.CodegenTestCase):
 
 
     def test_optimal(self):
-        x = cg.Variable()
+        x = cvx.Variable(name='x')
         constr = [x >= 1]
         obj = x
-        self.prob = cg.Problem(cg.Minimize(obj), constr)
+        self.prob = cvx.Problem(cvx.Minimize(obj), constr)
         self._run_codegen_test(self.prob, MODULE, self.class_name, '_test_optimal')
 
     def _test_optimal(self):

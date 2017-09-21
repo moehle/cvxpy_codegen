@@ -41,10 +41,8 @@
       import mul_declare, mul_define, mul_eval with context%}
 {% from "atoms/multiply/multiply.c.jinja" 
       import multiply_declare, multiply_define, multiply_eval with context%}
-{% from "atoms/mul/scalar_mul.c.jinja" 
-      import scalar_mul_declare, scalar_mul_define, scalar_mul_eval with context%}
-{% from "atoms/mul/scalar_rmul.c.jinja" 
-      import scalar_rmul_declare, scalar_rmul_define, scalar_rmul_eval with context%}
+{% from "atoms/promote/promote.c.jinja" 
+      import promote_declare, promote_define, promote_eval with context%}
 {% from "atoms/neg/neg.c.jinja" 
       import neg_declare, neg_define, neg_eval with context%}
 {% from "atoms/add/null.c.jinja" 

@@ -20,25 +20,28 @@
 {% import "utils/utils.c.jinja" as u with context %}
 
 
-{% macro scalar_rmul_declare() %}
-void scalar_rmul(long nnz, double *Bx, double alpha);
-{% endmacro %}
+{% macro promote_declare() -%}
+void promote(CsrMatrix *A, CsrMatrix *Z);
+{%- endmacro %}
 
 
-{% macro scalar_rmul_define() %}
-/* Computes Z = alpha*B, for scalar alpha. */
-void scalar_rmul(long nnz, double *Bx, double alpha){
+{% macro promote_define() %}
+void promote(CsrMatrix *A, CsrMatrix *Z){
+  long i, j, m=Z->m, n=Z->n, count=0;
 
-  long p;
-  for(p=0; p<nnz; p++){
-    Bx[p] *= alpha;
+  Z->p[0] = 0;
+  for(i=0; i<m; i++){
+    Z->p[i+1] = Z->p[i];
+    for(j=0; j<n; j++){
+      Z->j[count] = j;
+      Z->x[count++] = A->x[0];
+      Z->p[i+1]++;
+    }
   }
 }
 {% endmacro %}
 
 
-{% macro scalar_rmul_eval(expr) %}
-scalar_rmul({{ expr.sparsity.nnz }}l,
-{{-  u.nzval(expr) }},
-{{-  u.nzval(expr.args[1]) }}[0]);
+{% macro promote_eval(expr) %}
+promote(&work->{{ expr.args[0].storage.name }}, &work->{{ expr.storage.name }});
 {% endmacro %}

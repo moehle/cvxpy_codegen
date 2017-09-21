@@ -171,3 +171,55 @@ void print_csrmat(CsrMatrix *A){
   printf("\n\n");
 }
 {% endmacro %}
+
+
+
+
+{% macro print_cscmat_declare() %}
+void print_cscmat(CscMatrix *A);
+{% endmacro %}
+
+{% macro print_cscmat_eval(name) %}
+printf("CSC MATRIX {{name}}\n");
+print_cscmat(&work->{{name}});
+{% endmacro %}
+
+{% macro print_cscmat_define() %}
+void print_cscmat(CscMatrix *A){
+  long j, p, n=A->n;
+  printf("  m = %ld\n", A->m);
+  printf("  n = %ld\n", n);
+  printf("  nnz = %ld\n", A->p[n]);
+  printf("  Ap: \n");
+  for(j=0; j<n; j++){
+    printf("  Ap[%ld] = %ld\n", j, A->p[j]);
+    for(p=A->p[j]; p<A->p[j+1]; p++){
+      printf("    p, (i, j), x = %ld, (%ld, %ld), %f\n", p, A->i[p], j, A->x[p]);
+    }
+  }
+  printf("  Ap[%ld] = %ld\n", n, A->p[n]);
+  printf("\n\n");
+}
+{% endmacro %}
+
+
+
+{% macro print_vec_declare() %}
+void print_vec(double *x, long n);
+{% endmacro %}
+
+{% macro print_vec_eval(name, length) %}
+printf("DENSE VECTOR {{name}}\n");
+print_vec(work->{{name}}, {{length}}l);
+{% endmacro %}
+
+{% macro print_vec_define() %}
+void print_vec(double *x, long n){
+  long i;
+  printf("  n = %ld\n", n);
+  for(i=0; i<n; i++){
+    printf("  x[%ld] = %f\n", i, x[i]);
+  }
+  printf("\n\n");
+}
+{% endmacro %}
