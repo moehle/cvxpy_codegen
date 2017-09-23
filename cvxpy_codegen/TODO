@@ -1,19 +1,8 @@
 TASKS
 -write more linops
-  [x] neg
-  [x] index
-  [x] add
-  [x] sum
-  [x] transpose
-  [x] reshape
-  [x] vstack
-  [x] mul
-  [x] promote
-  [x] multiply
   [ ] rmul
   [ ] hstack
   [ ] div
-
   [ ] diag_vec
   [ ] diag_mat
   [ ] trace

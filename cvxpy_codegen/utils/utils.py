@@ -19,7 +19,8 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 
 import scipy.sparse as sp
 import numpy as np
-from cvxpy_codegen import CallbackParam, Constant, Parameter, Variable, __path__
+from cvxpy import CallbackParam, Constant, Parameter, Variable
+from cvxpy_codegen import __path__
 import os
 from jinja2 import Environment, PackageLoader, contextfilter, StrictUndefined
 

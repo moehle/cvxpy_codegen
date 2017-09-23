@@ -19,5 +19,4 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 
 __version__ = ".0.0.1"
 
-from cvxpy import *
-from cvxpy_codegen.codegen import codegen
+from cvxpy_codegen.code_generator import codegen

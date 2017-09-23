@@ -27,7 +27,7 @@ void sum(CsrMatrix *A, CsrMatrix *Z);
 
 {% macro sum_define() %}
 void sum(CsrMatrix *A, CsrMatrix *Z){
-  long i, j, p, p2, m=A->m;
+  long i, p, p2, m=A->m;
   Z->p[0] = 0;
   Z->p[1] = 1;
   Z->j[0] = 0;

@@ -19,11 +19,21 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 
 from cvxpy_codegen.expr_handler import ExprHandler
 from cvxpy_codegen.templates.template_handler import TemplateHandler
-#from cvxpy.problems.problem_data.sym_data import SymData
 from cvxpy_codegen.solvers.solver_intfs import SOLVER_INTFS
 from cvxpy_codegen.utils.utils import make_target_dir
 import cvxpy.settings as s
 import numpy as np
+
+from cvxpy.reductions.solvers.solving_chain import construct_solving_chain
+from cvxpy.reductions.dcp2cone.dcp2cone import Dcp2Cone
+from cvxpy.reductions.cvx_attr2constr import CvxAttr2Constr
+from cvxpy.reductions.matrix_stuffing import MatrixStuffing
+from cvxpy.reductions import InverseData
+
+
+def codegen(prob, target_dir, **kwargs):
+    cg = CodeGenerator(prob, **kwargs)
+    return cg.codegen(target_dir)
 
 
 
@@ -31,22 +41,44 @@ import numpy as np
 class CodeGenerator:
     
 
-    def __init__(self, objective, constraints,
+    def __init__(self, prob,
                  solver=None,
-                 include_solver=True):
-        self.objective = objective.expr
-        self.constraints = constraints
+                 include_solver=True,
+                 inv_data = None,
+                 dump = False):
+
+        # TODO: make nicer
+        sc = construct_solving_chain(prob, solver="ECOS")
+        for r in sc.reductions:
+            if isinstance(r, Dcp2Cone):
+                prob, dcp2cone_inv_data = r.apply(prob)
+            if isinstance(r, CvxAttr2Constr):
+                prob, attr_inv_data = r.apply(prob)
+
+        self.objective = prob.objective.expr
+        self.constraints = prob.constraints
+        if not inv_data:
+            inv_data = InverseData(prob)
+        self.inv_data = inv_data
         self.template_vars = {}
 
+        self.include_solver = include_solver
+        self.dump = dump
+        self.solver = solver
 
-    def codegen(self, target_dir,
-                solver = None,
-                include_solver = True,
-                dump = False):
+        
+
+
+
+    def codegen(self, target_dir):
+        
+        solver = self.solver
+        dump = self.dump
+        include_solver = self.include_solver
 
         if solver == None:
             solver = 'ecos'
-        elif not (solver in SOLVER_INTFS.keys):
+        elif not (solver in SOLVER_INTFS.keys()):
             raise TypeError("Unknown solver %s." % str(solver))
 
         # Create the target directory.
@@ -54,7 +86,7 @@ class CodeGenerator:
 
         # Create expression handler and solver interfaces.
         expr_handler = ExprHandler()
-        solver_intf = SOLVER_INTFS[solver](expr_handler, include_solver)
+        solver_intf = SOLVER_INTFS[solver](expr_handler, self.inv_data, include_solver)
 
         # Process objective, constraints.
         solver_intf.process_problem(self.objective, self.constraints)

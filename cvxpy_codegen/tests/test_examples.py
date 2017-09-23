@@ -29,11 +29,11 @@ MODULE = 'cvxpy_codegen.tests.test_examples'
 class TestMpc(tu.CodegenTestCase):
     class_name = 'TestMpc'
 
-    def mpc_setup(self, objective='quad'):
+    def _test_mpc(self, objective='1norm'):
         np.random.seed(0)
-        n = 3
+        n = 2
         m = 2
-        T = 6
+        T = 3
         self.A_val = np.eye(n) + .2*np.random.randn(n,n)
         self.B_val = 5*np.random.randn(n,m)
         self.x0_val = 5*np.random.randn(n)
@@ -42,9 +42,13 @@ class TestMpc(tu.CodegenTestCase):
         B  = cvx.Parameter((n, m), name='B')
         x0 = cvx.Parameter(n, name='x0')
 
-        A.value  = self.A_val
-        B.value  = self.B_val
-        x0.value = self.x0_val
+        A  = np.random.randn(n, n)
+        B  = np.random.randn(n, m)
+        x0 = np.random.randn(n)
+
+        #A.value  = self.A_val
+        #B.value  = self.B_val
+        #x0.value = self.x0_val
 
         x = cvx.Variable((n, T+1), name='x')
         u = cvx.Variable((m, T), name='u')
@@ -64,80 +68,43 @@ class TestMpc(tu.CodegenTestCase):
             else:
                 raise Exception
 
-        self.prob = cvx.Problem(cvx.Minimize(obj), constr)
-        self.prob.solve()
-        self.x_opt = x.value
+        prob = cvx.Problem(cvx.Minimize(obj), constr)
+        self._test_prob(prob)
+
+
+
+
 
 
     #def test_mpc_quad(self):
-    #    test_name = '_test_mpc_quad'
-    #    self.mpc_setup(objective='quad')
-    #    self._run_codegen_test(self.prob, MODULE, self.class_name, test_name)
-
-    #def _test_mpc_quad(self):
-    #    self.mpc_setup(objective='quad')
-    #    from cvxpy_codegen_solver import cg_solve
-    #    var_dict, stats_dict = cg_solve(x0=self.x0_val, A=self.A_val, B=self.B_val)
-    #    self.assertAlmostEqualMatrices(self.x_opt, var_dict['x'])
-    
+    #    self._test_mpc(objective='quad')
 
     def test_mpc_1norm(self):
-        test_name = '_test_mpc_1norm'
-        self.mpc_setup(objective='1norm')
-        self._run_codegen_test(self.prob, MODULE, self.class_name, test_name)
+        self._test_mpc(objective='1norm')
 
-    def _test_mpc_1norm(self):
-        self.mpc_setup(objective='1norm')
-        from cvxpy_codegen_solver import cg_solve
-        var_dict, stats_dict = cg_solve(x0=self.x0_val, A=self.A_val, B=self.B_val)
-        self.assertAlmostEqualMatrices(self.x_opt, var_dict['x'])
-    
-
-    # TODO FAILS, probably due to ECOS..
     #def test_mpc_exp1norm(self):
-    #    test_name = '_test_mpc_exp1norm'
-    #    self.mpc_setup(objective='exp1norm')
-    #    self.run_codegen_test(self.prob, MODULE, self.class_name, test_name)
-
-    #def _test_mpc_exp1norm(self):
-    #    self.mpc_setup(objective='exp1norm')
-    #    from cvxpy_codegen_solver import cg_solve
-    #    var_dict, stats_dict = cg_solve(x0=self.x0_val, A=self.A_val, B=self.B_val)
-    #    self.assertAlmostEqualMatrices(self.x_opt, var_dict['x'])
+    #    self._test_mpc(objective='exp1norm')
     
 
 
 
 
-#class TestLeastSquares(tu.CodegenTestCase):
-#    class_name = 'TestLeastSquares'
-#
-#    def ls_setup(self):
-#        np.random.seed(0)
-#        n = 5
-#        m = 10
-#        self.A_val = np.random.randn(m,n)
-#        self.b_val = np.random.randn(m)
-#        A = cvx.Parameter((m, n), name='A', value=self.A_val)
-#        b = cvx.Parameter(m, name='b', value=self.b_val)
-#        x = cvx.Variable(n, name='x')
-#        objective = cvx.norm(A*x - b)
-#
-#        self.prob = cvx.Problem(cvx.Minimize(objective))
-#        self.prob.solve()
-#        self.x_opt = x.value
-#
-#
-#    def test_least_squares(self):
-#        test_name = '_test_least_squares'
-#        self.ls_setup()
-#        self._run_codegen_test(self.prob, MODULE, self.class_name, test_name)
-#
-#    def _test_least_squares(self):
-#        self.ls_setup()
-#        from cvxpy_codegen_solver import cg_solve
-#        var_dict, stats_dict = cg_solve(A=self.A_val, b=self.b_val)
-#        self.assertAlmostEqualMatrices(self.x_opt, var_dict['x'])
+class TestLeastSquares(tu.CodegenTestCase):
+    class_name = 'TestLeastSquares'
+
+    def test_least_squares(self):
+        np.random.seed(0)
+        n = 5
+        m = 10
+        self.A_val = np.random.randn(m,n)
+        self.b_val = np.random.randn(m)
+        A = cvx.Parameter((m, n), name='A', value=self.A_val)
+        b = cvx.Parameter(m, name='b', value=self.b_val)
+        x = cvx.Variable(n, name='x')
+        objective = cvx.norm(A*x - b)
+
+        self.prob = cvx.Problem(cvx.Minimize(objective))
+        self._test_prob(self.prob)
     
 
     

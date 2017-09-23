@@ -4,7 +4,9 @@
 #ifndef CVXPY_CODEGEN
 #define CVXPY_CODEGEN
 
+{% if include_solver %}
 #include "{{ solver_name }}.h"
+{% endif %}
 
 
 /* Exit codes: */
@@ -77,7 +79,7 @@ typedef struct work_struct{
     long solver_flag;
 
     /* Variables used by the solver. */
-    {{ solver_workspace() }}
+    {{ solver_workspace(include_solver=include_solver) }}
 
     {{ expr_handler_workspace() }}
 

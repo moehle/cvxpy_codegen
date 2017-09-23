@@ -62,6 +62,7 @@ class CbParamData(ExprData):
         self.cname = self.storage.name
         self.has_offset = True
         self.coeffs = {}
+        self.offset_expr = self
 
     @property
     def storage(self):

@@ -28,7 +28,7 @@ void multiply_coeffs(CsrMatrix *A, LinopCoeff *B, LinopCoeff *Z);
 {% macro multiply_coeffs_define() %}
 void multiply_coeffs(CsrMatrix *A, LinopCoeff *B, LinopCoeff *Z){
 
-  long i, j, iB, p, p2, q, q2, m=Z->m, m_var=Z->m_var;
+  long i, j, iB, p, p2, q, m=Z->m, m_var=Z->m_var;
   double x;
 
   for (i=0; i<=m; i++) Z->p[i] = 0;
@@ -47,7 +47,6 @@ void multiply_coeffs(CsrMatrix *A, LinopCoeff *B, LinopCoeff *Z){
       j = A->j[p];
       x = A->x[p];
       iB = j*m_var + i;
-      q2 = B->p[iB+1];
       for(q=B->p[iB]; q<B->p[iB+1]; q++){
         Z->x[Z->p[iB]] = B->x[q] * x;
         Z->j[Z->p[iB]] = B->j[q];

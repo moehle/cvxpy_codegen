@@ -97,7 +97,7 @@ class TestEcosIntf(tu.CodegenTestCase):
         self._test_constrs([NonPos(self.var_n1 + self.const_n1)])
 
 
-    def test_nonpos(self):
+    def test_zero(self):
         self._test_constrs([Zero(-self.var_n1)])
         self._test_constrs([Zero(self.var_n)])
         self._test_constrs([Zero(self.var_n1 + self.const_n1)])
@@ -114,74 +114,74 @@ class TestEcosIntf(tu.CodegenTestCase):
 
 
 
-    def _test_constrs(self, constrs, printing=False):
-        prob = cvx.Problem(cvxpy.Minimize(0), constrs)
-        prob_data = prob.get_problem_data("ECOS")
-        data = prob_data[0]
-        inverses = prob_data[2]
-        for inv in inverses:
-            if hasattr(inv, 'r'):
-                true_obj_offset = inv.r
-        true_obj_coeff   = data[s.C]
-        true_obj_offset += data[s.OFFSET]
-        true_eq_coeff    = data[s.A]
-        true_eq_offset   = data[s.B]
-        true_leq_coeff   = data[s.G]
-        true_leq_offset  = data[s.H]
+    #def _test_constrs(self, constrs, printing=False):
+    #    prob = cvx.Problem(cvxpy.Minimize(0), constrs)
+    #    prob_data = prob.get_problem_data("ECOS")
+    #    data = prob_data[0]
+    #    inverses = prob_data[2]
+    #    for inv in inverses:
+    #        if hasattr(inv, 'r'):
+    #            true_obj_offset = inv.r
+    #    true_obj_coeff   = data[s.C]
+    #    true_obj_offset += data[s.OFFSET]
+    #    true_eq_coeff    = data[s.A]
+    #    true_eq_offset   = data[s.B]
+    #    true_leq_coeff   = data[s.G]
+    #    true_leq_offset  = data[s.H]
 
-        # Do code generation
-        template_vars = codegen(prob, target_dir, dump=True, include_solver=False)
+    #    # Do code generation
+    #    template_vars = codegen(prob, target_dir, dump=True, include_solver=False)
 
-        # Set up test harness.
-        render(target_dir, template_vars, HARNESS_C, 'harness.c')
-        render(target_dir, template_vars, CODEGEN_H, 'codegen.h')
-        test_data = self._run_test(target_dir)
-        test_obj_coeff  = np.array(test_data['obj_coeff'])
-        test_obj_offset = np.array(test_data['obj_offset'])
-        test_eq_coeff  = sp.csc_matrix((test_data['eq_nzval'],
-                                        test_data['eq_rowidx'],
-                                        test_data['eq_colptr']),
-                                        shape = (test_data['eq_shape0'],
-                                                 test_data['eq_shape1']))
-        test_eq_offset = np.array(test_data['eq_offset'])
-        test_leq_coeff = sp.csc_matrix((test_data['leq_nzval'],
-                                        test_data['leq_rowidx'],
-                                        test_data['leq_colptr']),
-                                        shape = (test_data['leq_shape0'],
-                                                 test_data['leq_shape1']))
-        test_leq_offset = np.array(test_data['leq_offset'])
+    #    # Set up test harness.
+    #    render(target_dir, template_vars, HARNESS_C, 'harness.c')
+    #    render(target_dir, template_vars, CODEGEN_H, 'codegen.h')
+    #    test_data = self._run_test(target_dir)
+    #    test_obj_coeff  = np.array(test_data['obj_coeff'])
+    #    test_obj_offset = np.array(test_data['obj_offset'])
+    #    test_eq_coeff  = sp.csc_matrix((test_data['eq_nzval'],
+    #                                    test_data['eq_rowidx'],
+    #                                    test_data['eq_colptr']),
+    #                                    shape = (test_data['eq_shape0'],
+    #                                             test_data['eq_shape1']))
+    #    test_eq_offset = np.array(test_data['eq_offset'])
+    #    test_leq_coeff = sp.csc_matrix((test_data['leq_nzval'],
+    #                                    test_data['leq_rowidx'],
+    #                                    test_data['leq_colptr']),
+    #                                    shape = (test_data['leq_shape0'],
+    #                                             test_data['leq_shape1']))
+    #    test_leq_offset = np.array(test_data['leq_offset'])
 
-        if printing:
-            print '\nTest objective coeff:\n',   test_obj_coeff
-            print '\nTrue objective coeff:\n',   true_obj_coeff
+    #    if printing:
+    #        print('\nTest objective coeff  :\n',   test_obj_coeff)
+    #        print('\nTrue objective coeff  :\n',   true_obj_coeff)
 
-            print '\nTest objective offset:\n',  test_obj_offset
-            print '\nTrue objective offset:\n',  true_obj_offset
+    #        print('\nTest objective offset :\n',   test_obj_offset)
+    #        print('\nTrue objective offset :\n',   true_obj_offset)
 
-            print '\nTest equality coeff:\n',    test_eq_coeff
-            print '\nTrue equality coeff:\n',    true_eq_coeff
+    #        print('\nTest equality coeff  :\n',    test_eq_coeff)
+    #        print('\nTrue equality coeff  :\n',    true_eq_coeff)
 
-            print '\nTest equality offset:\n',   test_eq_offset
-            print '\nTrue equality offset:\n',   true_eq_offset
+    #        print('\nTest equality offset :\n',    test_eq_offset)
+    #        print('\nTrue equality offset :\n',    true_eq_offset)
 
-            print '\nTest inequality coeff:\n',  test_leq_coeff
-            print '\nTrue inequality coeff:\n',  true_leq_coeff
+    #        print('\nTest inequality coeff  :\n',  test_leq_coeff)
+    #        print('\nTrue inequality coeff  :\n',  true_leq_coeff)
 
-            print '\nTest inequality offset:\n', test_leq_offset
-            print '\nTrue inequality offset:\n', true_leq_offset
+    #        print('\nTest inequality offset :\n',  test_leq_offset)
+    #        print('\nTrue inequality offset :\n',  true_leq_offset)
 
-        if not true_obj_coeff is None:
-            self.assertAlmostEqualMatrices(true_obj_coeff,  test_obj_coeff)
-        if not true_obj_offset is None:
-            self.assertAlmostEqualMatrices(true_obj_offset, test_obj_offset)
-        if not true_eq_coeff is None:
-            self.assertAlmostEqualMatrices(true_eq_coeff,   test_eq_coeff)
-        if not test_eq_offset is None:
-            self.assertAlmostEqualMatrices(true_eq_offset,  test_eq_offset)
-        if not test_leq_coeff is None:
-            self.assertAlmostEqualMatrices(true_leq_coeff,  test_leq_coeff)
-        if not test_leq_offset is None:
-            self.assertAlmostEqualMatrices(true_leq_offset, test_leq_offset)
+    #    if not true_obj_coeff is None:
+    #        self.assertAlmostEqualMatrices(true_obj_coeff,  test_obj_coeff)
+    #    if not true_obj_offset is None:
+    #        self.assertAlmostEqualMatrices(true_obj_offset, test_obj_offset)
+    #    if not true_eq_coeff is None:
+    #        self.assertAlmostEqualMatrices(true_eq_coeff,   test_eq_coeff)
+    #    if not test_eq_offset is None:
+    #        self.assertAlmostEqualMatrices(true_eq_offset,  test_eq_offset)
+    #    if not test_leq_coeff is None:
+    #        self.assertAlmostEqualMatrices(true_leq_coeff,  test_leq_coeff)
+    #    if not test_leq_offset is None:
+    #        self.assertAlmostEqualMatrices(true_leq_offset, test_leq_offset)
 
 
 

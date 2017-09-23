@@ -84,10 +84,11 @@ class EcosIntf(EmbeddedSolverIntf):
                       'solver_name'             : name } 
 
     
-    def __init__(self, expr_handler, include_solver=True):
+    def __init__(self, expr_handler, inv_data, include_solver=True):
         self.expr_handler = expr_handler
         self.eq_constrs = []
         self.leq_constrs = []
+        self.inv_data = inv_data
         self.n_eq = 0
         self.n_leq = 0
         self.n_soc = 0
@@ -101,7 +102,9 @@ class EcosIntf(EmbeddedSolverIntf):
     def get_template_vars(self):
 
         # Recover the sparsity patterns of the coefficient matrices.
-        x_length, var_offsets = self.expr_handler.get_sym_data()
+        #x_length, var_offsets = self.expr_handler.get_sym_data()
+        x_length = self.inv_data.x_length
+        var_offsets = self.inv_data.var_offsets
         obj_coeff, eq_coeff, leq_coeff = self.get_sparsity(x_length, var_offsets)
 
         # TODO rename many of these:

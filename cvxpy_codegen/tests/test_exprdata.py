@@ -19,7 +19,7 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
 import cvxpy_codegen.tests.utils as tu
-import cvxpy_codegen as cg
+import cvxpy as cvx
 import numpy as np
 import scipy.sparse as sp
 import numpy as np
@@ -34,7 +34,7 @@ class TestParamData(tu.CodegenTestCase):
     def test_param_data(self):
         n = 10
         m = 5
-        A = cg.Parameter((m,n), name='A')
+        A = cvx.Parameter((m,n), name='A')
 
         A_paramdata = ParamData(A)
 

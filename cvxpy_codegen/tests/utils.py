@@ -27,9 +27,23 @@ import sys
 import numpy as np
 import scipy.sparse as sp
 from cvxpy_codegen import codegen
+import cvxpy as cvx
+from cvxpy_codegen.utils.utils import render, make_target_dir
+import cvxpy.settings as s
+import json
+from cvxpy_codegen.code_generator import CodeGenerator
+from cvxpy.reductions.solvers.solving_chain import construct_solving_chain
+
+from cvxpy.reductions.eval_params import EvalParams
+from cvxpy.reductions.cvx_attr2constr import CvxAttr2Constr
+from cvxpy.reductions.dcp2cone.dcp2cone import Dcp2Cone
+from cvxpy.reductions.dcp2cone.cone_matrix_stuffing import ConeMatrixStuffing
+from cvxpy.reductions.solvers.conic_solvers.ecos_conif import ECOS
 
 
 TARGET_DIR = os.path.join(os.getcwd(), 'cg_build')
+HARNESS_C = 'tests/ecos_intf/harness.c.jinja'
+CODEGEN_H = 'tests/ecos_intf/codegen.h.jinja'
 
 
 
@@ -120,3 +134,126 @@ class CodegenTestCase(unittest.TestCase):
         self.install_custom_solver(TARGET_DIR)
         exit_code = self._run_isolated_test(module, class_name, method_name)
         self.assertEqual(exit_code, 0)
+
+
+
+    def _test_constrs(self, constrs, **kwargs):
+        prob = cvx.Problem(cvx.Minimize(0), constrs)
+        self._test_prob(prob, **kwargs)
+
+
+    def _test_expr(self, expr, **kwargs):
+        prob = cvx.Problem(cvx.Minimize(cvx.sum(expr)), [])
+        self._test_prob(prob, **kwargs)
+
+
+    def _test_const_expr(self, expr, **kwargs):
+        obj = cvx.Minimize(cvx.sum(expr) + cvx.Variable(name='extra_var'))
+        prob = cvx.Problem(obj, [])
+        self._test_prob(prob, **kwargs)
+
+
+    def _test_prob(self, prob, printing=False):
+        sc = construct_solving_chain(prob, solver="ECOS")
+
+        has_params = False
+        for r in sc.reductions:
+            if isinstance(r, EvalParams):
+                eval_params = r
+                has_params = True
+            elif isinstance(r, ConeMatrixStuffing):
+                cone_matrix_stuffing = r
+            elif isinstance(r, Dcp2Cone):
+                dcp2cone = r
+            elif isinstance(r, CvxAttr2Constr):
+                cvx_attr2constr= r
+            elif isinstance(r, ECOS):
+                ecos = r
+            else:
+                raise Exception('Unrecognized reduction.')
+
+        prob, inv_data = dcp2cone.apply(prob)
+        prob, __ = cvx_attr2constr.apply(prob)
+        if has_params:
+            prob_cvx, __ = eval_params.apply(prob)
+            prob_cvx, inv_matrixstuffing = cone_matrix_stuffing.apply(prob_cvx)
+        else:
+            prob_cvx, inv_matrixstuffing = cone_matrix_stuffing.apply(prob)
+        data, __ = ecos.apply(prob_cvx)
+
+        true_obj_offset = inv_matrixstuffing.r
+        true_obj_coeff   = data[s.C]
+        true_obj_offset += data[s.OFFSET]
+        true_eq_coeff    = data[s.A]
+        true_eq_offset   = data[s.B]
+        true_leq_coeff   = data[s.G]
+        true_leq_offset  = data[s.H]
+
+        obj = prob.objective
+        constraints = prob.constraints
+        inv_data = inv_matrixstuffing
+
+        # Do code generation
+        template_vars = codegen(prob, TARGET_DIR, dump=True, include_solver=False, solver='ecos')
+
+        # Set up test harness.
+        render(TARGET_DIR, template_vars, HARNESS_C, 'harness.c')
+        test_data = self._run_test(TARGET_DIR)
+        test_obj_coeff  = np.array(test_data['obj_coeff'])
+        test_obj_offset = np.array(test_data['obj_offset'])
+        test_eq_coeff  = sp.csc_matrix((test_data['eq_nzval'],
+                                        test_data['eq_rowidx'],
+                                        test_data['eq_colptr']),
+                                        shape = (test_data['eq_shape0'],
+                                                 test_data['eq_shape1']))
+        test_eq_offset = np.array(test_data['eq_offset'])
+        test_leq_coeff = sp.csc_matrix((test_data['leq_nzval'],
+                                        test_data['leq_rowidx'],
+                                        test_data['leq_colptr']),
+                                        shape = (test_data['leq_shape0'],
+                                                 test_data['leq_shape1']))
+        test_leq_offset = np.array(test_data['leq_offset'])
+
+        if printing:
+            print('\nTest objective coeff  :\n',   test_obj_coeff)
+            print('\nTrue objective coeff  :\n',   true_obj_coeff)
+
+            print('\nTest objective offset :\n',   test_obj_offset)
+            print('\nTrue objective offset :\n',   true_obj_offset)
+
+            print('\nTest equality coeff  :\n',    test_eq_coeff.todense())
+            print('\nTrue equality coeff  :\n',    true_eq_coeff.todense())
+
+            print('\nTest equality offset :\n',    test_eq_offset)
+            print('\nTrue equality offset :\n',    true_eq_offset)
+
+            print('\nTest inequality coeff  :\n',  test_leq_coeff.todense())
+            print('\nTrue inequality coeff  :\n',  true_leq_coeff.todense())
+
+            print('\nTest inequality offset :\n',  test_leq_offset)
+            print('\nTrue inequality offset :\n',  true_leq_offset)
+
+        if not true_obj_coeff is None:
+            self.assertAlmostEqualMatrices(true_obj_coeff,  test_obj_coeff)
+        if not true_obj_offset is None:
+            self.assertAlmostEqualMatrices(true_obj_offset, test_obj_offset)
+        if not true_eq_coeff is None:
+            self.assertAlmostEqualMatrices(true_eq_coeff,   test_eq_coeff)
+        if not test_eq_offset is None:
+            self.assertAlmostEqualMatrices(true_eq_offset,  test_eq_offset)
+        if not test_leq_coeff is None:
+            self.assertAlmostEqualMatrices(true_leq_coeff,  test_leq_coeff)
+        if not test_leq_offset is None:
+            self.assertAlmostEqualMatrices(true_leq_offset, test_leq_offset)
+
+
+    def _run_test(self, target_dir):
+        prev_path = os.getcwd()
+        os.chdir(TARGET_DIR)
+        output = subprocess.check_output(
+                     ['gcc', 'harness.c', 'expr_handler.c', 'solver_intf.c',
+                      '-g', '-o' 'main'],
+                     stderr=subprocess.STDOUT)
+        exec_output = subprocess.check_output(['./main'], stderr=subprocess.STDOUT)
+        os.chdir(prev_path)
+        return json.loads(exec_output.decode("utf-8"))

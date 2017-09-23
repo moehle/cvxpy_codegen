@@ -21,6 +21,7 @@ from cvxpy_codegen.object_data import ParamData, ConstData, CbParamData, CONST_I
 from cvxpy_codegen.object_data.atom_data import AtomData
 from cvxpy_codegen.object_data.constr_data import ConstrData
 import scipy.sparse as sp
+import numpy as np
 from cvxpy_codegen.utils.utils import render
 from cvxpy_codegen.atoms.atoms import get_expr_data
 
@@ -31,6 +32,8 @@ from cvxpy.expressions.constants.constant import Constant
 from cvxpy.atoms.atom import Atom
 from cvxpy.expressions.variable import Variable
 
+from cvxpy.atoms.affine.add_expr import AddExpression
+from cvxpy.atoms.affine.promote import promote
 
 
 class ExprHandler():
@@ -91,8 +94,8 @@ class ExprHandler():
         if not self.named_vars:
             raise TypeError("Problem has no variables.")
 
-        # Get variable vector information.
-        x_length, var_offsets = self.get_sym_data()
+        ## Get variable vector information.
+        #x_length, var_offsets = self.get_sym_data()
 
         # Fill out the variables needed to render the C template.
         self.template_vars.update({'vars': self.vars,
@@ -108,22 +111,22 @@ class ExprHandler():
                                    'work_float': work_float,
                                    'work_varargs': work_varargs,
                                    'work_coeffs': work_coeffs,
-                                   'x_length': x_length,
-                                   'var_offsets': var_offsets,
+                                   #'x_length': x_length,
+                                   #'var_offsets': var_offsets,
                                    'CONST_ID' : CONST_ID })
 
         return self.template_vars
 
 
-    def get_sym_data(self):
-        offset = 0
-        var_offsets = {}
-        #for var in self.named_vars:
-        for var in self.vars:
-            var_offsets.update({var.id : offset})
-            offset += var.length
-        x_length = offset
-        return x_length, var_offsets
+    #def get_sym_data(self):
+    #    offset = 0
+    #    var_offsets = {}
+    #    #for var in self.named_vars:
+    #    for var in self.vars:
+    #        var_offsets.update({var.id : offset})
+    #        offset += var.length
+    #    x_length = offset
+    #    return x_length, var_offsets
 
 
 
@@ -163,6 +166,7 @@ class ExprHandler():
                 self.linops[idx].force_copy()
                 data = self.linops[idx]
             else:
+                self.preprocess_expr(expr)
                 arg_data = []
                 for arg in expr.args: # Recurse on args.
                     arg_data += [self.process_expression(arg)]
@@ -183,6 +187,19 @@ class ExprHandler():
             raise TypeError('Invalid expression tree type: %s' % type(expr))
 
         return data
+
+
+
+    def preprocess_expr(self, expr):
+        if isinstance(expr, AddExpression):
+           new_args = []
+           for a in expr.args:
+               if np.prod(expr.shape) != 1 and np.prod(a.shape) == 1:
+                   new_args += [promote(a, expr.shape)]
+               else:
+                   new_args += [a]
+           expr.args = new_args
+
 
 
 
