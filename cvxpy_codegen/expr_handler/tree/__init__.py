@@ -17,7 +17,5 @@ You should have received a copy of the GNU General Public License
 along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from cvxpy_codegen.solvers.admmgen_intf import AdmmGenIntf
 
-solver_intfs = [AdmmGenIntf()]
-SOLVERS = {solver.name():solver for solver in solver_intfs}
+from cvxpy_codegen.expr_handler.expr_handler import ExprHandler

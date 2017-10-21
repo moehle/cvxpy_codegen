@@ -1,5 +1,5 @@
 {% from 'solvers/'+solver_name+"_intf.c.jinja" import solver_workspace with context %}
-{% from 'expr_handler/expr_handler.c.jinja'
+{% from 'expr_handler_sym/expr_handler.c.jinja'
         import expr_handler_workspace with context %}
 #ifndef CVXPY_CODEGEN
 #define CVXPY_CODEGEN
@@ -18,20 +18,14 @@
 
 typedef struct params_struct{
     {% for p in named_params -%}
-    double {{ p.name -}}
-        {%- if p.is_scalar() -%}
-        {%- elif p.is_vector()-%}
-            [{{ p.shape[0] }}]
-        {%- else -%}
-            [{{ p.shape[0] }}][{{ p.shape[1] }}]
-        {%- endif -%};
+    {{ p.c_print_struct() }}
     {% endfor %}
 } Params;
 
 
 typedef struct vars_struct{
-    {% for var in named_vars %}
-    double {{ var.name }}[{{ var.shape[0] }}][{{ var.shape[1] }}];
+    {% for v in named_vars %}
+    {{ v.c_print_struct() }}
     {% endfor %}
 } Vars;
 

@@ -7,18 +7,19 @@ def cg_solve({%- for p in named_params -%}
 
     {% for p in named_params %}
     {% if p.is_scalar() %}
-    if {{p.name}}.shape != ():
-        raise TypeError("Parameter {{p.name}} should have shape (),"
-                        "but has shape %s" % str({{p.name}}.shape))
+    if not (isinstance({{p.name}}, float) or isinstance({{p.name}}, int)):
+        raise TypeError("Parameter {{p.name}} should be an int or float, "
+                        "but instead has type %s" % type({{p.name}}))
+    {{p.name}} = float({{p.name}})
 
     {% elif p.is_vector() %}
     if {{p.name}}.shape != ({{p.shape[0]}},):
-        raise TypeError("Parameter {{p.name}} should have shape ({{p.shape[0]}}),"
+        raise TypeError("Parameter {{p.name}} should have shape ({{p.shape[0]}},), "
                         "but has shape %s" % str({{p.name}}.shape))
 
     {% else %}
     if {{p.name}}.shape != {{p.shape}}:
-        raise TypeError("Parameter {{p.name}} should have shape {{p.shape}},"
+        raise TypeError("Parameter {{p.name}} should have shape {{p.shape}}, "
                         "but has shape %s" % str({{p.name}}.shape))
 
     {% endif %}

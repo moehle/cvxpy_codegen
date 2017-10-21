@@ -67,7 +67,13 @@ static PyObject *solve_wrapper(PyObject *self, PyObject *args){
   /* Copy parameter values into the parameter structure. */
   {% for p in named_params %}
   // memcpy(params.{{ p.name }}, {{ p.name }}->data, {{ p.shape[0]*p.shape[1] }}*sizeof(double));
+  {% if p.is_scalar() %}
+  memcpy(&params.{{ p.name }}, PyArray_DATA({{ p.name }}), {{ p.shape[0]*p.shape[1] }}*sizeof(double));
+  {% elif p.is_vector() %}
   memcpy(params.{{ p.name }}, PyArray_DATA({{ p.name }}), {{ p.shape[0]*p.shape[1] }}*sizeof(double));
+  {% else %}
+  memcpy(params.{{ p.name }}[0], PyArray_DATA({{ p.name }}), {{ p.shape[0]*p.shape[1] }}*sizeof(double));
+  {% endif %}
   {% endfor %}
 
 
@@ -76,6 +82,8 @@ static PyObject *solve_wrapper(PyObject *self, PyObject *args){
   cg_solve(&params, &work, &vars);
   cg_cleanup(&work);
 
+  printf("work.optval = %f\n", work.optval);
+
   /* Convert the variables from the structure into Numpy arrays. */
   {% for v in named_vars %}
   nd = 2;
@@ -83,8 +91,13 @@ static PyObject *solve_wrapper(PyObject *self, PyObject *args){
   shape[{{i}}] = {{sz}};
   {% endfor %}
   {{ v.name }} = (PyArrayObject*) PyArray_SimpleNew(nd, shape, NPY_DOUBLE);
-  // memcpy({{ v.name }}->data, vars.{{ v.name }}[0], {{ v.shape[0]*v.shape[1] }}*sizeof(double));
+  {% if v.is_scalar() %}
+  memcpy(PyArray_DATA({{ v.name }}), &vars.{{ v.name }}, {{ v.shape[0]*v.shape[1] }}*sizeof(double));
+  {% elif v.is_vector() %}
+  memcpy(PyArray_DATA({{ v.name }}), vars.{{ v.name }}, {{ v.shape[0]*v.shape[1] }}*sizeof(double));
+  {% else %}
   memcpy(PyArray_DATA({{ v.name }}), vars.{{ v.name }}[0], {{ v.shape[0]*v.shape[1] }}*sizeof(double));
+  {% endif %}
   {% endfor %}
 
 

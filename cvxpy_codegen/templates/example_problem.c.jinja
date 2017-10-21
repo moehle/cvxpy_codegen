@@ -18,6 +18,21 @@
 
 #include "codegen.h"
 #include <stdio.h>
+#include <time.h>
+
+
+static clock_t tic_timestart;
+
+void tic(void) {
+  tic_timestart = clock();
+}
+
+double toc(void) {
+  clock_t tic_timestop;
+  tic_timestop = clock();
+  return((double)((tic_timestop - tic_timestart) / CLOCKS_PER_SEC));
+}
+
 
 
 int main(){
@@ -25,41 +40,24 @@ int main(){
     Params params;
     Work work;
     Vars vars;
+    double solve_time;
 
     {% for p in named_params %}
-      {%- if p.is_scalar() %}
-    params.{{ p.name }} = {{ p.value }};
-      {% elif p.is_vector() -%}
-        {% for i in range(p.shape[0]) %}
-    params.{{ p.name }}[{{ i }}] = {{ p.value[i] }};
-        {% endfor %}
-      {%- else -%}
-        {% for i in range(p.shape[0]) %}
-          {% for j in range(p.shape[1]) %}
-    params.{{ p.name }}[{{ i }}][{{ j }}] = {{ p.value[i,j] }};
-          {% endfor %}
-        {% endfor %}
-      {%- endif -%}
+    {{ p.c_print() }}
     {% endfor %}
 
     cg_init(&work);
+    tic();
     cg_solve(&params, &work, &vars);
+    solve_time = toc();
     cg_cleanup(&work); 
 
-
-    printf("Optimal value: %f\n", work.optval);
-
-    {# TODO
-    {% for var in named_vars %}
-      
-      {% for i in range(var.shape[0]) %}
-        {% for j in range(var.shape[1]) %}
-    printf("{{ var.name() }}[{{ i }}][{{ j }}] = %f\n", vars.{{ var.name() }}[{{ i }}][{{ j }}]);
-        {% endfor %}
-      {% endfor %}
+    {% for v in named_vars %}
+    {{ v.c_print() }}
     {% endfor %}
-    #}
 
+    printf("Solve time: %f seconds\n", solve_time);
+    printf("Optimal value: %f\n", work.optval);
 
     return(0);
 }

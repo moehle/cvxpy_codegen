@@ -22,15 +22,12 @@ import scipy.sparse as sp
 from cvxpy_codegen.object_data.const_data import CONST_ID
 import cvxpy.settings as s
 
-VAR_NAMES = []
-
 
 class VarData(ExprData):
-    def __init__(self, expr):
+    def __init__(self, expr, var_offset):
         ExprData.__init__(self, expr)
         self.type = 'var'
         self.id = expr.id
-        #self.name = 'var%d' % self.id
         self.name = expr.name()
         self.arg_data = []
         self.sparsity = sp.csr_matrix(sp.eye(self.length, dtype=bool))
@@ -39,13 +36,65 @@ class VarData(ExprData):
         self.has_offset = False
         self.coeffs = {self.id : self}
         self.vid = self.id
+        self.var_offset = var_offset
 
         # TODO option to not ignore default names.
         self.is_named = False
-        if self.name in VAR_NAMES:
-            raise TypeError('Duplicate variable name %s' % self.name)
         if not self.name == "%s%d" % (s.VAR_PREFIX, self.id):
             self.is_named = True
+
+
+    def c_print(self):
+        s = ''
+        if self.is_scalar():
+            s += '    printf("%s = %%f\\n", vars.%s);\n' \
+                    % (self.name, self.name)
+        elif self.is_vector():
+            for i in range(self.shape[0]):
+                s += '    printf("%s[%d] = %%f\\n", vars.%s[%d]);\n' \
+                        % (self.name, i, self.name, i)
+        else:
+            for j in range(self.shape[1]):
+                for i in range(self.shape[0]):
+                    s += '    printf("%s[%d][%d] = %%f\\n", vars.%s[%d][%d]);\n' \
+                            % (self.name, i, j, self.name, i, j)
+        s += '    \n'
+        return s
+
+
+    def c_print_getvar(self):
+        s =  ''
+        if self.is_scalar():
+            s += '    vars->%s = *(work->primal_var + %d);\n' \
+                                % (self.name, self.var_offset)
+            s += '\n'
+        elif self.is_vector():
+            s += '    for(i=0; i<%d; i++){\n' % self.shape[0]
+            s += '        vars->%s[i] = *(work->primal_var + %d + i);\n' \
+                                % (self.name, self.var_offset)
+            s += '    }\n'
+            s += '\n'
+        else:
+            s += '    for(i=0; i<%d; i++){\n' % self.shape[0]
+            s += '        for(j=0; j<%d; j++){\n' % self.shape[1]
+            s += '            vars->%s[i][j] = *(work->primal_var + %d + i + %d*j);\n' \
+                                % (self.name, self.var_offset, self.shape[0])
+            s += '        }\n'
+            s += '    }\n'
+            s += '\n'
+        return s
+
+
+    
+    def c_print_struct(self):
+        if self.is_scalar():
+            s = '    double %s;\n' % self.name
+        elif self.is_vector():
+            s = '    double %s[%d];\n' % (self.name, self.shape[0])
+        else:
+            s = '    double %s[%d][%d];\n' % \
+                    (self.name, self.shape[0], self.shape[1])
+        return s
 
 
     

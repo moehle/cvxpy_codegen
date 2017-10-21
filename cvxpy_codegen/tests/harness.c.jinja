@@ -49,8 +49,7 @@ void json_vector_double(double *x, long len){
 
 void solver_init(Work *work);
 void expr_handler_init(Work *work);
-void eval_exprs(Params *params, Work *work);
-void fill_matrices(Work *work);
+void fill_matrices(Params *params, Work *work);
 
 
 int main(){
@@ -77,61 +76,60 @@ int main(){
 
     expr_handler_init(&work);
     solver_init(&work);
-    eval_exprs(&params, &work);
-    fill_matrices(&work);
+    fill_matrices(&params, &work);
 
 
     printf("{");
 
       /* Objective. */
       printf("\"obj_coeff\":");
-      json_vector_double(work.obj_vec, {{ x_length }});
+      json_vector_double(work.obj_coeff, {{ x_length }});
       printf(",");
       printf("\"obj_offset\":%9.9lf", work.obj_offset);
 
       /* Equality constraint. */
       printf(",");
-      printf("\"eq_shape0\":%d", {{ eq_coeff.shape[0] }});
+      printf("\"eq_shape0\":%d", work.eq_coeff.m);
       printf(",");
-      printf("\"eq_shape1\":%d", {{ eq_coeff.shape[1] }});
+      printf("\"eq_shape1\":%d", work.eq_coeff.n);
 
       printf(",");
       printf("\"eq_colptr\":");
-      json_vector_long(work.eq_coeff.p, {{ eq_coeff.shape[1]+1 }});
+      json_vector_long(work.eq_coeff.p, work.eq_coeff.n+1);
 
       printf(",");
       printf("\"eq_rowidx\":");
-      json_vector_long(work.eq_coeff.i, {{ eq_coeff.nnz }});
+      json_vector_long(work.eq_coeff.i, work.eq_coeff.nnz);
 
       printf(",");
       printf("\"eq_nzval\":");
-      json_vector_double(work.eq_coeff.x, {{ eq_coeff.nnz }});
+      json_vector_double(work.eq_coeff.x, work.eq_coeff.nnz);
 
       printf(",");
       printf("\"eq_offset\":");
-      json_vector_double(work.eq_offset, {{ eq_coeff.shape[0] }});
+      json_vector_double(work.eq_offset, work.eq_coeff.m);
 
       /* Inequality constraint. */
       printf(",");
-      printf("\"leq_shape0\":%d", {{ leq_coeff.shape[0] }});
+      printf("\"leq_shape0\":%d", work.leq_coeff.m);
       printf(",");
-      printf("\"leq_shape1\":%d", {{ leq_coeff.shape[1] }});
+      printf("\"leq_shape1\":%d", work.leq_coeff.n);
 
       printf(",");
       printf("\"leq_colptr\":");
-      json_vector_long(work.leq_coeff.p, {{ leq_coeff.shape[1]+1 }});
+      json_vector_long(work.leq_coeff.p, work.leq_coeff.n+1);
 
       printf(",");
       printf("\"leq_rowidx\":");
-      json_vector_long(work.leq_coeff.i, {{ leq_coeff.nnz }});
+      json_vector_long(work.leq_coeff.i, work.leq_coeff.nnz);
 
       printf(",");
       printf("\"leq_nzval\":");
-      json_vector_double(work.leq_coeff.x, {{ leq_coeff.nnz }});
+      json_vector_double(work.leq_coeff.x, work.leq_coeff.nnz);
 
       printf(",");
       printf("\"leq_offset\":");
-      json_vector_double(work.leq_offset, {{ leq_coeff.shape[0] }});
+      json_vector_double(work.leq_offset, work.leq_coeff.m);
 
     printf("}");
 

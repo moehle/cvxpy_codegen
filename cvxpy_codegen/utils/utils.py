@@ -27,6 +27,8 @@ from jinja2 import Environment, PackageLoader, contextfilter, StrictUndefined
 PKG_PATH = os.path.dirname(os.path.abspath(__path__[0]))
 EXP_CONE_LENGTH = 3
 
+CONST_ID = "CONST_ID"
+
 class Counter():
     def __init__(self):
         self.count = 0
@@ -83,3 +85,5 @@ def render(target_dir, template_vars, template_path, target_name):
     f = open(os.path.join(target_dir, target_name), 'w')
     f.write(template.render(total_template_vars))
     f.close()
+
+

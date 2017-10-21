@@ -28,7 +28,7 @@ void solver_solve(Work *work);
 /* Function declarations */
 void recover_vars(Work *work, Vars *vars);
 void eval_exprs(Params *params, Work *work);
-void fill_matrices(Work *work);
+void fill_matrices(Params *params, Work *work);
 void expr_handler_init(Work *work);
 void solver_init(Work *work);
 
@@ -44,11 +44,8 @@ void cg_init(Work *work){
 /* Main solve function */
 int cg_solve(Params *params, Work *work, Vars *vars){
 
-    /* Evaluate expressions. */
-    eval_exprs(params, work);
-
     /* Fill the data matrices using the parameters */
-    fill_matrices(work);
+    fill_matrices(params, work);
 
     /* Call the solver to solve the problem */
     solver_solve(work);
@@ -61,14 +58,14 @@ int cg_solve(Params *params, Work *work, Vars *vars){
 
 
 void recover_vars(Work *work, Vars *vars){
-    {% if named_vars %}
+    {% if has_vector_vars %}
+    int i;
+
+    {% elif has_matrix_vars %}
     int i, j;
+    
     {% endif %}
     {% for var in named_vars %}
-    for(i=0; i<{{ var.shape[0] }}; i++){
-        for(j=0; j<{{ var.shape[1] }}; j++){
-            vars->{{ var.name }}[i][j] = *(work->primal_var + {{ var_offsets[var.id] }} + i + {{var.shape[0]}}*j);
-        }
-    }
+    {{ var.c_print_getvar() }}
     {% endfor %}
 }

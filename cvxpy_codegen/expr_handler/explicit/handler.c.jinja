@@ -1,0 +1,119 @@
+/*
+ *  Copyright 2017 Nicholas Moehle
+ *  
+ *  This file is part of CVXPY-CODEGEN.
+ *  
+ *  CVXPY-CODEGEN is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *  
+ *  CVXPY-CODEGEN is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License
+ *  along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+{% import "utils/utils.c.jinja" as u with context %}
+#include "codegen.h"
+
+
+{% macro expr_handler_workspace() %}
+    /* Problem coefficients. */
+
+    {% for f in aff_operators %}
+    CscMatrix {{ f.name }}_coeff;
+    long *{{ f.name }}_colptr;
+    long *{{ f.name }}_rowidx;
+    double {{ f.name }}_nzval[{{ f.coeff.nnz }}];
+    double {{ f.name }}_offset[{{ f.shape[0] }}];
+
+    {% endfor %}
+    {% for f in aff_functionals %}
+    double {{ f.name }}_coeff[{{ f.shape[0] }}];
+    double {{ f.name }}_offset;
+
+    {% endfor %}
+{% endmacro %}
+
+
+/* Sparsity pattern for the objective and constraint matrices. */
+{% for f in aff_operators %}
+long {{ f.name }}_colptr{{ u.print_vec(f.coeff.indptr) }};
+long {{ f.name }}_rowidx{{ u.print_vec(f.coeff.indices) }};
+
+{% endfor %}
+
+
+
+{# TODO: can this be cleaner? #}
+{% macro print_sym_expr( expr ) %}
+    {% if isinstance(expr, SymMult) -%}
+        ( {{ print_sym_expr(expr.args[0]) }} * {{ print_sym_expr(expr.args[1]) }} )
+    {%- elif isinstance(expr, SymDiv) -%}
+        ( {{ print_sym_expr(expr.args[0]) }} / {{ print_sym_expr(expr.args[1]) }} )
+    {%- elif isinstance(expr, SymAdd) -%}
+        ({%- for a in expr.args[:-1] -%}
+             {{- print_sym_expr(a) }} + 
+        {%- endfor -%}
+        {{- print_sym_expr(expr.args[-1]) }} )
+    {%- elif isinstance(expr, SymParam) -%}
+        {%- if isinstance(expr.param, CallbackParam) -%}
+            work->{{ expr.param.name() }}_nzval[{{ expr.nz_idx}}]
+        {%- else -%}
+            {%- if len(expr.param.shape) == 0 -%}
+                params->{{ expr.param.name() }}
+            {%- elif len(expr.param.shape) == 1 -%}
+                params->{{ expr.param.name() }}[{{ expr.idx[0] }}]
+            {%- else -%}
+                params->{{ expr.param.name() }}[{{ expr.idx[0] }}][{{expr.idx[1] }}]
+            {%- endif -%}
+        {%- endif -%}
+    {%- elif isinstance(expr, SymConst) -%}
+        {{ expr.value }}
+    {%- endif %}
+{% endmacro %}
+
+
+void expr_handler_init(Work *work){
+    {% for f in aff_operators %}
+    work->{{ f.name }}_coeff.p = {{ f.name }}_colptr;
+    work->{{ f.name }}_coeff.i = {{ f.name }}_rowidx;
+    work->{{ f.name }}_coeff.x = work->{{ f.name }}_nzval;
+    work->{{ f.name }}_coeff.m = {{ f.coeff.shape[0] }};
+    work->{{ f.name }}_coeff.n = {{ f.coeff.shape[1] }};
+    work->{{ f.name }}_coeff.nnz = {{ f.coeff.nnz }};
+
+    {% endfor %}
+
+}
+
+
+void fill_matrices(Params *params, Work *work){
+
+
+    {% for f in aff_operators %}
+    {% for i, j, p, elem in f.coeff %}
+    work->{{ f.name }}_nzval[{{ p }}] = {{ print_sym_expr(elem) }};
+    {% endfor %}
+
+    {% for i, j, p, elem in f.offset.as_dense() %}
+    work->{{ f.name }}_offset[{{ i }}] = {{ print_sym_expr(elem) }};
+    {% endfor %}
+    {% endfor %}
+
+
+    {% for f in aff_functionals %}
+    {% for i, j, p, elem in f.coeff.as_dense() %}
+    work->{{ f.name }}_coeff[{{ i }}] = {{ print_sym_expr(elem) }};
+    {% endfor %}
+
+    {% for i, j, p, elem in f.offset.as_dense() %}
+    work->{{ f.name }}_offset = {{ print_sym_expr(elem) }};
+    {% endfor %}
+    {% endfor %}
+}
+

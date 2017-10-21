@@ -48,6 +48,33 @@ class ParamData(ExprData):
         mat = sp.csc_matrix((coeff_height, x_length), dtype=bool)
         return mat
 
+    def c_print(self):
+        s = ''
+        if self.is_scalar():
+            s += '    params.%s = %f;\n' % (self.name, self.value)
+        elif self.is_vector():
+            for i in range(self.shape[0]):
+                s += '    params.%s[%d] = %f;\n' % (self.name, i, self.value[i])
+        else:
+            for i in range(self.shape[0]):
+                for j in range(self.shape[1]):
+                    s += '    params.%s[%d][%d] = %f;\n' % (self.name, i, j, self.value[i,j])
+        s += '    \n'
+        return s
+
+
+
+    def c_print_struct(self):
+        if self.is_scalar():
+            s = '    double %s;\n' % self.name
+        elif self.is_vector():
+            s = '    double %s[%d];\n' % (self.name, self.shape[0])
+        else:
+            s = '    double %s[%d][%d];\n' % \
+                    (self.name, self.shape[0], self.shape[1])
+        return s
+        
+
 
 class CbParamData(ExprData):
     def __init__(self, expr, arg_data):

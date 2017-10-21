@@ -17,9 +17,15 @@ You should have received a copy of the GNU General Public License
 along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-class EmbeddedSolverIntf():
-    def __init__(self):
-        return  
 
-
+class ExprMatrixData():
+    
+    def __init__(self, expr_datas, name):
+        self.name = name
+        self.exprs = exprs
+        self.vert_offsets = []
+        vert_offset = 0
+        for e in expr_datas:
+            self.vert_offsets += [vert_offset]
+            vert_offset += e.length
 

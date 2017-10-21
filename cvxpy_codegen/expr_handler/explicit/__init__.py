@@ -17,9 +17,4 @@ You should have received a copy of the GNU General Public License
 along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-class EmbeddedSolverIntf():
-    def __init__(self):
-        return  
-
-
-
+#from cvxpy_codegen.expr_handler_sym.expr_handler import ExprHandler

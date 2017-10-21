@@ -36,6 +36,7 @@
     pwork *solver_work;
     {% endif %}
 
+    {#
     /* Problem coefficients. */
 
     /* Storage for the equality constraints. */
@@ -53,16 +54,19 @@
     double obj_nzval[{{ obj_coeff.nnz }}];
     double obj_vec[{{ x_length }}];
     double obj_offset;
+    #}
 {%- endmacro %}
 
 
 /* Sparsity pattern for the objective and constraint matrices. */
+{#
 long obj_colptr{{ u.print_vec(obj_coeff.indptr) }};
 long obj_rowidx{{ u.print_vec(obj_coeff.indices) }};
 long eq_colptr{{ u.print_vec(eq_coeff.indptr) }};
 long eq_rowidx{{ u.print_vec(eq_coeff.indices) }};
 long leq_colptr{{ u.print_vec(leq_coeff.indptr) }};
 long leq_rowidx{{ u.print_vec(leq_coeff.indices) }};
+#}
 
 
 void add_matrix(long hshift, long vshift,
@@ -81,6 +85,7 @@ static long soc_sizes{{ u.print_vec(soc_dims) }};
 /* Initialize ECOS. */
 void solver_init(Work *work){
 
+    {#
     work->eq_coeff.p = eq_colptr;
     work->eq_coeff.i = eq_rowidx;
     work->eq_coeff.x = work->eq_nzval;
@@ -102,77 +107,25 @@ void solver_init(Work *work){
     work->obj_coeff.n = {{ obj_coeff.shape[1] }};
     work->obj_coeff.nnz = {{ obj_coeff.nnz }};
     work->obj_offset = 0;
+    #}
 
 
     /* Zero out the floating point values to avoid numerical difficulties. */
-    long i;
-    for (i=0; i<{{ eq_coeff.nnz }}; i++)  work->eq_nzval[i]   = 0;
-    for (i=0; i<{{ leq_coeff.nnz }}; i++)  work->leq_nzval[i]  = 0;
-    for (i=0; i<{{ eq_coeff.shape[0] }}; i++)  work->eq_offset[i]  = 0;
-    for (i=0; i<{{ leq_coeff.shape[0] }}; i++)  work->leq_offset[i] = 0;
-    for (i=0; i<{{ x_length }}; i++)  work->obj_vec[i]  = 0;
-
+    long p;
+    for (p=0; p<work->eq_coeff.nnz; p++)  work->eq_coeff.x[p] = 0;
+    for (p=0; p<work->leq_coeff.nnz; p++)  work->leq_coeff.x[p] = 0;
 
     {% if include_solver %}
     work->solver_work = ECOS_setup({{ x_length }}, {{ cone_dim }}, {{ eq_dim }},
              {{ leq_dim }}, {{ len(soc_dims) }}, soc_sizes, {{ exp_cones }}, 
              work->leq_coeff.x, work->leq_coeff.p, work->leq_coeff.i,
              work->eq_coeff.x, work->eq_coeff.p, work->eq_coeff.i,
-             work->obj_vec, work->leq_offset, work->eq_offset);
+             work->obj_coeff, work->leq_offset, work->eq_offset);
     {% endif %}
 
 }
 
 
-
-/* Stuff matrices. */
-void fill_matrices(Work *work){
-    long i;
-
-    /* Construct equality constraint. */
-    {% for c in eq_constr %}
-    {% for coeff in c.exprs[0].coeffs.values() %}
-    add_matrix({{ var_offsets[coeff.vid] }}, {{ c.vert_offset }},
-                  &work->eq_coeff, &work->{{ coeff.storage.name }});
-  
-    {% endfor %}
-    {% if c.exprs[0].has_offset %} {# TODO wrong #}
-    csr_vectorize(&work->{{ c.exprs[0].offset_expr.storage.name }}, {# TODO wrong #}
-                  work->eq_offset, {{ c.vert_offset}});
-    {% endif %}
-    {% endfor %}
-    reset_colptr({{  eq_coeff.shape[1] }},  eq_colptr);
-  
-    /* Construct iequality constraint. */
-    {% for c in leq_constr %}
-    {% for coeff in c.exprs[0].coeffs.values() %} {# TODO wrong #}
-    add_matrix({{ var_offsets[coeff.vid] }}, {{ c.vert_offset }},
-               &work->leq_coeff, &work->{{ coeff.storage.name }});
-  
-    {% endfor %}
-    {% if c.exprs[0].has_offset %} {# TODO wrong #}
-    csr_vectorize(&work->{{ c.exprs[0].offset_expr.storage.name }}, {# TODO wrong #}
-                  work->leq_offset, {{ c.vert_offset}});
-    {% endif %}
-    {% endfor %}
-    reset_colptr({{ leq_coeff.shape[1] }}, leq_colptr);
-  
-    /* Construct objective. */
-    {% for coeff in objective.coeffs.values() %}
-    add_matrix({{ var_offsets[coeff.vid] }}, 0,
-               &work->obj_coeff, &work->{{ coeff.storage.name }});
-    {% if objective.has_offset %}
-    work->obj_offset = work->{{ objective.offset_expr.storage.name }}.x[0];
-    {% endif %}
-    {% endfor %}
-    reset_colptr({{ obj_coeff.shape[1] }}, obj_colptr);
-    cscrow2vec(work->obj_coeff, work->obj_vec);
-
-    /* Convert from our format (Ax+b=0) to ECOS format (Ax=b). */
-    for (i=0; i<{{  eq_coeff.shape[0] }}; i++)  work->eq_offset[i]  = -work->eq_offset[i];
-    for (i=0; i<{{ leq_coeff.shape[0] }}; i++)  work->leq_offset[i] = -work->leq_offset[i];
-
-}
 
 
 
@@ -185,15 +138,20 @@ void solver_solve(Work *work){
     
     {#
     {{ u.print_cscmat_eval('eq_coeff') }}
-    {{ u.print_vec_eval('eq_offset', eq_coeff.shape[0]) }}
+    {{ u.print_vec_eval('eq_offset', eq_dim ) }}
     {{ u.print_cscmat_eval('leq_coeff') }}
-    {{ u.print_vec_eval('leq_offset', leq_coeff.shape[0]) }}
-    {{ u.print_cscmat_eval('obj_coeff') }}
-    {{ u.print_vec_eval('obj_vec', leq_coeff.shape[1]) }}
+    {{ u.print_vec_eval('leq_offset', cone_dim) }}
+    {{ u.print_vec_eval('obj_coeff', x_length) }}
+    printf("obj_offset = %f\n", work->obj_offset);
     #}
 
+    /* Flip signs. */
+    long i;
+    for (i=0; i<work->eq_coeff.m; i++)  work->eq_offset[i] *= -1;
+    for (i=0; i<work->leq_coeff.m; i++)  work->leq_offset[i] *= -1;
+
     ECOS_updateData(work->solver_work, work->leq_nzval, work->eq_nzval,
-                     work->obj_vec, work->leq_offset, work->eq_offset);
+                     work->obj_coeff, work->leq_offset, work->eq_offset);
 
     solver_flag = ECOS_solve(work->solver_work);
 

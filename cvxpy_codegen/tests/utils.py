@@ -42,8 +42,7 @@ from cvxpy.reductions.solvers.conic_solvers.ecos_conif import ECOS
 
 
 TARGET_DIR = os.path.join(os.getcwd(), 'cg_build')
-HARNESS_C = 'tests/ecos_intf/harness.c.jinja'
-CODEGEN_H = 'tests/ecos_intf/codegen.h.jinja'
+HARNESS_C = 'tests/harness.c.jinja'
 
 
 
@@ -129,10 +128,10 @@ class CodegenTestCase(unittest.TestCase):
         return exit_code
 
 
-    def _run_codegen_test(self, prob, module, class_name, method_name):
+    def _run_codegen_test(self, prob, method_name):
         codegen(prob, TARGET_DIR)
         self.install_custom_solver(TARGET_DIR)
-        exit_code = self._run_isolated_test(module, class_name, method_name)
+        exit_code = self._run_isolated_test(self.module, self.class_name, method_name)
         self.assertEqual(exit_code, 0)
 
 
@@ -151,7 +150,6 @@ class CodegenTestCase(unittest.TestCase):
         obj = cvx.Minimize(cvx.sum(expr) + cvx.Variable(name='extra_var'))
         prob = cvx.Problem(obj, [])
         self._test_prob(prob, **kwargs)
-
 
     def _test_prob(self, prob, printing=False):
         sc = construct_solving_chain(prob, solver="ECOS")
@@ -189,9 +187,15 @@ class CodegenTestCase(unittest.TestCase):
         true_leq_coeff   = data[s.G]
         true_leq_offset  = data[s.H]
 
+        if not true_eq_offset is None:
+            true_eq_offset = -true_eq_offset
+        if not true_leq_offset is None:
+            true_leq_offset = -true_leq_offset
+
         obj = prob.objective
         constraints = prob.constraints
         inv_data = inv_matrixstuffing
+
 
         # Do code generation
         template_vars = codegen(prob, TARGET_DIR, dump=True, include_solver=False, solver='ecos')
@@ -221,14 +225,14 @@ class CodegenTestCase(unittest.TestCase):
             print('\nTest objective offset :\n',   test_obj_offset)
             print('\nTrue objective offset :\n',   true_obj_offset)
 
-            print('\nTest equality coeff  :\n',    test_eq_coeff.todense())
-            print('\nTrue equality coeff  :\n',    true_eq_coeff.todense())
+            print('\nTest equality coeff  :\n',    test_eq_coeff)
+            print('\nTrue equality coeff  :\n',    true_eq_coeff)
 
             print('\nTest equality offset :\n',    test_eq_offset)
             print('\nTrue equality offset :\n',    true_eq_offset)
 
-            print('\nTest inequality coeff  :\n',  test_leq_coeff.todense())
-            print('\nTrue inequality coeff  :\n',  true_leq_coeff.todense())
+            print('\nTest inequality coeff  :\n',  test_leq_coeff)
+            print('\nTrue inequality coeff  :\n',  true_leq_coeff)
 
             print('\nTest inequality offset :\n',  test_leq_offset)
             print('\nTrue inequality offset :\n',  true_leq_offset)
