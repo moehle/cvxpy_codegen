@@ -37,6 +37,11 @@ from cvxpy.atoms.affine.add_expr import AddExpression
 from cvxpy.atoms.affine.promote import promote
 
 
+
+
+
+
+
 class TreeExprHandler():
 
     def __init__(self):
@@ -88,6 +93,12 @@ class TreeExprHandler():
         c = sym.transpose(c).as_vector()
         d = d.as_vector()
         self.aff_functionals += [AffineOperator(c, d, name)]
+
+
+    def _exprs_to_mat(self, exprs, x_length, var_offsets):
+        for e in exprs
+            self.process_expression(expr)
+        return A, b
 
 
 
@@ -212,3 +223,43 @@ class TreeExprHandler():
     def render(self, target_dir):
         render(target_dir, self.template_vars,
                'expr_handler/expr_handler.c.jinja', 'expr_handler.c')
+
+
+
+    # Gets the sparsity patterns of the objective and constraint coefficients.
+    # (This tells us how much memory to allocate in C).
+    def get_sparsity(self, x_length, var_offsets):
+
+        # Get Boolean sparse matrix for the objective.
+        obj_coeff = self.obj.get_matrix(x_length, var_offsets) 
+        
+        return (sp.csc_matrix(obj_coeff),
+                sp.csc_matrix(eq_coeff),
+                sp.csc_matrix(leq_coeff))
+
+
+    # Gets the sparsity patterns of the objective and constraint coefficients.
+    # (This tells us how much memory to allocate in C).
+    def get_sparsity(self, x_length, var_offsets):
+
+        # Get Boolean sparse matrix for the objective.
+        obj_coeff = self.obj.get_matrix(x_length, var_offsets) 
+        
+        # Get Boolean sparse matrix for the equality constraints.
+        eq_coeff = sp.csc_matrix((0, x_length), dtype=bool)
+        for c in self.eq_constrs:
+            eq_coeff = sp.vstack([eq_coeff,
+                    c.get_matrix(x_length, var_offsets)])
+
+        # Get Boolean sparse matrix for the inequality constraints.
+        leq_coeff = sp.csc_matrix((0, x_length), dtype=bool)
+        for c in self.leq_constrs:
+            leq_coeff = sp.vstack([leq_coeff,
+                    c.get_matrix(x_length, var_offsets)])
+
+        self.leq_nnz = leq_coeff.nnz
+        self.eq_nnz = eq_coeff.nnz
+
+        return (sp.csc_matrix(obj_coeff),
+                sp.csc_matrix(eq_coeff),
+                sp.csc_matrix(leq_coeff))

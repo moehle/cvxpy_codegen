@@ -17,12 +17,10 @@ You should have received a copy of the GNU General Public License
 along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from cvxpy_codegen.object_data \
-        import ParamData, ConstData, CbParamData, CONST_ID, CoeffData, VarData
+from cvxpy_codegen.object_data import ParamData, ConstData, CbParamData, CONST_ID, CoeffData, VarData
 from cvxpy_codegen.object_data.atom_data import AtomData
 from cvxpy_codegen.object_data.constr_data import ConstrData
 import scipy.sparse as sp
-import numpy as np
 from cvxpy_codegen.utils.utils import render
 from cvxpy_codegen.atoms.atoms import get_expr_data
 
@@ -33,36 +31,20 @@ from cvxpy.expressions.constants.constant import Constant
 from cvxpy.atoms.atom import Atom
 from cvxpy.expressions.variable import Variable
 
-from cvxpy.atoms.affine.add_expr import AddExpression
-from cvxpy.atoms.affine.promote import promote
-
-
-class AffineOperator(object):
-    def __init__(self, coeff, offset, name):
-        self.coeff = coeff
-        self.offset = offset
-        self.name = name
-        self.shape = coeff.shape
 
 
 class ExprHandler():
 
-    def __init__(self, var_offsets):
-        return NotImplemented
+    
+    def __init__(self):
 
 
-    def aff_operator(self, exprs, name, inv_data):
-        return NotImplemented
-
-
-    def aff_functional(self, expr, name, inv_data):
-        return NotImplemented
 
 
     # Return all variables needed to evaluate the C templates.
     def get_template_vars(self):
-        return NotImplemented
 
 
     def render(self, target_dir):
-        return NotImplemented
+        render(target_dir, self.template_vars,
+               'expr_handler/expr_handler.c.jinja', 'expr_handler.c')
