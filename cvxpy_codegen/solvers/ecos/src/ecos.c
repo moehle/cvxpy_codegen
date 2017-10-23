@@ -1625,10 +1625,6 @@ void ECOS_updateData(pwork *w, pfloat *Gpr, pfloat *Apr,
 
     idxint k;
 
-#if defined EQUILIBRATE && EQUILIBRATE > 0
-    unset_equilibration(w);
-#endif
-
     /* update pointers */
     w->G->pr = Gpr;
     w->A->pr = Apr;

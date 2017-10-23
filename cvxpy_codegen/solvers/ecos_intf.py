@@ -250,6 +250,11 @@ class EcosIntf(EmbeddedSolverIntf):
 
 
     def preprocess_problem(self, prob):
-        sc = get_solving_chain(prob, solver='ecos'):
+        sc = construct_solving_chain(prob, solver="ECOS")
+        for r in sc.reductions:
+            if isinstance(r, Dcp2Cone):
+                prob, dcp2cone_inv_data = r.apply(prob)
+            if isinstance(r, CvxAttr2Constr):
+                prob, attr_inv_data = r.apply(prob)
 
-        return
+        return prob
