@@ -234,24 +234,19 @@ void eval_exprs(Params *params, Work *work){
   {#{{ u.print_linopcoeff_eval(coeff) }}#}
 
   {% endfor %}
-  {% for mat in expr_matrices %}
-  {% for e in mat.expr_datas %}
-  {% for vert_offset, coeff in zip(e.vert_offsets, e.coeffs.values()) %}
+  {% for op in aff_operators %}
+  {% for vert_offset, e in zip(op.vert_offsets, e.expr_datas) %}
+  {% for coeff in e.coeffs.values()) %}
   add_matrix({{ var_offsets[coeff.vid] }}, {{ vert_offset }},
-             &work->{{ mat.name }}, &work->{{ coeff.storage.name }});
+             &work->{{ op.name }}, &work->{{ coeff.storage.name }});
   
   {% endfor %}
-  {% if c.exprs[0].has_offset %}
-
-
-
-
- 
-  csr_vectorize(&work->{{ c.exprs[0].offset_expr.storage.name }}, {# TODO wrong #}
+  {% if e.has_offset %}
+  csr_vectorize(&work->{{ e.offset_expr.storage.name }}, {# TODO wrong #}
                 work->leq_offset, {{ c.vert_offset}});
   {% endif %}
   {% endfor %}
-  reset_colptr({{ leq_coeff.shape[1] }}, leq_colptr);
+  reset_colptr({{ op.shape[1] }}, leq_colptr);
 
   {% endfor %}
 }

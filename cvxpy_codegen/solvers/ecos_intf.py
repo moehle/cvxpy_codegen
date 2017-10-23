@@ -247,3 +247,9 @@ class EcosIntf(EmbeddedSolverIntf):
         return (sp.csc_matrix(obj_coeff),
                 sp.csc_matrix(eq_coeff),
                 sp.csc_matrix(leq_coeff))
+
+
+    def preprocess_problem(self, prob):
+        sc = get_solving_chain(prob, solver='ecos'):
+
+        return

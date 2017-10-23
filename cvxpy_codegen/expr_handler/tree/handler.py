@@ -36,13 +36,26 @@ from cvxpy.expressions.variable import Variable
 from cvxpy.atoms.affine.add_expr import AddExpression
 from cvxpy.atoms.affine.promote import promote
 
+from cvxpy_codegen.expr_handler.expr_handler import \
+        ExprHandler, AffineOperator
+
+
+class TreeAffineOperator(AffineOperator):
+    def __init__(self, name, coeff, exprs):
+        self.name = name
+        self.coeff = coeff
+        self.shape = coeff.shape
+        self.exprs = exprs
+
+        self.vert_offsets = []
+        count = 0
+        for e in exprs:
+            self.vert_offsets += [count]
+            count += e.length
 
 
 
-
-
-
-class TreeExprHandler():
+class TreeExprHandler(ExprHandler):
 
     def __init__(self):
 
@@ -83,22 +96,26 @@ class TreeExprHandler():
 
 
     def aff_operator(self, exprs, name, x_length, var_offsets):
-        A, b = self._exprs_to_mat(exprs, x_length, var_offsets)
-        b = b.as_vector()
-        self.aff_operators += [AffineOperator(A, b, name)]
+        expr_datas = []
+        size = 0
+        for e in exprs:
+            expr_datas += [self.process_expression(e)]
+            size += e.size
+
+        coeff = self._get_sparsity(exprs, x_length, var_offsets)
+        self.aff_operators += [TreeAffineOperator(name, coeff, exprs=expr_datas)]
+
 
 
     def aff_functional(self, expr, name, x_length, var_offsets):
-        c, d = self._exprs_to_mat([expr], x_length, var_offsets)
-        c = sym.transpose(c).as_vector()
-        d = d.as_vector()
-        self.aff_functionals += [AffineOperator(c, d, name)]
+        expr_datas = []
+        size = 0
+        for e in exprs:
+            expr_datas += [self.process_expression(e)]
+            size += e.size
 
-
-    def _exprs_to_mat(self, exprs, x_length, var_offsets):
-        for e in exprs
-            self.process_expression(expr)
-        return A, b
+        coeff = self._get_sparsity(exprs, x_length, var_offsets)
+        self.aff_operators += [TreeAffineOperator(name, coeff, exprs=expr_datas)]
 
 
 
@@ -226,40 +243,11 @@ class TreeExprHandler():
 
 
 
-    # Gets the sparsity patterns of the objective and constraint coefficients.
+    # Gets the sparsity patterns of the coefficient.
     # (This tells us how much memory to allocate in C).
-    def get_sparsity(self, x_length, var_offsets):
+    def _get_sparsity(self, exprs, x_length, var_offsets):
 
-        # Get Boolean sparse matrix for the objective.
-        obj_coeff = self.obj.get_matrix(x_length, var_offsets) 
-        
-        return (sp.csc_matrix(obj_coeff),
-                sp.csc_matrix(eq_coeff),
-                sp.csc_matrix(leq_coeff))
-
-
-    # Gets the sparsity patterns of the objective and constraint coefficients.
-    # (This tells us how much memory to allocate in C).
-    def get_sparsity(self, x_length, var_offsets):
-
-        # Get Boolean sparse matrix for the objective.
-        obj_coeff = self.obj.get_matrix(x_length, var_offsets) 
-        
-        # Get Boolean sparse matrix for the equality constraints.
-        eq_coeff = sp.csc_matrix((0, x_length), dtype=bool)
-        for c in self.eq_constrs:
-            eq_coeff = sp.vstack([eq_coeff,
-                    c.get_matrix(x_length, var_offsets)])
-
-        # Get Boolean sparse matrix for the inequality constraints.
-        leq_coeff = sp.csc_matrix((0, x_length), dtype=bool)
-        for c in self.leq_constrs:
-            leq_coeff = sp.vstack([leq_coeff,
-                    c.get_matrix(x_length, var_offsets)])
-
-        self.leq_nnz = leq_coeff.nnz
-        self.eq_nnz = eq_coeff.nnz
-
-        return (sp.csc_matrix(obj_coeff),
-                sp.csc_matrix(eq_coeff),
-                sp.csc_matrix(leq_coeff))
+        coeff = sp.csc_matrix((0, x_length), dtype=bool)
+        for e in exprs:
+            coeff = sp.vstack([coeff, e.get_matrix(x_length, var_offsets)])
+        return sp.csc_matrix(coeff)

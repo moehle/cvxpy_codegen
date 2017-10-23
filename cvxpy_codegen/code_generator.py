@@ -51,13 +51,12 @@ def codegen(prob, target_dir,
         if codegen_mode == 'explicit':
             expr_handler = ExplicitExprHandler(inv_data.var_offsets)
         elif codegen_mode == 'tree':
-            expr_handler = TreeExprHandler(inv_data.var_offsets)
+            expr_handler = TreeExprHandler()
         else:
             raise Exception('Code generation mode "%s" not recognized.' % codegen_mode)
 
         # Process problem.
-        solver_intf = SOLVER_INTFS[solver.lower()](expr_handler,
-                            inv_data, include_solver)
+        solver_intf = SOLVER_INTFS[solver.lower()](expr_handler, include_solver)
         prob = solver_intf.preprocess_problem(prob)
         solver_intf.process_problem(prob)
 
