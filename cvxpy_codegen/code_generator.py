@@ -17,62 +17,60 @@ You should have received a copy of the GNU General Public License
 along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from cvxpy_codegen.expr_handler.explicit.handler import ExplicitExprHandler
-from cvxpy_codegen.expr_handler.tree.handler import TreeExprHandler
+from cvxpy_codegen.expr_handler import ExprHandler
 from cvxpy_codegen.templates.template_handler import TemplateHandler
+#from cvxpy.problems.problem_data.sym_data import SymData
 from cvxpy_codegen.solvers.solver_intfs import SOLVER_INTFS
 from cvxpy_codegen.utils.utils import make_target_dir
 import cvxpy.settings as s
 import numpy as np
 
-from cvxpy.reductions import InverseData
 
 
-def codegen(prob, target_dir,
-            solver = None,
-            include_solver = True,
-            inv_data = None,
-            codegen_mode = 'explicit',
-            dump = False):
 
-        # Solver defaults to ECOS.
+class CodeGenerator:
+    
+
+    def __init__(self, objective, constraints,
+                 solver=None,
+                 include_solver=True):
+        self.objective = objective.expr
+        self.constraints = constraints
+        self.template_vars = {}
+
+
+    def codegen(self, target_dir,
+                solver = None,
+                include_solver = True,
+                dump = False):
+
         if solver == None:
-            solver = "ecos"
-        if not solver.lower() in SOLVER_INTFS:
-            raise Exception('Solver "%s" not found' % solver)
+            solver = 'ecos'
+        elif not (solver in SOLVER_INTFS.keys):
+            raise TypeError("Unknown solver %s." % str(solver))
 
-        if not inv_data:
-            inv_data = InverseData(prob)
-        
         # Create the target directory.
         make_target_dir(target_dir)
 
         # Create expression handler and solver interfaces.
-        if codegen_mode == 'explicit':
-            expr_handler = ExplicitExprHandler(inv_data.var_offsets)
-        elif codegen_mode == 'tree':
-            expr_handler = TreeExprHandler()
-        else:
-            raise Exception('Code generation mode "%s" not recognized.' % codegen_mode)
+        expr_handler = ExprHandler()
+        solver_intf = SOLVER_INTFS[solver](expr_handler, include_solver)
 
-        # Process problem.
-        solver_intf = SOLVER_INTFS[solver.lower()](expr_handler, include_solver)
-        prob = solver_intf.preprocess_problem(prob)
-        solver_intf.process_problem(prob)
-
-        # Get template variables from solver interface, then render.
-        template_vars = {}
-        template_vars.update(solver_intf.get_template_vars())
-        solver_intf.render(target_dir)
+        # Process objective, constraints.
+        solver_intf.process_problem(self.objective, self.constraints)
 
         # Get template vars for the expr tree processor, then render.
-        template_vars.update(expr_handler.get_template_vars())
+        self.template_vars.update(expr_handler.get_template_vars())
         expr_handler.render(target_dir)
+
+        # Get template variables from solver interface, then render.
+        self.template_vars.update(solver_intf.get_template_vars())
+        solver_intf.render(target_dir)
 
         # Get template variables to render template
         template_handler = TemplateHandler(target_dir)
-        template_vars.update(template_handler.get_template_vars())
-        template_handler.render(target_dir, template_vars)
+        self.template_vars.update(template_handler.get_template_vars())
+        template_handler.render(target_dir, self.template_vars)
 
         if dump:
-            return template_vars
+            return self.template_vars
