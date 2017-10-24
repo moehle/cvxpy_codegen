@@ -59,7 +59,7 @@ class TestCodegen(tu.CodegenTestCase):
         prob = cvx.Problem(cvx.Minimize(x), [])
         with self.assertRaises(Exception) as cm:
             codegen(prob, TARGET_DIR, solver='SCS')
-        self.assertEqual(str(cm.exception), 'Unknown solver SCS.')
+        self.assertEqual(str(cm.exception), 'Solver "SCS" not found')
 
 
 

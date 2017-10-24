@@ -1,6 +1,5 @@
 {% from 'solvers/'+solver_name+"_intf.c.jinja" import solver_workspace with context %}
-{% from 'expr_handler_sym/expr_handler.c.jinja'
-        import expr_handler_workspace with context %}
+{% from expr_handler_c_jinja import expr_handler_workspace with context %}
 #ifndef CVXPY_CODEGEN
 #define CVXPY_CODEGEN
 

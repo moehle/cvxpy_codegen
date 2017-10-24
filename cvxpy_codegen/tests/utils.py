@@ -31,7 +31,6 @@ import cvxpy as cvx
 from cvxpy_codegen.utils.utils import render, make_target_dir
 import cvxpy.settings as s
 import json
-from cvxpy_codegen.code_generator import CodeGenerator
 from cvxpy.reductions.solvers.solving_chain import construct_solving_chain
 
 from cvxpy.reductions.eval_params import EvalParams
@@ -198,7 +197,8 @@ class CodegenTestCase(unittest.TestCase):
 
 
         # Do code generation
-        template_vars = codegen(prob, TARGET_DIR, dump=True, include_solver=False, solver='ecos')
+        template_vars = codegen(prob, TARGET_DIR, dump=True,
+                                include_solver=False, solver='ecos')
 
         # Set up test harness.
         render(TARGET_DIR, template_vars, HARNESS_C, 'harness.c')

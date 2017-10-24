@@ -38,8 +38,9 @@ from cvxpy.atoms.affine.promote import promote
 
 
 class AffineOperator(object):
-    def __init__(self, name, coeff):
+    def __init__(self, coeff, offset, name):
         self.coeff = coeff
+        self.offset = offset
         self.name = name
         self.shape = coeff.shape
 

@@ -49,6 +49,9 @@ from cvxpy_codegen.utils.utils import CONST_ID
 
 
 
+EXPR_HANDLER_C_JINJA = 'expr_handler/explicit/handler.c.jinja'
+
+
 class ExplicitExprHandler(ExprHandler):
     
     def __init__(self, var_offsets):
@@ -159,6 +162,7 @@ class ExplicitExprHandler(ExprHandler):
                                    'SymParam'  : SymParam,
                                    'SymConst'  : SymConst,
                                    'Variable'  : Variable,
+                                   'expr_handler_c_jinja': EXPR_HANDLER_C_JINJA,
                                    'has_matrix_vars'  : has_matrix_vars,
                                    'has_vector_vars'  : has_vector_vars,
                                    'CONST_ID' : CONST_ID })
@@ -169,7 +173,7 @@ class ExplicitExprHandler(ExprHandler):
 
     def render(self, target_dir):
         render(target_dir, self.template_vars,
-               'expr_handler/explicit/handler.c.jinja', 'handler.c')
+               EXPR_HANDLER_C_JINJA, 'expr_handler.c')
 
 
 

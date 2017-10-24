@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import cvxpy_codegen.expr_handler_sym.sym_matrix as sym
+import cvxpy_codegen.expr_handler.explicit.sym_matrix as sym
 import scipy.sparse as sp
 import numpy as np
 

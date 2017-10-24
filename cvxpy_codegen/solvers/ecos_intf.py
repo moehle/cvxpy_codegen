@@ -28,9 +28,16 @@ import ecos
 from cvxpy.reductions.solvers.solver import group_constraints
 from cvxpy.constraints import SOC, ExpCone, NonPos, Zero
 from cvxpy_codegen.expr_handler.expr_handler import ExprHandler
-from cvxpy_codegen.object_data.constr_data import NonPosData, SocData, ExpConeData, ZeroData
+from cvxpy_codegen.object_data.constr_data import \
+        NonPosData, SocData, ExpConeData, ZeroData
 import scipy.sparse as sp
 from cvxpy import vstack, reshape
+
+from cvxpy.reductions.solvers.solving_chain import construct_solving_chain
+from cvxpy.reductions.dcp2cone.dcp2cone import Dcp2Cone
+from cvxpy.reductions.cvx_attr2constr import CvxAttr2Constr
+from cvxpy.reductions.matrix_stuffing import MatrixStuffing
+
 
 
 class EcosIntf(EmbeddedSolverIntf):
@@ -84,8 +91,7 @@ class EcosIntf(EmbeddedSolverIntf):
                       'solver_name'             : name } 
 
     
-    def __init__(self, expr_handler, include_solver=True):
-        self.expr_handler = expr_handler
+    def __init__(self, include_solver=True):
         self.eq_constrs = []
         self.leq_constrs = []
         self.n_eq = 0
@@ -96,29 +102,85 @@ class EcosIntf(EmbeddedSolverIntf):
         self.cone_dim = 0
         self.template_vars.update({'include_solver' : include_solver})
 
+                
+    # TODO untested:
+    def preprocess_problem(self, prob):
+        sc = construct_solving_chain(prob, solver="ECOS")
+
+        for r in sc.reductions:
+            if isinstance(r, Dcp2Cone):
+                prob, dcp2cone_inv_data = r.apply(prob)
+            if isinstance(r, CvxAttr2Constr):
+                prob, attr_inv_data = r.apply(prob)
+
+        if not attr_inv_data == ():
+            id2new_var, id2old_var, __ = attr_inv_data
+            for id in id2old_var.keys():
+                # TODO Sets a private attribute :(
+                id2new_var[id]._name = id2old_var[id].name()
+
+        return prob
+    
+
+    def register_expr_handler(self, handler):
+        self.expr_handler = handler
+
+
+    def process_problem(self, prob, expr_handler, inv_data):
+        obj = prob.objective.expr
+        constrs = prob.constraints
+
+        self.expr_handler = expr_handler
+        self.inv_data = inv_data
+
+        # Separate constraints.
+        constr_map = group_constraints(constrs)
+        x_length = self.inv_data.x_length
+        var_offsets = self.inv_data.var_offsets
+
+        self.expr_handler.aff_functional(
+                obj, 'obj', x_length, var_offsets)
+
+        exprs = []
+        eq_constrs = constr_map[Zero]
+        for constr in eq_constrs:
+            exprs += [constr.args[0]]
+        self.expr_handler.aff_operator(exprs, 'eq', x_length, var_offsets)
+        self.n_eq = sum([e.size for e in exprs])
+
+        neq_constrs = constr_map[NonPos] + constr_map[SOC] + constr_map[ExpCone]
+        exprs = []
+        for constr in neq_constrs:
+            if isinstance(constr, NonPos):
+                exprs += [constr.args[0]]
+                self.n_leq += constr.size
+            elif isinstance(constr, SOC):
+                exprs += [self._get_soc_expr(constr)]
+                self.n_soc += len(constr.cone_sizes())
+                self.soc_sizes += constr.cone_sizes()
+            elif isinstance(constr, ExpCone):
+                raise Exception("Exp cone not implemented")
+            else:
+                raise Exception("Unknown constraint type")
+        self.expr_handler.aff_operator(exprs, 'leq', x_length, var_offsets)
+
+        self.cone_dim = self.n_leq + 3*self.n_exp + sum(self.soc_sizes)
+
 
 
     def get_template_vars(self):
 
         # Recover the sparsity patterns of the coefficient matrices.
-        x_length, var_offsets = self.expr_handler.get_sym_data()
-        obj_coeff, eq_coeff, leq_coeff = self.get_sparsity(x_length, var_offsets)
+        x_length = self.inv_data.x_length
+        var_offsets = self.inv_data.var_offsets
 
         # TODO rename many of these:
         self.template_vars.update({
-                'obj_coeff'    : obj_coeff,
-                'eq_coeff'     : eq_coeff,
-                'leq_coeff'    : leq_coeff,
-                'objective'    : self.obj,
-                'eq_constr'    : self.eq_constrs,
-                'leq_constr'   : self.leq_constrs,
                 'leq_dim'      : self.n_leq,
                 'eq_dim'       : self.n_eq,
                 'soc_dims'     : self.soc_sizes,
                 'exp_cones'    : self.n_exp,
                 'cone_dim'     : self.cone_dim,
-                'leq_nnz'      : self.leq_nnz,
-                'eq_nnz'       : self.eq_nnz,
                 'var_offsets'  : var_offsets,
                 'x_length'     : x_length})
 
@@ -137,77 +199,14 @@ class EcosIntf(EmbeddedSolverIntf):
         sh.copytree(self.SOURCE_DIR, solver_dir, ignore=self.IGNORES)
 
         # Render interface template:
-        render(target_dir, self.template_vars, 'solvers/ecos_intf.c.jinja', 'solver_intf.c')
+        render(target_dir, self.template_vars,
+               'solvers/ecos_intf.c.jinja', 'solver_intf.c')
 
 
-    def process_problem(self, obj, constrs):
-
-        # TODO reorganize?
-        #self.obj = obj
-        #self.constrs = constrs
-
-        # Separate constraints.
-        constr_map = group_constraints(constrs)
-
-        # Process objective.
-        self.obj = self.expr_handler.process_expression(obj)
-
-        # Process equality constraints.
-        vert_offset = 0
-        eq_constrs = constr_map[Zero]
-        for constr in eq_constrs:
-            exprs = []
-            for a in constr.args:
-                exprs += [self.expr_handler.process_expression(a)]
-            self.eq_constrs += [ZeroData(constr, exprs, vert_offset=vert_offset)]
-            vert_offset += constr.size
-        self.n_eq = vert_offset
-
-        # Process conic constraints.
-        neq_constrs = constr_map[NonPos] + constr_map[SOC] + constr_map[ExpCone]
-        vert_offset = 0
-        for constr in neq_constrs:
-            if isinstance(constr, NonPos):
-                expr = self.expr_handler.process_expression(constr.args[0])
-                self.leq_constrs += [NonPosData(constr, [expr], 
-                                     vert_offset=vert_offset)]
-                self.n_leq += constr.size
-                vert_offset += constr.size
-            elif isinstance(constr, SOC):
-                expr = self.get_soc_expr(constr)
-                expr = self.expr_handler.process_expression(expr)
-                self.leq_constrs += [SocData(constr, [expr],
-                                     vert_offset=vert_offset)]
-                self.n_soc += len(constr.cone_sizes())
-                self.soc_sizes += constr.cone_sizes()
-                vert_offset += sum(constr.cone_sizes())
-            elif isinstance(constr, ExpCone):
-                raise Exception("Exp cone not implemented")
-                exprs = []
-                for a in constr.args:
-                    exprs += [self.expr_handler.process_expression(a)]
-                self.leq_constrs += [ExpConeData(constr, exprs,
-                                     vert_offset=vert_offset)]
-                self.n_exp += constr.sizesize
-                vert_offset += constr.size
-            else:
-                raise Exception("Unknown constraint type")
-
-        self.cone_dim = self.n_leq + 3*self.n_exp + sum(self.soc_sizes)
-
-
-
-    # For each constraint, collect data on the constraint,
-    # then process its expression trees.
-    def process_constr(self, constrs):
-        constr_data = []
-        vert_offset = 0
-        return constr_data
-    
-
-    def get_soc_expr(self, c):
+    def _get_soc_expr(self, c):
         T = c.args[0]
         X = c.args[1]
+        c.axis = 0
         if c.axis == 1:
             X = X.T
         if len(X.shape) == 0:
@@ -217,44 +216,3 @@ class EcosIntf(EmbeddedSolverIntf):
         n, n_cones = X.shape
         T = reshape(T, (1, n_cones))
         return -reshape(vstack([T,X]), ((n+1)*n_cones,))
- 
-
-
-
-
-    # Gets the sparsity patterns of the objective and constraint coefficients.
-    # (This tells us how much memory to allocate in C).
-    def get_sparsity(self, x_length, var_offsets):
-
-        # Get Boolean sparse matrix for the objective.
-        obj_coeff = self.obj.get_matrix(x_length, var_offsets) 
-        
-        # Get Boolean sparse matrix for the equality constraints.
-        eq_coeff = sp.csc_matrix((0, x_length), dtype=bool)
-        for c in self.eq_constrs:
-            eq_coeff = sp.vstack([eq_coeff,
-                    c.get_matrix(x_length, var_offsets)])
-
-        # Get Boolean sparse matrix for the inequality constraints.
-        leq_coeff = sp.csc_matrix((0, x_length), dtype=bool)
-        for c in self.leq_constrs:
-            leq_coeff = sp.vstack([leq_coeff,
-                    c.get_matrix(x_length, var_offsets)])
-
-        self.leq_nnz = leq_coeff.nnz
-        self.eq_nnz = eq_coeff.nnz
-
-        return (sp.csc_matrix(obj_coeff),
-                sp.csc_matrix(eq_coeff),
-                sp.csc_matrix(leq_coeff))
-
-
-    def preprocess_problem(self, prob):
-        sc = construct_solving_chain(prob, solver="ECOS")
-        for r in sc.reductions:
-            if isinstance(r, Dcp2Cone):
-                prob, dcp2cone_inv_data = r.apply(prob)
-            if isinstance(r, CvxAttr2Constr):
-                prob, attr_inv_data = r.apply(prob)
-
-        return prob

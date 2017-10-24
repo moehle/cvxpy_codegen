@@ -40,6 +40,11 @@ from cvxpy_codegen.expr_handler.expr_handler import \
         ExprHandler, AffineOperator
 
 
+
+
+EXPR_HANDLER_C_JINJA = 'expr_handler/tree/handler.c.jinja'
+
+
 class TreeAffineOperator(AffineOperator):
     def __init__(self, name, coeff, exprs):
         self.name = name
@@ -93,29 +98,25 @@ class TreeExprHandler(ExprHandler):
         # The variables needed to render the C code.
         self.template_vars = dict()
 
+        self.aff_operators = []
+        self.aff_functionals = []
+
 
 
     def aff_operator(self, exprs, name, x_length, var_offsets):
         expr_datas = []
-        size = 0
         for e in exprs:
-            expr_datas += [self.process_expression(e)]
-            size += e.size
-
-        coeff = self._get_sparsity(exprs, x_length, var_offsets)
+            expr_datas += [self._process_expression(e, var_offsets)]
+        coeff = self._get_sparsity(expr_datas, x_length, var_offsets)
         self.aff_operators += [TreeAffineOperator(name, coeff, exprs=expr_datas)]
 
 
 
     def aff_functional(self, expr, name, x_length, var_offsets):
         expr_datas = []
-        size = 0
-        for e in exprs:
-            expr_datas += [self.process_expression(e)]
-            size += e.size
-
-        coeff = self._get_sparsity(exprs, x_length, var_offsets)
-        self.aff_operators += [TreeAffineOperator(name, coeff, exprs=expr_datas)]
+        expr_data = self._process_expression(expr, var_offsets)
+        coeff = self._get_sparsity([expr_data], x_length, var_offsets)
+        self.aff_functionals += [TreeAffineOperator(name, coeff, exprs=[expr_data])]
 
 
 
@@ -136,6 +137,11 @@ class TreeExprHandler(ExprHandler):
         if not self.named_vars:
             raise TypeError("Problem has no variables.")
 
+        var_offsets = {v.id: v.var_offset for v in self.named_vars}
+
+        has_vector_vars = any([v.is_vector() for v in self.named_vars])
+        has_matrix_vars = any([v.is_matrix() for v in self.named_vars])
+
         # Fill out the variables needed to render the C template.
         self.template_vars.update({'vars': self.vars,
                                    'named_vars': self.named_vars,
@@ -150,6 +156,13 @@ class TreeExprHandler(ExprHandler):
                                    'work_float': work_float,
                                    'work_varargs': work_varargs,
                                    'work_coeffs': work_coeffs,
+                                   'zip': zip,
+                                   'aff_operators': self.aff_operators,
+                                   'aff_functionals': self.aff_functionals,
+                                   'var_offsets': var_offsets,
+                                   'expr_handler_c_jinja': EXPR_HANDLER_C_JINJA,
+                                   'has_matrix_vars'  : has_matrix_vars,
+                                   'has_vector_vars'  : has_vector_vars,
                                    'CONST_ID' : CONST_ID })
 
         return self.template_vars
@@ -158,13 +171,13 @@ class TreeExprHandler(ExprHandler):
 
     # Recursively process a linear operator,
     # collecting data according to the operator type.
-    def process_expression(self, expr):
+    def _process_expression(self, expr, var_offsets):
         expr_type = None
         expr_data = None
         is_linop = False
 
         if isinstance(expr, CallbackParam):
-            data_arg = self.process_expression(expr.atom)
+            data_arg = self._process_expression(expr.atom)
             data = CbParamData(expr, [data_arg])
             if expr.id not in self.cbparam_ids: # Check if already there.
                 self.callback_params += [data]
@@ -181,7 +194,7 @@ class TreeExprHandler(ExprHandler):
             self.constants += [data]
 
         elif isinstance(expr, Variable):
-            data = VarData(expr)
+            data = VarData(expr, var_offsets[expr.id])
             if expr.id not in self.var_ids: # Check if already there.
                 self.vars += [data]
                 self.var_ids += [expr.id]
@@ -195,7 +208,7 @@ class TreeExprHandler(ExprHandler):
                 self.preprocess_expr(expr)
                 arg_data = []
                 for arg in expr.args: # Recurse on args.
-                    arg_data += [self.process_expression(arg)]
+                    arg_data += [self._process_expression(arg, var_offsets)]
                 data = get_expr_data(expr, arg_data)
                 self.linop_coeffs += data.get_coeffs().values()
                 if data.has_offset:
@@ -239,7 +252,7 @@ class TreeExprHandler(ExprHandler):
 
     def render(self, target_dir):
         render(target_dir, self.template_vars,
-               'expr_handler/expr_handler.c.jinja', 'expr_handler.c')
+               EXPR_HANDLER_C_JINJA, 'expr_handler.c')
 
 
 
