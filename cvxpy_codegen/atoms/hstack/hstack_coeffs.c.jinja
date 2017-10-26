@@ -20,28 +20,26 @@
 {% import "utils/utils.c.jinja" as u with context %}
 
 
-{% macro vstack_coeffs_declare() %}
-void vstack_coeffs(long n_args, LinopCoeff *C, LinopCoeff *Z, long *offsets);
+{% macro hstack_coeffs_declare() %}
+void hstack_coeffs(long n_args, LinopCoeff *C, LinopCoeff *Z, long *offsets);
 {% endmacro %}
 
 
-{% macro vstack_coeffs_define() %}
-void vstack_coeffs(long n_args, LinopCoeff *C, LinopCoeff *Z, long *offsets){
-  long i, jZ, k, p, p2, iZ=0, count=0;
+{% macro hstack_coeffs_define() %}
+void hstack_coeffs(long n_args, LinopCoeff *C, LinopCoeff *Z, long *offsets){
+  long i, k, p, p2, count=0, iZ=0;
 
   Z->p[iZ++] = 0;
-  for (jZ=0; jZ<Z->n_var; jZ++){
-    for (k=0; k<n_args; k++){
-      for ( ; iZ<jZ*Z->m_var+offsets[k]+1; iZ++) Z->p[iZ] = Z->p[iZ-1];
-      for (i=jZ*C[k].m_var; i<(jZ+1)*C[k].m_var; i++){
-        p2 = C[k].p[i+1];
-        Z->p[iZ] = Z->p[iZ-1] + p2 - C[k].p[i];
-        for (p=C[k].p[i]; p<p2; p++){
-          Z->j[count]   = C[k].j[p];
-          Z->x[count++] = C[k].x[p];
-        }
-        iZ++;
+  for (k=0; k<n_args; k++){
+    for ( ; iZ<offsets[k]+1; iZ++) Z->p[iZ] = Z->p[iZ-1];
+    for (i=0; i<C[k].m; i++){
+      p2 = C[k].p[i+1];
+      Z->p[iZ] = Z->p[iZ-1] + p2 - C[k].p[i];
+      for (p=C[k].p[i]; p<p2; p++){
+        Z->j[count]   = C[k].j[p];
+        Z->x[count++] = C[k].x[p];
       }
+      iZ++;
     }
   }
   for ( ; iZ<=Z->m; iZ++) Z->p[iZ] = Z->p[iZ-1];
@@ -49,11 +47,11 @@ void vstack_coeffs(long n_args, LinopCoeff *C, LinopCoeff *Z, long *offsets){
 {% endmacro %}
 
 
-{% macro vstack_coeffs_eval(expr) %}
+{% macro hstack_coeffs_eval(expr) %}
 {% for i, c in enumerate(expr.args) %}
 work->work_coeffs[{{ i }}] = work->{{ c.storage.name }};
 work->work_int[{{ i }}] = {{ expr.data[i] }};
 {% endfor %}
-vstack_coeffs({{ len(expr.args) }}, work->work_coeffs, &work->{{ expr.name }},
+hstack_coeffs({{ len(expr.args) }}, work->work_coeffs, &work->{{ expr.name }},
               work->work_int);
 {% endmacro %}

@@ -51,11 +51,17 @@ class BilinAtomData(AtomData, object):
         if not self.var_arg is None:
             coeff_args = [None, None]
             for vid in self.args[self.var_arg].var_ids:
-                coeff_args[self.const_arg] = self.args[self.const_arg]
+                
+                if isinstance(self.args[self.const_arg], AtomData):
+                    coeff_args[self.const_arg] = self.args[self.const_arg].offset_expr
+                else:
+                    coeff_args[self.const_arg] = self.args[self.const_arg]
+
                 if isinstance(self.args[self.var_arg], AtomData):
                     coeff_args[self.var_arg] = self.args[self.var_arg].coeffs[vid]
                 else:
                     coeff_args[self.var_arg] = self.args[self.var_arg]
+
                 coeff = self.get_coeff_data(coeff_args, vid) 
                 self.coeffs.update({vid : coeff})
         return self.coeffs

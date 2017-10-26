@@ -52,6 +52,9 @@ class TestExprHandler(tu.CodegenTestCase):
         m = 8
         n = 12
         p = 10
+        m = 3
+        n = 5
+        p = 4
         self.m = m
         self.n = n
         self.p = p
@@ -117,210 +120,216 @@ class TestExprHandler(tu.CodegenTestCase):
     #    self._test_const_expr(cvx.max(-self.param_n1[:4]))
 
 
-    def test_add(self):
-        self._test_expr(self.param_mn + self.var_mn)
-        self._test_expr(self.var_mn + self.var_mn)
-        self._test_expr(self.var_mn + self.var + self.var_11)
-        self._test_expr(self.const_mn - self.var_mn)
-        self._test_expr(self.param_n1 + self.var_n1)
-        self._test_expr(self.param_n1 - self.var_n1)
-        self._test_expr(self.param_n + self.var_n)
-        self._test_expr(self.param + self.var)
-        self._test_expr(self.param_11 + self.var_mn + self.const_mn)
-        self._test_expr(self.const_mn + self.var_mn + self.param_11)
-        self._test_const_expr(self.param_11 + self.var_mn)
-        self._test_const_expr(self.param_mn + self.var_11)
-        self._test_const_expr(self.param_mn + self.var_11 + self.const_11)
-        self._test_const_expr(self.param_11 + self.var_11 + self.const_11)
-        self._test_const_expr(self.param_11 + self.var_11 + self.const_mn)
-        self._test_const_expr(self.const_mn + self.var_11 + self.param_mn)
-        self._test_const_expr(self.param_mn + self.param_mn)
-        self._test_const_expr(self.param_mn - self.param_mn)
-        self._test_const_expr(self.param_n1 + self.const_n1)
-        self._test_const_expr(self.param_n1 - self.const_n1)
-        self._test_const_expr(self.param_mn + self.param_11)
-        self._test_const_expr(self.param_11 + self.const_mn)
-        self._test_const_expr(self.param_mn + self.param_11 + self.const_11)
-        self._test_const_expr(self.param_11 + self.param_11 + self.const_11)
-        self._test_const_expr(self.param_11 + self.param_11 + self.const_mn)
-        self._test_const_expr(self.param_11 + self.const_mn + self.const_mn)
-        self._test_const_expr(self.const_mn + self.const_mn + self.param_11)
-        self._test_const_expr(self.const_mn + self.const_11 + self.param_mn)
-        self._test_const_expr(self.param_n + self.const_n)
-        self._test_const_expr(self.param + self.const)
+    #def test_add(self):
+    #    self._test_expr(self.param_mn + self.var_mn)
+    #    self._test_expr(self.var_mn + self.var_mn)
+    #    self._test_expr(self.var_mn + self.var + self.var_11)
+    #    self._test_expr(self.const_mn - self.var_mn)
+    #    self._test_expr(self.param_n1 + self.var_n1)
+    #    self._test_expr(self.param_n1 - self.var_n1)
+    #    self._test_expr(self.param_n + self.var_n)
+    #    self._test_expr(self.param + self.var)
+    #    self._test_expr(self.param_11 + self.var_mn + self.const_mn)
+    #    self._test_expr(self.const_mn + self.var_mn + self.param_11)
+    #    self._test_const_expr(self.param_11 + self.var_mn)
+    #    self._test_const_expr(self.param_mn + self.var_11)
+    #    self._test_const_expr(self.param_mn + self.var_11 + self.const_11)
+    #    self._test_const_expr(self.param_11 + self.var_11 + self.const_11)
+    #    self._test_const_expr(self.param_11 + self.var_11 + self.const_mn)
+    #    self._test_const_expr(self.const_mn + self.var_11 + self.param_mn)
+    #    self._test_const_expr(self.param_mn + self.param_mn)
+    #    self._test_const_expr(self.param_mn - self.param_mn)
+    #    self._test_const_expr(self.param_n1 + self.const_n1)
+    #    self._test_const_expr(self.param_n1 - self.const_n1)
+    #    self._test_const_expr(self.param_mn + self.param_11)
+    #    self._test_const_expr(self.param_11 + self.const_mn)
+    #    self._test_const_expr(self.param_mn + self.param_11 + self.const_11)
+    #    self._test_const_expr(self.param_11 + self.param_11 + self.const_11)
+    #    self._test_const_expr(self.param_11 + self.param_11 + self.const_mn)
+    #    self._test_const_expr(self.param_11 + self.const_mn + self.const_mn)
+    #    self._test_const_expr(self.const_mn + self.const_mn + self.param_11)
+    #    self._test_const_expr(self.const_mn + self.const_11 + self.param_mn)
+    #    self._test_const_expr(self.param_n + self.const_n)
+    #    self._test_const_expr(self.param + self.const)
 
 
-    def test_diag_vec(self):
-        self._test_expr(cvx.diag(self.var_n1))
-        self._test_expr(cvx.diag(-self.var_n1))
-        self._test_expr(cvx.diag(self.var_1n))
-        self._test_expr(cvx.diag(self.var_n))
-        self._test_const_expr(cvx.diag(self.param_n1))
-        self._test_const_expr(cvx.diag(-self.param_n1))
-        self._test_const_expr(cvx.diag(self.param_1n))
-        self._test_const_expr(cvx.diag(self.param_n))
+    ##def test_diag_vec(self):
+    ##    self._test_expr(cvx.diag(self.var_n1))
+    ##    self._test_expr(cvx.diag(-self.var_n1))
+    ##    self._test_expr(cvx.diag(self.var_1n))
+    ##    self._test_expr(cvx.diag(self.var_n))
+    ##    self._test_const_expr(cvx.diag(self.param_n1))
+    ##    self._test_const_expr(cvx.diag(-self.param_n1))
+    ##    self._test_const_expr(cvx.diag(self.param_1n))
+    ##    self._test_const_expr(cvx.diag(self.param_n))
 
 
-    def test_diag_mat(self):
-        self._test_expr(cvx.diag(self.var_nn))
-        self._test_expr(cvx.diag(cvx.diag(self.var_n1)))
-        self._test_expr(cvx.diag(self.var_nn - cvx.diag(self.var_n1)))
-        self._test_const_expr(cvx.diag(self.param_nn))
-        self._test_const_expr(cvx.diag(cvx.diag(self.param_n1)))
-        self._test_const_expr(cvx.diag(self.param_nn - cvx.diag(self.param_n1)))
-    
-
-    def test_diff(self):
-        self._test_expr(cvx.diff(self.var_n))
+    ##def test_diag_mat(self):
+    ##    self._test_expr(cvx.diag(self.var_nn))
+    ##    self._test_expr(cvx.diag(cvx.diag(self.var_n1)))
+    ##    self._test_expr(cvx.diag(self.var_nn - cvx.diag(self.var_n1)))
+    ##    self._test_const_expr(cvx.diag(self.param_nn))
+    ##    self._test_const_expr(cvx.diag(cvx.diag(self.param_n1)))
+    ##    self._test_const_expr(cvx.diag(self.param_nn - cvx.diag(self.param_n1)))
 
 
-    def test_div(self):
-        self._test_expr(cvx.sum(self.var_11 / self.const_11))
-        self._test_expr(cvx.sum(self.var_mn / self.const_11))
-        self._test_expr(cvx.sum(self.var_11 / self.param_11))
-        self._test_expr(cvx.sum(self.var_mn / self.param_11))
-    
+    ##def test_diff(self):
+    ##    self._test_expr(cvx.diff(self.var_n))
+
+
+    ##def test_div(self):
+    ##    self._test_expr(cvx.sum(self.var_11 / self.const_11))
+    ##    self._test_expr(cvx.sum(self.var_mn / self.const_11))
+    ##    self._test_expr(cvx.sum(self.var_11 / self.param_11))
+    ##    self._test_expr(cvx.sum(self.var_mn / self.param_11))
+
 
     def test_hstack(self):
         self._test_expr(cvx.hstack([self.var_n1, self.var_np, self.var_nn]))
         self._test_expr(cvx.hstack([self.var_n1, self.const_np, self.param_nn]))
+        self._test_expr(cvx.hstack([self.var_n1, self.var_n1, self.param_nn]))
+        self._test_expr(cvx.hstack([self.param, self.var]))
+        self._test_expr(cvx.hstack([self.var, self.var]))
+        self._test_expr(cvx.hstack([self.var_n, self.var, self.const_n]))
         self._test_const_expr(cvx.hstack([self.param_nn, self.param_n1]))
         self._test_const_expr(cvx.hstack([self.param_np, self.const_n1, self.param_nn]))
+        self._test_const_expr(cvx.hstack([self.const_n, self.param, self.const_n]))
     
 
-    def test_index(self):
-        self._test_expr(self.var_mn[2:8:2,2:4])
-        self._test_expr(self.var_n1[2:7:2])
-        self._test_expr(self.var_n1[2:4])
-        self._test_expr(self.var_n[1:3])
-        self._test_const_expr(self.param_mn[0:8:2, 1:17:3])
-        self._test_const_expr(self.param_n1[0:8:2])
-        self._test_const_expr(self.param_1n[:5])
-        self._test_const_expr(self.param_n[5:])
-        self._test_const_expr(self.param_n[:4])
-    
+    #def test_index(self):
+    #    self._test_expr(self.var_mn[2:8:2,2:4])
+    #    self._test_expr(self.var_n1[2:7:2])
+    #    self._test_expr(self.var_n1[2:4])
+    #    self._test_expr(self.var_n[1:3])
+    #    self._test_const_expr(self.param_mn[0:8:2, 1:17:3])
+    #    self._test_const_expr(self.param_n1[0:8:2])
+    #    self._test_const_expr(self.param_1n[:5])
+    #    self._test_const_expr(self.param_n[5:])
+    #    self._test_const_expr(self.param_n[:4])
+    #
 
-    def test_mul(self):
-        self._test_expr(self.const_mn * self.var_n1)
-        self._test_expr(self.const_mn * self.var_np)
-        self._test_expr(self.param_mn * self.var_np)
-        self._test_expr(self.const_mn * self.var_n)
-        self._test_expr(self.const_n  * self.var_mn.T)
-        self._test_expr(self.const_n  * self.var_n)
-        self._test_const_expr(self.param_mn * self.param_np)
-        self._test_const_expr(self.param_mn * self.const_np)
-        self._test_const_expr(self.param_mn * self.param_n1)
-        self._test_const_expr(self.param_mn * self.param_n)
-        self._test_const_expr(self.const_n  * self.param_mn.T)
-        self._test_const_expr(self.const_n  * self.param_n)
-
-
-    def test_rmul(self):
-        self._test_expr(self.var_mn * self.param_np)
-        self._test_expr(self.var_mn * self.const_np)
-        self._test_expr(self.var_mn * self.param_np)
-        self._test_expr(self.var_mn * self.param_np)
-        self._test_expr(self.var_n  * self.const_mn.T)
-        self._test_expr(self.var_n  * self.const_n)
+    #def test_mul(self):
+    #    self._test_expr(self.const_mn * self.var_n1)
+    #    self._test_expr(self.const_mn * self.var_np)
+    #    self._test_expr(self.param_mn * self.var_np)
+    #    self._test_expr(self.const_mn * self.var_n)
+    #    self._test_expr(self.const_n  * self.var_mn.T, printing=True)
+    #    self._test_expr(self.const_n  * self.var_n)
+    #    self._test_const_expr(self.param_mn * self.param_np)
+    #    self._test_const_expr(self.param_mn * self.const_np)
+    #    self._test_const_expr(self.param_mn * self.param_n1)
+    #    self._test_const_expr(self.param_mn * self.param_n)
+    #    self._test_const_expr(self.const_n  * self.param_mn.T)
+    #    self._test_const_expr(self.const_n  * self.param_n)
 
 
-    def test_multiply(self):
-        self._test_expr(cvx.multiply(self.const_mn, self.var_mn))
-        self._test_expr(cvx.multiply(self.param_mn, self.var_mn))
-        self._test_expr(self.const_n1 * self.var_11)
-        self._test_expr(self.const_np * self.var_11)
-        self._test_expr(self.param_mn * self.var_11)
-        self._test_expr(cvx.multiply(self.var_mn, self.const_mn))
-        self._test_expr(self.var_11 * self.const_np)
-        self._test_expr(self.var_mn * self.const_11)
-        self._test_expr(self.var_11 * self.param_np)
-        self._test_expr(self.var_mn * self.param_11)
-        self._test_const_expr(cvx.multiply(self.param_mn, self.const_mn))
-        self._test_const_expr(cvx.multiply(self.param_mn, self.param_mn))
-        self._test_const_expr(cvx.multiply(self.param_n1, self.param_n1))
-        self._test_const_expr(cvx.multiply(self.param_n1, self.const_n1))
-        self._test_const_expr(cvx.multiply(self.param_11, self.param_11))
-        self._test_const_expr(cvx.multiply(self.param_11, self.const_11))
-        self._test_const_expr(self.param_mn * self.param_11)
-        self._test_const_expr(self.param_11 * self.param_mn)
-        self._test_const_expr(self.const_mn * self.param_11)
-        self._test_const_expr(self.const_11 * self.param_mn)
+    ##def test_rmul(self):
+    ##    self._test_expr(self.var_mn * self.param_np)
+    ##    self._test_expr(self.var_mn * self.const_np)
+    ##    self._test_expr(self.var_mn * self.param_np)
+    ##    self._test_expr(self.var_mn * self.param_np)
+    ##    self._test_expr(self.var_n  * self.const_mn.T)
+    ##    self._test_expr(self.var_n  * self.const_n)
 
 
-    def test_neg(self):
-        self._test_expr(-self.var_mn)
-        self._test_expr(self.param_mn - self.var_mn)
-        self._test_expr(self.const_mn - self.var_mn)
-        self._test_const_expr(-self.param_mn)
-        self._test_const_expr(-self.param_n1)
+    #def test_multiply(self):
+    #    self._test_expr(cvx.multiply(self.const_mn, self.var_mn))
+    #    self._test_expr(cvx.multiply(self.param_mn, self.var_mn))
+    #    self._test_expr(self.const_n1 * self.var_11)
+    #    self._test_expr(self.const_np * self.var_11)
+    #    self._test_expr(self.param_mn * self.var_11)
+    #    self._test_expr(cvx.multiply(self.var_mn, self.const_mn))
+    #    self._test_expr(self.var_11 * self.const_np)
+    #    self._test_expr(self.var_mn * self.const_11)
+    #    self._test_expr(self.var_11 * self.param_np)
+    #    self._test_expr(self.var_mn * self.param_11)
+    #    self._test_const_expr(cvx.multiply(self.param_mn, self.const_mn))
+    #    self._test_const_expr(cvx.multiply(self.param_mn, self.param_mn))
+    #    self._test_const_expr(cvx.multiply(self.param_n1, self.param_n1))
+    #    self._test_const_expr(cvx.multiply(self.param_n1, self.const_n1))
+    #    self._test_const_expr(cvx.multiply(self.param_11, self.param_11))
+    #    self._test_const_expr(cvx.multiply(self.param_11, self.const_11))
+    #    self._test_const_expr(self.param_mn * self.param_11)
+    #    self._test_const_expr(self.param_11 * self.param_mn)
+    #    self._test_const_expr(self.const_mn * self.param_11)
+    #    self._test_const_expr(self.const_11 * self.param_mn)
 
 
-    def test_sum(self):
-        self._test_expr(cvx.sum(self.var_mn))
-        self._test_expr(cvx.sum(self.var_mn + self.var_mn))
-        self._test_expr(cvx.sum(self.var_mn + self.const_mn))
-        self._test_expr(cvx.sum(self.var_mn + self.param_mn))
-        self._test_expr(self.var_11 + cvx.sum(self.const_mn))
-        self._test_expr(self.param_11 + cvx.sum(self.var_mn))
+    #def test_neg(self):
+    #    self._test_expr(-self.var_mn)
+    #    self._test_expr(self.param_mn - self.var_mn)
+    #    self._test_expr(self.const_mn - self.var_mn)
+    #    self._test_const_expr(-self.param_mn)
+    #    self._test_const_expr(-self.param_n1)
 
 
-    def test_reshape(self):
-        self._test_expr(cvx.reshape(self.var_mn, (self.n, self.m)))
-        self._test_expr(cvx.reshape(
-                self.var_mn + self.const_mn, (self.n, self.m))[1:3, 4:5])
-        self._test_expr(cvx.reshape(self.var_mn.T, (self.n, self.m)))
-        self._test_expr(cvx.reshape(self.var_mn, (self.n, self.m)).T)
-        self._test_expr(cvx.reshape(self.var_mn, (self.n, self.m)) + self.var_mn.T)
-        self._test_expr(cvx.reshape(self.var_n1, (1, self.n)) + self.const_n1.T)
-        self._test_const_expr(cvx.reshape(self.param_mn, (self.n, self.m)))
-        self._test_const_expr(cvx.reshape(self.param_mn + self.const_mn,
-                (self.n, self.m)))
-        self._test_const_expr(cvx.reshape(self.param_n1, (1, self.n)))
-        self._test_const_expr(cvx.reshape(self.param_n1, (self.n,)))
-        self._test_const_expr(cvx.reshape(self.param_n1.T, (self.n,)))
-        self._test_const_expr(cvx.reshape(self.param_n, (1, self.n)))
-        self._test_const_expr(cvx.reshape(self.param_n, (self.n, 1)))
-        self._test_const_expr(cvx.reshape(self.param, (1, 1)))
-        self._test_const_expr(cvx.reshape(self.param_11, (1,)))
-        self._test_const_expr(cvx.reshape(self.param_11, ()))
+    #def test_sum(self):
+    #    self._test_expr(self.var_mn)
+    #    self._test_expr(cvx.sum(self.var_mn))
+    #    self._test_expr(cvx.sum(self.var_mn + self.var_mn))
+    #    self._test_expr(cvx.sum(self.var_mn + self.const_mn))
+    #    self._test_expr(cvx.sum(self.var_mn + self.param_mn))
+    #    self._test_expr(self.var_11 + cvx.sum(self.const_mn))
+    #    self._test_expr(self.param_11 + cvx.sum(self.var_mn))
 
 
-    def test_trace(self):
-        self._test_expr(cvx.trace(self.var_nn))
-        self._test_expr(cvx.trace(self.var_11))
-        self._test_const_expr(cvx.trace(self.param_nn))
-        self._test_const_expr(cvx.trace(cvx.diag(self.param_n1)))
-        self._test_const_expr(cvx.trace(self.param_11))
-    
-
-    def test_transpose(self):
-        self._test_expr(self.var_mn.T[1:3, 2:5])
-        self._test_expr((self.var_mn.T + self.const_mn.T)[1:3, 2:5])
-        self._test_expr(self.var_n1.T[0, 1:3])
-        self._test_expr((self.var_n1 + self.const_n1).T[0, 1:3])
-        self._test_expr(self.var_n.T[1:3])
-        self._test_const_expr(cvx.sum(self.param_mn.T[1:3, 2:5]))
-    
-
-    def test_upper_tri(self):
-        self._test_expr(self.var_nn)
-        self._test_expr(self.var_nn + self.const_nn)
-        self._test_expr(self.var_nn + self.param_nn)
+    #def test_reshape(self):
+    #    self._test_expr(cvx.reshape(self.var_mn, (self.n, self.m)))
+    #    self._test_expr(cvx.reshape(
+    #            self.var_mn + self.const_mn, (self.n, self.m))[1:3, 4:5])
+    #    self._test_expr(cvx.reshape(self.var_mn.T, (self.n, self.m)))
+    #    self._test_expr(cvx.reshape(self.var_mn, (self.n, self.m)).T)
+    #    self._test_expr(cvx.reshape(self.var_mn, (self.n, self.m)) + self.var_mn.T)
+    #    self._test_expr(cvx.reshape(self.var_n1, (1, self.n)) + self.const_n1.T)
+    #    self._test_const_expr(cvx.reshape(self.param_mn, (self.n, self.m)))
+    #    self._test_const_expr(cvx.reshape(self.param_mn + self.const_mn,
+    #            (self.n, self.m)))
+    #    self._test_const_expr(cvx.reshape(self.param_n1, (1, self.n)))
+    #    self._test_const_expr(cvx.reshape(self.param_n1, (self.n,)))
+    #    self._test_const_expr(cvx.reshape(self.param_n1.T, (self.n,)))
+    #    self._test_const_expr(cvx.reshape(self.param_n, (1, self.n)))
+    #    self._test_const_expr(cvx.reshape(self.param_n, (self.n, 1)))
+    #    self._test_const_expr(cvx.reshape(self.param, (1, 1)))
+    #    self._test_const_expr(cvx.reshape(self.param_11, (1,)))
+    #    self._test_const_expr(cvx.reshape(self.param_11, ()))
 
 
-    def test_vstack(self):
-        self._test_expr(cvx.vstack(
-                [self.var_1n, self.var_mn, self.var_nn])[:,0])
-        self._test_expr(cvx.vstack(
-                [self.var_1n, self.var_mn])[:,0])
-        self._test_expr(cvx.vstack(
-                [self.var_1n, self.const_mn, self.param_nn])[:,0])
-        self._test_const_expr(cvx.vstack(
-                [self.param_n1, self.param_11])[:,0])
-        self._test_const_expr(cvx.vstack(
-                [self.param_n1, self.param_11, self.const_11])[:,0])
-        self._test_const_expr(cvx.vstack(
-                [self.param_mn, self.param_pn, self.const_1n])[:,0])
+    ##def test_trace(self):
+    ##    self._test_expr(cvx.trace(self.var_nn))
+    ##    self._test_expr(cvx.trace(self.var_11))
+    ##    self._test_const_expr(cvx.trace(self.param_nn))
+    ##    self._test_const_expr(cvx.trace(cvx.diag(self.param_n1)))
+    ##    self._test_const_expr(cvx.trace(self.param_11))
+    #
+
+    #def test_transpose(self):
+    #    self._test_expr(self.var_mn.T[1:3, 2:5])
+    #    self._test_expr((self.var_mn.T + self.const_mn.T)[1:3, 2:5])
+    #    self._test_expr(self.var_n1.T[0, 1:3])
+    #    self._test_expr((self.var_n1 + self.const_n1).T[0, 1:3])
+    #    self._test_expr(self.var_n.T[1:3])
+    #    self._test_const_expr(cvx.sum(self.param_mn.T[1:3, 2:5]))
+    #
+
+    ##def test_upper_tri(self):
+    ##    self._test_expr(self.var_nn)
+    ##    self._test_expr(self.var_nn + self.const_nn)
+    ##    self._test_expr(self.var_nn + self.param_nn)
+
+
+    #def test_vstack(self):
+    #    self._test_expr(cvx.vstack(
+    #            [self.var_1n, self.var_mn, self.var_nn])[:,0])
+    #    self._test_expr(cvx.vstack(
+    #            [self.var_1n, self.var_mn])[:,0])
+    #    self._test_expr(cvx.vstack(
+    #            [self.var_1n, self.const_mn, self.param_nn])[:,0])
+    #    self._test_const_expr(cvx.vstack(
+    #            [self.param_n1, self.param_11])[:,0])
+    #    self._test_const_expr(cvx.vstack(
+    #            [self.param_n1, self.param_11, self.const_11])[:,0])
+    #    self._test_const_expr(cvx.vstack(
+    #            [self.param_mn, self.param_pn, self.const_1n])[:,0])
 
 
 

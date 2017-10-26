@@ -35,6 +35,9 @@ from cvxpy.expressions.variable import Variable
 
 from cvxpy.atoms.affine.add_expr import AddExpression
 from cvxpy.atoms.affine.promote import promote
+from cvxpy.atoms.affine.binary_operators import MulExpression, multiply
+from cvxpy.atoms.affine.reshape import reshape
+from cvxpy.atoms.affine.hstack import Hstack, hstack
 
 from cvxpy_codegen.expr_handler.expr_handler import \
         ExprHandler, AffineOperator
@@ -73,8 +76,7 @@ class TreeExprHandler(ExprHandler):
         self.linop_coeffs = []
 
         # The parameters appearing in the linear operators.
-        self.named_params = []
-        self.param_ids = []
+        self.named_params = {}
 
         # The callback parameters appearing in the linops.
         self.callback_params = []
@@ -121,7 +123,7 @@ class TreeExprHandler(ExprHandler):
 
 
     # Return all variables needed to evaluate the C templates.
-    def get_template_vars(self):
+    def get_template_vars(self, var_offsets):
 
         # The sizes of the C workspaces needed to evaluate the
         # the different operations on linops coefficients.
@@ -134,19 +136,27 @@ class TreeExprHandler(ExprHandler):
 
         # Get the named variables.
         self.named_vars = [v for v in self.vars if v.is_named]
-        if not self.named_vars:
-            raise TypeError("Problem has no variables.")
 
-        var_offsets = {v.id: v.var_offset for v in self.named_vars}
+        var_names = []
+        for v in self.named_vars:
+            if v.name in var_names:
+                raise Exception('Duplicate variable name "%s".' % v.name)
+            var_names += v.name
+
+        param_names = []
+        for p in self.named_params.values():
+            if p.name in param_names:
+                raise Exception('Duplicate parameter name "%s".' % p.name)
+            param_names += p.name
 
         has_vector_vars = any([v.is_vector() for v in self.named_vars])
         has_matrix_vars = any([v.is_matrix() for v in self.named_vars])
-
+        
         # Fill out the variables needed to render the C template.
         self.template_vars.update({'vars': self.vars,
                                    'named_vars': self.named_vars,
                                    'constants': self.constants,
-                                   'named_params': self.named_params,
+                                   'named_params': self.named_params.values(),
                                    'callback_params': self.callback_params,
                                    'expressions': self.expressions,
                                    'linop_coeffs': self.linop_coeffs,
@@ -177,17 +187,18 @@ class TreeExprHandler(ExprHandler):
         is_linop = False
 
         if isinstance(expr, CallbackParam):
-            data_arg = self._process_expression(expr.atom)
+            data_arg = self._process_expression(expr.atom, var_offsets)
             data = CbParamData(expr, [data_arg])
             if expr.id not in self.cbparam_ids: # Check if already there.
                 self.callback_params += [data]
                 self.cbparam_ids += [expr.id]
 
         elif isinstance(expr, Parameter):
-            data = ParamData(expr)
-            if expr.id not in self.param_ids: # Check if already there.
-                self.named_params += [data]
-                self.param_ids += [expr.id]
+            if expr.id not in self.named_params: # Check if already there.
+                data = ParamData(expr)
+                self.named_params.update({expr.id: data})
+            else:
+                data = self.named_params[expr.id]
 
         elif isinstance(expr, Constant):
             data = ConstData(expr)
@@ -205,7 +216,7 @@ class TreeExprHandler(ExprHandler):
                 self.linops[idx].force_copy()
                 data = self.linops[idx]
             else:
-                self.preprocess_expr(expr)
+                expr = self.preprocess_expr(expr)
                 arg_data = []
                 for arg in expr.args: # Recurse on args.
                     arg_data += [self._process_expression(arg, var_offsets)]
@@ -236,16 +247,42 @@ class TreeExprHandler(ExprHandler):
         self.expr_matrices += [ExprMatrix(expr_datas)]
 
 
-
+    # TODO move in with atoms
     def preprocess_expr(self, expr):
         if isinstance(expr, AddExpression):
-           new_args = []
-           for a in expr.args:
-               if np.prod(expr.shape) != 1 and np.prod(a.shape) == 1:
-                   new_args += [promote(a, expr.shape)]
-               else:
-                   new_args += [a]
-           expr.args = new_args
+            new_args = []
+            for a in expr.args:
+                if np.prod(expr.shape) != 1 and np.prod(a.shape) == 1:
+                    new_args += [promote(a, expr.shape)]
+                else:
+                    new_args += [a]
+            expr.args = new_args
+        if isinstance(expr, MulExpression) and not isinstance(expr, multiply):
+            arg0 = expr.args[0]
+            if (len(arg0.shape) == 1 and len(expr.args[1].shape) == 2):
+                n = expr.args[0].shape[0]
+                m = expr.args[1].shape[1]
+                lhs = reshape(expr.args[0], (1, n))
+                rhs = expr.args[1]
+                expr = reshape(lhs * rhs, (m,))
+            elif (len(arg0.shape) == 1 and len(expr.args[1].shape) == 1):
+                n = expr.args[0].shape[0]
+                lhs = reshape(expr.args[0], (1, n))
+                rhs = reshape(expr.args[1], (n, 1))
+                expr = reshape(lhs * rhs, ())
+        if isinstance(expr, Hstack):
+            if all([len(a.shape) == 2 for a in expr.args]):
+                return expr
+            elif all([len(a.shape) <= 1 for a in expr.args]):
+                new_args = []
+                for i, a in enumerate(expr.args):
+                    new_args += [reshape(a, (1, a.size))]
+                hstack_expr = hstack(new_args)
+                expr = reshape(hstack_expr, (hstack_expr.size,))
+            else:
+                return Exception("Bad dimensions used in Hstack atom.")
+        return expr
+           
 
 
 

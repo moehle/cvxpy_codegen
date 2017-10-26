@@ -98,7 +98,7 @@
 
     {% endfor %}
     {% for f in aff_functionals %}
-    double {{ f.name }}_coeff[{{ f.shape[0] }}];
+    double {{ f.name }}_coeff[{{ f.shape[1] }}];
     double {{ f.name }}_offset;
 
     {% endfor %}
@@ -160,7 +160,8 @@ void init_dense_sparsity(CsrMatrix A);
  */
 
 void expr_handler_init(Work *work){
- 
+    long i;
+
     {% for e in expressions %}
     {% if not e.inplace or e.make_copy %}
     work->{{ e.name }}.p = work->{{ e.name }}_rowptr;
@@ -225,14 +226,22 @@ void expr_handler_init(Work *work){
     {% endfor %}
     #}
 
-    {% for f in aff_operators %}
-    work->{{ f.name }}_coeff.p = {{ f.name }}_colptr;
-    work->{{ f.name }}_coeff.i = {{ f.name }}_rowidx;
-    work->{{ f.name }}_coeff.x = work->{{ f.name }}_nzval;
-    work->{{ f.name }}_coeff.m = {{ f.coeff.shape[0] }};
-    work->{{ f.name }}_coeff.n = {{ f.coeff.shape[1] }};
-    work->{{ f.name }}_coeff.nnz = {{ f.coeff.nnz }};
-
+    {% for op in aff_operators %}
+    work->{{ op.name }}_coeff.p = {{ op.name }}_colptr;
+    work->{{ op.name }}_coeff.i = {{ op.name }}_rowidx;
+    work->{{ op.name }}_coeff.x = work->{{ op.name }}_nzval;
+    work->{{ op.name }}_coeff.m = {{ op.coeff.shape[0] }};
+    work->{{ op.name }}_coeff.n = {{ op.coeff.shape[1] }};
+    work->{{ op.name }}_coeff.nnz = {{ op.coeff.nnz }};
+    for (i=0; i<{{ op.coeff.shape[0] }}; i++){
+        work->{{ op.name }}_offset[i] = 0;
+    }
+    {% endfor %}
+    {% for op in aff_functionals %}
+    for (i=0; i<{{ op.coeff.shape[1] }}; i++){
+        work->{{ op.name }}_coeff[i] = 0;
+    }
+    work->{{ op.name }}_offset = 0;
     {% endfor %}
 
 }

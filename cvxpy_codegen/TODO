@@ -1,7 +1,7 @@
 TASKS
 -write more linops
-  [ ] rmul
   [ ] hstack
+  [ ] rmul
   [ ] div
   [ ] diag_vec
   [ ] diag_mat

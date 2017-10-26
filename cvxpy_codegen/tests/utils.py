@@ -195,7 +195,6 @@ class CodegenTestCase(unittest.TestCase):
         constraints = prob.constraints
         inv_data = inv_matrixstuffing
 
-
         # Do code generation
         template_vars = codegen(prob, TARGET_DIR, dump=True,
                                 include_solver=False, solver='ecos')
@@ -231,8 +230,8 @@ class CodegenTestCase(unittest.TestCase):
             print('\nTest equality offset :\n',    test_eq_offset)
             print('\nTrue equality offset :\n',    true_eq_offset)
 
-            print('\nTest inequality coeff  :\n',  test_leq_coeff)
-            print('\nTrue inequality coeff  :\n',  true_leq_coeff)
+            print('\nTest inequality coeff  :\n',  test_leq_coeff.todense())
+            print('\nTrue inequality coeff  :\n',  true_leq_coeff.todense())
 
             print('\nTest inequality offset :\n',  test_leq_offset)
             print('\nTrue inequality offset :\n',  true_leq_offset)

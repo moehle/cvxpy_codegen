@@ -32,7 +32,7 @@ def codegen(prob, target_dir,
             solver = None,
             include_solver = True,
             inv_data = None,
-            codegen_mode = 'explicit',
+            codegen_mode = 'tree',
             dump = False):
 
         # Solver defaults to ECOS.
@@ -68,7 +68,7 @@ def codegen(prob, target_dir,
         solver_intf.render(target_dir)
 
         # Get template vars for the expr tree processor, then render.
-        template_vars.update(expr_handler.get_template_vars())
+        template_vars.update(expr_handler.get_template_vars(inv_data.var_offsets))
         expr_handler.render(target_dir)
 
         # Get template variables to render template

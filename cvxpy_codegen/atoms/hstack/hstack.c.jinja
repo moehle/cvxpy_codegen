@@ -21,12 +21,13 @@
 
 
 {% macro hstack_declare() %}
-void hstack(long n_args, CsrMatrix *C, CsrMatrix *Z);
+void hstack(long n_args, CsrMatrix *C, CsrMatrix *Z, long *offsets);
 {% endmacro %}
 
 
+{# TODO need offsets #}
 {% macro hstack_define() %}
-void hstack(long n_args, CsrMatrix *C, CsrMatrix *Z){
+void hstack(long n_args, CsrMatrix *C, CsrMatrix *Z, long *offsets){
   long i, k, p, p2, count=0;
 
   Z->p[0] = 0;
@@ -36,7 +37,7 @@ void hstack(long n_args, CsrMatrix *C, CsrMatrix *Z){
       p2 = C[k].p[i+1];
       Z->p[i+1] += p2;
       for (p=C[k].p[i]; p<p2; p++){
-        Z->j[count]   = C[k].j[p];
+        Z->j[count]   = C[k].j[p] + offsets[k];
         Z->x[count++] = C[k].x[p];
       }
     }
@@ -47,17 +48,8 @@ void hstack(long n_args, CsrMatrix *C, CsrMatrix *Z){
 
 {% macro hstack_eval(expr) %}
 {% for i, c in enumerate(expr.args) %}
-work->work_varargs[{{ i }}] = work->{{ c.name }};
+work->work_varargs[{{ i }}] = work->{{ c.storage.name }};
+work->work_int[{{ i }}] = {{ expr.data[i] }};
 {% endfor %}
-hstack({{ len(expr.args) }}, work->work_varargs, &work->{{ expr.name }});
+hstack({{ len(expr.args) }}, work->work_varargs, &work->{{ expr.storage.name }}, work->work_int);
 {% endmacro %}
-
-
-
-
-
-
-
-
-
-

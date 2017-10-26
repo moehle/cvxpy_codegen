@@ -128,14 +128,12 @@ void solver_solve(Work *work){
     {% if include_solver %}
     idxint solver_flag;
     
-    {#
     {{ u.print_cscmat_eval('eq_coeff') }}
     {{ u.print_vec_eval('eq_offset', eq_dim ) }}
     {{ u.print_cscmat_eval('leq_coeff') }}
     {{ u.print_vec_eval('leq_offset', cone_dim) }}
     {{ u.print_vec_eval('obj_coeff', x_length) }}
     printf("obj_offset = %f\n", work->obj_offset);
-    #}
 
     /* Flip signs. */
     long i;

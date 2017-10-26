@@ -34,7 +34,7 @@ class MulData(BilinAtomData):
 
 
     def get_coeff_data(self, args, var):
-        n  = self.sparsity.shape[1]
+        n = args[1].shape[1]
 
         if args[1].var_ids:
             lhs = sp.kron(sp.eye(n), args[0].sparsity)

@@ -21,7 +21,7 @@ import unittest
 import cvxpy_codegen.tests.utils as tu
 import cvxpy as cvx
 import numpy as np
-import cvxpy_codegen.expr_handler_sym.sym_matrix as sym
+import cvxpy_codegen.expr_handler.explicit.sym_matrix as sym
 import scipy.sparse as sp
  
 m = 5

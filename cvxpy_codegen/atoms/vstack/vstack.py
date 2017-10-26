@@ -64,6 +64,7 @@ class VStackData(AffAtomData):
 
 
 
+    # TODO why no varargs?!
     def get_coeff_data(self, args, var):
         # TODO replace with arg_pos:
         vert_offset = 0

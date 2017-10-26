@@ -26,7 +26,7 @@ import numpy as np
 
 class MultiplyData(BilinAtomData):
 
-    def get_atom_data(self, expr, arg_data):
+    def get_atom_data(self, expr, arg_data, arg_pos):
         return ConstExprData(expr, arg_data,
                              macro_name = "multiply",
                              sparsity = arg_data[0].sparsity.multiply(arg_data[1].sparsity),

@@ -43,6 +43,7 @@ class ConstData(ExprData):
         self.mem_name = self.name
         self.cname = self.storage.name
         self.coeffs = {}
+        self.offset_expr = self
 
 
     @property

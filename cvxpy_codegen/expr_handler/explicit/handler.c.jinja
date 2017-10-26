@@ -33,7 +33,7 @@
 
     {% endfor %}
     {% for f in aff_functionals %}
-    double {{ f.name }}_coeff[{{ f.shape[0] }}];
+    double {{ f.name }}_coeff[{{ f.shape[1] }}];
     double {{ f.name }}_offset;
 
     {% endfor %}

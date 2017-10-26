@@ -74,7 +74,7 @@ GET_EXPR_DATA = {abs           : AbsData,
                  Promote       : PromoteData,
                  reshape       : ReshapeData,
                  Sum           : SumData,
-                 trace         : TraceData,
+                 #trace         : TraceData, # TODO not complete
                  transpose     : TransposeData,
                  Vstack        : VStackData }
 

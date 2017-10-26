@@ -179,7 +179,7 @@ class TestActuatorAllocation(tu.CodegenTestCase):
         self.assertAlmostEqual(stats['objective'], self.optval)
         self.assertAlmostEqualMatrices(self.u, vars['u'])
 
-   
+  
 
 class TestMarkowitzPortfolio(tu.CodegenTestCase):
     class_name = 'TestMarkowitzPortfolio'
@@ -200,7 +200,6 @@ class TestMarkowitzPortfolio(tu.CodegenTestCase):
         constrs = [x >= 0, cvx.sum(x) == 1]
 
         prob = cvx.Problem(cvx.Minimize(objective), constrs)
-        self._test_prob(prob)
         self.optval = prob.solve()
         self.x = x.value
 
