@@ -23,52 +23,24 @@
 #include "ecos.h"
 {% endif %}
 #include <math.h>
-#include <stdio.h> // TODO
 
 
-{{ u.print_cscmat_declare() }}
-{{ u.print_vec_declare() }}
+{% if debug %}
+    #include <stdio.h>
+    {{ u.print_cscmat_declare() }}
+    {{ u.print_vec_declare() }}
+    {{ u.print_cscmat_define() }}
+    {{ u.print_vec_define() }}
+{% endif %}
 
 
 {% macro solver_workspace(include_solver=True) -%}
-    
     {% if include_solver %}
+    /* Private workspace for ECOS. */
     pwork *solver_work;
+
     {% endif %}
-
-    {#
-    /* Problem coefficients. */
-
-    /* Storage for the equality constraints. */
-    CscMatrix eq_coeff;
-    double eq_nzval[{{ eq_coeff.nnz }}];
-    double eq_offset[{{ eq_dim }}];
-
-    /* Storage for the inequality constraints. */
-    CscMatrix leq_coeff;
-    double leq_nzval[{{ leq_coeff.nnz }}];
-    double leq_offset[{{ cone_dim }}];
-
-    /* Storage for the objective vector. */
-    CscMatrix obj_coeff;
-    double obj_nzval[{{ obj_coeff.nnz }}];
-    double obj_vec[{{ x_length }}];
-    double obj_offset;
-    #}
 {%- endmacro %}
-
-
-/* Sparsity pattern for the objective and constraint matrices. */
-{#
-long obj_colptr{{ u.print_vec(obj_coeff.indptr) }};
-long obj_rowidx{{ u.print_vec(obj_coeff.indices) }};
-long eq_colptr{{ u.print_vec(eq_coeff.indptr) }};
-long eq_rowidx{{ u.print_vec(eq_coeff.indices) }};
-long leq_colptr{{ u.print_vec(leq_coeff.indptr) }};
-long leq_rowidx{{ u.print_vec(leq_coeff.indices) }};
-#}
-
-
 
 
 static long soc_sizes{{ u.print_vec(soc_dims) }};
@@ -76,31 +48,6 @@ static long soc_sizes{{ u.print_vec(soc_dims) }};
 
 /* Initialize ECOS. */
 void solver_init(Work *work){
-
-    {#
-    work->eq_coeff.p = eq_colptr;
-    work->eq_coeff.i = eq_rowidx;
-    work->eq_coeff.x = work->eq_nzval;
-    work->eq_coeff.m = {{ eq_coeff.shape[0] }};
-    work->eq_coeff.n = {{ eq_coeff.shape[1] }};
-    work->eq_coeff.nnz = {{ eq_coeff.nnz }};
-
-    work->leq_coeff.p = leq_colptr;
-    work->leq_coeff.i = leq_rowidx;
-    work->leq_coeff.x = work->leq_nzval;
-    work->leq_coeff.m = {{ leq_coeff.shape[0] }};
-    work->leq_coeff.n = {{ leq_coeff.shape[1] }};
-    work->leq_coeff.nnz = {{ leq_coeff.nnz }};
-
-    work->obj_coeff.p = obj_colptr;
-    work->obj_coeff.i = obj_rowidx;
-    work->obj_coeff.x = work->obj_nzval;
-    work->obj_coeff.m = {{ obj_coeff.shape[0] }};
-    work->obj_coeff.n = {{ obj_coeff.shape[1] }};
-    work->obj_coeff.nnz = {{ obj_coeff.nnz }};
-    work->obj_offset = 0;
-    #}
-
 
     /* Zero out the floating point values to avoid numerical difficulties. */
     long p;
@@ -127,13 +74,15 @@ void solver_solve(Work *work){
 
     {% if include_solver %}
     idxint solver_flag;
-    
-    {{ u.print_cscmat_eval('eq_coeff') }}
-    {{ u.print_vec_eval('eq_offset', eq_dim ) }}
-    {{ u.print_cscmat_eval('leq_coeff') }}
-    {{ u.print_vec_eval('leq_offset', cone_dim) }}
-    {{ u.print_vec_eval('obj_coeff', x_length) }}
-    printf("obj_offset = %f\n", work->obj_offset);
+
+    {% if debug %}
+        {{ u.print_cscmat_eval('eq_coeff') }}
+        {{ u.print_vec_eval('eq_offset', eq_dim ) }}
+        {{ u.print_cscmat_eval('leq_coeff') }}
+        {{ u.print_vec_eval('leq_offset', cone_dim) }}
+        {{ u.print_vec_eval('obj_coeff', x_length) }}
+        printf("obj_offset = %f\n", work->obj_offset);
+    {% endif %}
 
     /* Flip signs. */
     long i;
@@ -193,13 +142,6 @@ void cg_cleanup(Work *work){
 
 
 
-
-
 {% macro makefile_target() -%}
      libecos.a
 {%- endmacro %} 
-
-
-{{ u.print_cscmat_define() }}
-
-{{ u.print_vec_define() }}

@@ -36,7 +36,6 @@ from cvxpy import vstack, reshape
 from cvxpy.reductions.solvers.solving_chain import construct_solving_chain
 from cvxpy.reductions.dcp2cone.dcp2cone import Dcp2Cone
 from cvxpy.reductions.cvx_attr2constr import CvxAttr2Constr
-from cvxpy.reductions.matrix_stuffing import MatrixStuffing
 
 
 
@@ -90,8 +89,13 @@ class EcosIntf(EmbeddedSolverIntf):
                       'solver_template'         : SOLVER_TEMPLATE,
                       'solver_name'             : name } 
 
+    #ecos/libecos.a:
+    #	cd ecos && make libecos.a
+    #
+    #	cd ecos && make clean
+
     
-    def __init__(self, include_solver=True):
+    def __init__(self, include_solver=True, debug=False):
         self.eq_constrs = []
         self.leq_constrs = []
         self.n_eq = 0
@@ -100,7 +104,8 @@ class EcosIntf(EmbeddedSolverIntf):
         self.n_exp = 0
         self.soc_sizes = []
         self.cone_dim = 0
-        self.template_vars.update({'include_solver' : include_solver})
+        self.template_vars.update({'include_solver' : include_solver,
+                                   'debug' : debug})
 
                 
     # TODO untested:
@@ -112,12 +117,11 @@ class EcosIntf(EmbeddedSolverIntf):
                 prob, dcp2cone_inv_data = r.apply(prob)
             if isinstance(r, CvxAttr2Constr):
                 prob, attr_inv_data = r.apply(prob)
-
-        if not attr_inv_data == ():
-            id2new_var, id2old_var, __ = attr_inv_data
-            for id in id2old_var.keys():
-                # TODO Sets a private attribute :(
-                id2new_var[id]._name = id2old_var[id].name()
+                if not attr_inv_data == ():
+                    id2new_var, id2old_var, __ = attr_inv_data
+                    for id in id2old_var.keys():
+                        # TODO Sets a private attribute :(
+                        id2new_var[id]._name = id2old_var[id].name()
 
         return prob
     

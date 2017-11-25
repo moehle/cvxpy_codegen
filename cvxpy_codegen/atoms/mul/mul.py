@@ -42,6 +42,11 @@ class MulData(BilinAtomData):
         else:
             raise Exception("Right multiplication not supported.")
 
+        work_int = sparsity.shape[1]
+        work_float = sparsity.shape[1]
+
         return CoeffData(self, args, var,
                          sparsity = sparsity,
+                         work_int = work_int,
+                         work_float = work_float,
                          macro_name = 'mul_coeffs')

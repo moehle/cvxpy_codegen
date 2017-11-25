@@ -26,14 +26,14 @@ import scipy.sparse as sp
 class VStackData(AffAtomData):
 
     def get_atom_data(self, expr, arg_data, arg_pos):
-        offsets = []
         vert_offset = 0
+        offsets = []
         for i, a in enumerate(expr.args):
             if i in arg_pos:
                 offsets += [vert_offset]
             vert_offset += a.shape[0]
 
-        work_varargs = len(arg_data) # This is a varargs atom.
+        work_varargs = len(arg_data)
         work_int = len(arg_data)
 
         ndims = len(expr.shape)
@@ -52,7 +52,6 @@ class VStackData(AffAtomData):
             m = a.shape[0]
             sparsity[o:o+m, :] = a.sparsity
 
-        #sparsity = sp.vstack([a.sparsity for a in arg_data])
         return ConstExprData(expr, arg_data,
                              macro_name = "vstack",
                              sparsity = sp.csr_matrix(sparsity),
@@ -64,9 +63,7 @@ class VStackData(AffAtomData):
 
 
 
-    # TODO why no varargs?!
     def get_coeff_data(self, args, var):
-        # TODO replace with arg_pos:
         vert_offset = 0
         offsets = []
         for a in self.args:
@@ -82,18 +79,10 @@ class VStackData(AffAtomData):
             mats = []
             for a, o in zip(args, offsets):
                 m = a.shape[0]
-                #mats += [a.sparsity[j*m : (j+1)*m, :]]
-                #print(m_var)
-                #print(j)
-                #print(o)
-                #print(m)
-                #print(sparsity[m_var*j+o:m_var*j+o+m,:].shape)
-                #print(a.sparsity[j*m : (j+1)*m, :].shape)
                 a_sparsity = sp.lil_matrix(a.sparsity)[j*m : (j+1)*m, :]
                 sparsity[m_var*j+o:m_var*j+o+m,:] = a_sparsity
-            #sparsity = sp.vstack([sparsity] + mats)
 
-        work_coeffs = len(args) # This is a varargs self.
+        work_coeffs = len(args)
         work_int = len(args)
         return CoeffData(self, args, var,
                          sparsity = sp.csr_matrix(sparsity),

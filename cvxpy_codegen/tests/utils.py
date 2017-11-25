@@ -35,10 +35,15 @@ from cvxpy.reductions.solvers.solving_chain import construct_solving_chain
 
 from cvxpy.reductions.eval_params import EvalParams
 from cvxpy.reductions.cvx_attr2constr import CvxAttr2Constr
+from cvxpy.reductions.solvers.qp_solvers.osqp_qpif import OSQP
+from cvxpy.reductions.qp2quad_form.qp2symbolic_qp import Qp2SymbolicQp
+from cvxpy.reductions.qp2quad_form.qp_matrix_stuffing import QpMatrixStuffing
+
 from cvxpy.reductions.dcp2cone.dcp2cone import Dcp2Cone
 from cvxpy.reductions.dcp2cone.cone_matrix_stuffing import ConeMatrixStuffing
 from cvxpy.reductions.solvers.conic_solvers.ecos_conif import ECOS
 
+np.set_printoptions(threshold=np.nan)
 
 TARGET_DIR = os.path.join(os.getcwd(), 'cg_build')
 HARNESS_C = 'tests/harness.c.jinja'
@@ -150,7 +155,115 @@ class CodegenTestCase(unittest.TestCase):
         prob = cvx.Problem(obj, [])
         self._test_prob(prob, **kwargs)
 
-    def _test_prob(self, prob, printing=False):
+
+    def _test_prob(self, prob, printing=False, solver='ecos'):
+        if solver == 'ecos':
+            return self._test_prob_ecos(prob, printing=printing)
+        elif solver == 'osqp':
+            return self._test_prob_osqp(prob, printing=printing)
+
+
+    def _test_prob_osqp(self, prob, printing=False, solver='ecos'):
+        sc = construct_solving_chain(prob, solver="OSQP")
+
+        has_params = False
+        for r in sc.reductions:
+            if isinstance(r, EvalParams):
+                eval_params = r
+                has_params = True
+            elif isinstance(r, Qp2SymbolicQp):
+                dcp2cone = r
+            elif isinstance(r, CvxAttr2Constr):
+                cvx_attr2constr= r
+            elif isinstance(r, QpMatrixStuffing):
+                cone_matrix_stuffing = r
+            elif isinstance(r, OSQP):
+                osqp = r
+            else:
+                raise Exception('Unrecognized reduction.')
+
+        prob, inv_data = dcp2cone.apply(prob)
+        prob, __ = cvx_attr2constr.apply(prob)
+        if has_params:
+            prob_cvx, __ = eval_params.apply(prob)
+            prob_cvx, inv_matrixstuffing = cone_matrix_stuffing.apply(prob_cvx)
+        else:
+            prob_cvx, inv_matrixstuffing = cone_matrix_stuffing.apply(prob)
+        data, __ = osqp.apply(prob_cvx)
+
+        true_obj_offset = inv_matrixstuffing.r
+        true_quad_coeff  = sp.triu(data[s.P])
+        true_obj_coeff   = data[s.Q]
+        true_eq_coeff    = data[s.A]
+        true_eq_offset   = data[s.B]
+        true_leq_coeff   = data[s.F]
+        true_leq_offset  = data[s.G]
+
+        if not true_eq_offset is None:
+            true_eq_offset = -true_eq_offset
+        if not true_leq_offset is None:
+            true_leq_offset = -true_leq_offset
+
+        true_constraint_coeff = sp.vstack([true_eq_coeff, true_leq_coeff])
+        true_constraint_offset = np.hstack([true_eq_offset, true_leq_offset])
+
+        obj = prob.objective
+        constraints = prob.constraints
+        inv_data = inv_matrixstuffing
+
+        # Do code generation
+        template_vars = codegen(prob, TARGET_DIR, dump=True,
+                                include_solver=False, solver='osqp',
+                                debug=False)
+
+        # Set up test harness.
+        render(TARGET_DIR, template_vars, HARNESS_C, 'harness.c')
+        test_data = self._run_test(TARGET_DIR)
+        test_obj_coeff  = np.array(test_data['obj_coeff'])
+        test_obj_offset = np.array(test_data['obj_offset'])
+        test_quad_coeff = sp.csc_matrix((test_data['quad_nzval'],
+                                         test_data['quad_rowidx'],
+                                         test_data['quad_colptr']),
+                                         shape = (test_data['quad_shape0'],
+                                         test_data['quad_shape1']))
+        test_constraint_coeff  = sp.csc_matrix((test_data['constraint_nzval'],
+                                                test_data['constraint_rowidx'],
+                                                test_data['constraint_colptr']),
+                                                shape = (test_data['constraint_shape0'],
+                                                test_data['constraint_shape1']))
+        test_constraint_offset = np.array(test_data['constraint_offset'])
+
+        if printing:
+            print('\nTest quadratic coeff  :\n',   test_quad_coeff)
+            print('\nTrue quadratic coeff  :\n',   true_quad_coeff)
+
+            print('\nTest objective coeff  :\n',   test_obj_coeff)
+            print('\nTrue objective coeff  :\n',   true_obj_coeff)
+
+            print('\nTest objective offset :\n',   test_obj_offset)
+            print('\nTrue objective offset :\n',   true_obj_offset)
+
+            print('\nTest constraint coeff :\n',    test_constraint_coeff)
+            print('\nTrue constraint coeff :\n',    true_constraint_coeff)
+
+            print('\nTest constraint offset:\n',    test_constraint_offset)
+            print('\nTrue constraint offset:\n',    true_constraint_offset)
+
+        if not true_quad_coeff is None:
+            self.assertAlmostEqualMatrices(true_quad_coeff,  test_quad_coeff)
+        if not true_obj_coeff is None:
+            self.assertAlmostEqualMatrices(true_obj_coeff,  test_obj_coeff)
+        if not true_obj_offset is None:
+            self.assertAlmostEqualMatrices(true_obj_offset, test_obj_offset)
+        if not true_constraint_coeff is None:
+            self.assertAlmostEqualMatrices(true_constraint_coeff, test_constraint_coeff)
+        if not true_constraint_offset is None:
+            self.assertAlmostEqualMatrices(true_constraint_offset, test_constraint_offset)
+
+
+
+
+    def _test_prob_ecos(self, prob, printing=False):
         sc = construct_solving_chain(prob, solver="ECOS")
 
         has_params = False
@@ -197,7 +310,8 @@ class CodegenTestCase(unittest.TestCase):
 
         # Do code generation
         template_vars = codegen(prob, TARGET_DIR, dump=True,
-                                include_solver=False, solver='ecos')
+                                include_solver=False, solver='ecos',
+                                debug=False)
 
         # Set up test harness.
         render(TARGET_DIR, template_vars, HARNESS_C, 'harness.c')
@@ -230,8 +344,8 @@ class CodegenTestCase(unittest.TestCase):
             print('\nTest equality offset :\n',    test_eq_offset)
             print('\nTrue equality offset :\n',    true_eq_offset)
 
-            print('\nTest inequality coeff  :\n',  test_leq_coeff.todense())
-            print('\nTrue inequality coeff  :\n',  true_leq_coeff.todense())
+            print('\nTest inequality coeff :\n',  test_leq_coeff)
+            print('\nTrue inequality coeff :\n',  true_leq_coeff)
 
             print('\nTest inequality offset :\n',  test_leq_offset)
             print('\nTrue inequality offset :\n',  true_leq_offset)

@@ -18,6 +18,7 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from cvxpy_codegen.object_data.expr_data import ExprData
+from cvxpy_codegen.object_data.const_expr_data import ConstExprData
 import numpy as np
 
 
@@ -37,6 +38,22 @@ class ParamData(ExprData):
         self.has_offset = True
         self.coeffs = {}
         self.offset_expr = self
+        self.work_int = 0
+        self.work_float = 0
+        self.work_varargs = 0
+        self.expr = expr
+
+        self._get_offset_expr()
+
+
+    def _get_offset_expr(self):
+        self.offset = ConstExprData(self, [])
+
+
+    def _codegen_offset(self, expr):
+        return "init_dense_sparsity(%s);" % (expr.c_name)
+
+
         
     @property
     def storage(self):
@@ -90,6 +107,11 @@ class CbParamData(ExprData):
         self.has_offset = True
         self.coeffs = {}
         self.offset_expr = self
+        self.work_int = 0
+        self.work_float = 0
+        self.work_varargs = 0
+        self.offset = self.storage.offset
+
 
     @property
     def storage(self):
@@ -99,3 +121,4 @@ class CbParamData(ExprData):
         coeff_height = self.shape[0] * self.shape[1]
         mat = sp.csc_matrix((coeff_height, x_length), dtype=bool)
         return mat
+

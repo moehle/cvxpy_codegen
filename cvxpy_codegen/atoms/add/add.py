@@ -27,9 +27,7 @@ class AddData(AffAtomData):
     def get_atom_data(self, expr, arg_data, arg_pos):
     
         if len(arg_data) == 1 and arg_data[0].shape != (1,1):
-        #if False:
-        #if len(arg_data) == 1:
-            return ConstExprData(expr, arg_data,
+            return ConstExprData(self, arg_data,
                                  inplace = True,
                                  sparsity = arg_data[0].sparsity,
                                  macro_name = 'null')
@@ -44,7 +42,7 @@ class AddData(AffAtomData):
                 work_int    = max([a.shape[1] for a in arg_data])
                 work_float  = max([a.shape[1] for a in arg_data])
             work_varargs    = len(arg_data) # This is a varargs atom.
-            return ConstExprData(expr, arg_data,
+            return ConstExprData(self, arg_data,
                                  sparsity = sparsity,
                                  work_int = work_int,
                                  work_float = work_float,
@@ -52,12 +50,25 @@ class AddData(AffAtomData):
                                  macro_name = 'add')
 
 
+    def codegen_offset(self, expr):
+        if len(expr.args) == 1 and expr.args[0].shape != (1,1):
+            return ""
+        else:
+            s = ""
+            for i, c in enumerate(expr.args):
+                s += "work->work_varargs[%d] = work->%s;\n" % (i, c.storage.name)
+            s += "add(%d, work->work_varargs, %s, work->work_int, work->work_double);\n" \
+                        % (len(expr.args), expr.c_name)
+            return s
+        
+
+
     def get_coeff_data(self, args, var):
         if len(args) == 1 and args[0].shape == self.shape:
             return CoeffData(self, args, var,
-                                  inplace = True,
-                                  sparsity = args[0].sparsity,
-                                  macro_name = 'null')
+                             inplace = True,
+                             sparsity = args[0].sparsity,
+                             macro_name = 'null')
     
         else:
             work_coeffs = len(args) # This is a varargs expr.
@@ -70,3 +81,15 @@ class AddData(AffAtomData):
                              work_float = work_float,
                              work_coeffs = work_coeffs,
                              macro_name = 'add_coeffs')
+
+
+    def codegen_coeff(self, expr):
+        if len(expr.args) == 1 and expr.args[0].shape == self.shape:
+            return ""
+        else:
+            s = ""
+            for i, c in enumerate(expr.args):
+                s += "work->work_coeffs[%d] = work->%s;\n" % (i, c.storage.name)
+            s += "add_coeffs(%d, work->work_coeffs, %s, work->work_int, work->work_double);\n" \
+                        % (len(expr.args), expr.c_name)
+            return s

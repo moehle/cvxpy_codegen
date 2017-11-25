@@ -20,28 +20,42 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 from cvxpy_codegen.object_data.expr_data import ExprData
 import scipy.sparse as sp
 from cvxpy_codegen.object_data.const_data import CONST_ID
+from cvxpy_codegen.object_data.coeff_data import CoeffData
 import cvxpy.settings as s
 
 
 class VarData(ExprData):
     def __init__(self, expr, var_offset):
         ExprData.__init__(self, expr)
-        self.type = 'var'
         self.id = expr.id
         self.name = expr.name()
         self.arg_data = []
-        self.sparsity = sp.csr_matrix(sp.eye(self.length, dtype=bool))
         self.var_ids = {self.id}
         self.storage = self # Where is the coefficient stored in C?
         self.has_offset = False
         self.coeffs = {self.id : self}
         self.vid = self.id
         self.var_offset = var_offset
+        self.overwriteable = False
 
         # TODO option to not ignore default names.
         self.is_named = False
         if not self.name == "%s%d" % (s.VAR_PREFIX, self.id):
             self.is_named = True
+
+        self._get_coeffs()
+
+
+    def _get_coeffs(self):
+        sparsity = sp.csr_matrix(sp.eye(self.length, dtype=bool))
+        coeff = CoeffData(self, [], self.id, 
+                          sparsity=sparsity)
+        self.coeffs = {self.id : coeff}
+
+
+    def codegen_coeff(self, expr):
+        return "get_var_coeff(%s, %d, %d);" % (expr.c_name, expr.length, expr.length)
+
 
 
     def c_print(self):

@@ -29,3 +29,8 @@ class DiagMatData(AffAtomData):
         return ConstExprData(expr, arg_data,
                              macro_name = 'diag_mat',
                              sparsity = sparsity)
+
+
+    def codegen_offset(self, expr):
+        s = 'diag_mat(&work->%s, &work->%s);\n' % (expr.args[0].storage.name, expr.storage.name)
+        return s

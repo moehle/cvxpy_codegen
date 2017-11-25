@@ -21,7 +21,7 @@ package_data={'cvxpy_codegen.atoms'                : ['atoms.c.jinja', 'linops.c
               'cvxpy_codegen.tests'                : ['*.c.jinja'],
               'cvxpy_codegen.solvers'              : ['*.jinja'] + ecos_sources,
               'cvxpy_codegen.utils'                : ['utils.c.jinja'],
-              'cvxpy_codegen.templates'            : ['*.jinja']}
+              'cvxpy_codegen.templates'            : ['*.jinja', '*.h', '*.c']}
 package_data.update({d : ['*.jinja'] for d in atom_dirs})
 
 
@@ -39,6 +39,7 @@ setup(
               'cvxpy_codegen.solvers',
               'cvxpy_codegen.templates',
               'cvxpy_codegen.tests',
+              'cvxpy_codegen.tests.examples',
               'cvxpy_codegen.utils']
               + atom_dirs,
     package_dir={'cvxpy_codegen': 'cvxpy_codegen'},
@@ -49,7 +50,7 @@ setup(
     description='Embedded C code generation for convex optimization' + 
                 'using CVXPY.',
     install_requires=["ecos >= 2",
-                      "cvxpy >= 0.4, <1.0",
+                      "cvxpy >= 1.0",
                       "numpy >= 1.9",
                       "jinja2 >= 2.8",
                       "scipy >= 0.15"],

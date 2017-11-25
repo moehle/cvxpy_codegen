@@ -18,6 +18,7 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from cvxpy_codegen.object_data.expr_data import ExprData
+from cvxpy_codegen.object_data.const_expr_data import ConstExprData
 from cvxpy_codegen.utils.utils import Counter
 import scipy.sparse as sp
 
@@ -42,8 +43,14 @@ class ConstData(ExprData):
         self.has_offset = True
         self.mem_name = self.name
         self.cname = self.storage.name
-        self.coeffs = {}
+        self.coeffs = dict()
         self.offset_expr = self
+        self.work_int = 0
+        self.work_float = 0
+        self.work_varargs = 0
+
+        self._get_coeffs()
+        self._get_offset_expr()
 
 
     @property
@@ -54,3 +61,14 @@ class ConstData(ExprData):
         coeff_height = self.shape[0] * self.shape[1]
         mat = sp.csc_matrix((coeff_height, x_length), dtype=bool)
         return mat
+
+
+    def _get_offset_expr(self):
+        self.offset = ConstExprData(self, [])
+
+    def _get_coeffs(self):
+        pass
+
+
+    def codegen_offset(self, expr):
+        return "get_constant(%s, %s);" % (expr.c_name, expr.name)

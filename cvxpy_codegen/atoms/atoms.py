@@ -24,6 +24,7 @@ from cvxpy_codegen.object_data.aff_atom_data import AffAtomData
 
 from cvxpy.atoms.affine.binary_operators import MulExpression
 from cvxpy.atoms.affine.unary_operators import NegExpression
+from cvxpy.atoms.affine.binary_operators import DivExpression
 from cvxpy.atoms.affine.add_expr import AddExpression
 from cvxpy.atoms.affine.trace import trace
 from cvxpy.atoms.affine.hstack import Hstack
@@ -42,6 +43,7 @@ from cvxpy_codegen.atoms.abs.abs import AbsData
 from cvxpy_codegen.atoms.add.add import AddData
 from cvxpy_codegen.atoms.diag_vec.diag_vec import DiagVecData
 from cvxpy_codegen.atoms.diag_mat.diag_mat import DiagMatData
+from cvxpy_codegen.atoms.div.div import DivData
 from cvxpy_codegen.atoms.hstack.hstack import HStackData
 from cvxpy_codegen.atoms.index.index import IndexData
 from cvxpy_codegen.atoms.kron.kron import KronData
@@ -63,9 +65,10 @@ GET_EXPR_DATA = {abs           : AbsData,
                  AddExpression : AddData,
                  diag_mat      : DiagMatData,
                  diag_vec      : DiagVecData,
+                 DivExpression : DivData,
                  Hstack        : HStackData,
                  index         : IndexData,
-                 kron          : KronData,
+                 #kron          : KronData, # TODO not complete
                  max           : MaxData,
                  MulExpression : MulData,
                  multiply      : MultiplyData,

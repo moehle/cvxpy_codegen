@@ -1,0 +1,165 @@
+/*
+ *  Copyright 2017 Nicholas Moehle
+ *  
+ *  This file is part of CVXPY-CODEGEN.
+ *  
+ *  CVXPY-CODEGEN is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *  
+ *  CVXPY-CODEGEN is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License
+ *  along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+{% import "utils/utils.c.jinja" as u with context %}
+#include "codegen.h"
+{% if include_solver %}
+#include "osqp.h"
+#include "workspace.h"
+{% endif %}
+#include <math.h>
+#include <stdio.h> // TODO
+
+
+{{ u.print_cscmat_declare() }}
+{{ u.print_vec_declare() }}
+
+
+{% macro solver_workspace(include_solver=True) -%}
+    double lower_bound[{{ eq_dim + leq_dim }}];
+    double upper_bound[{{ eq_dim + leq_dim }}];
+{%- endmacro %}
+
+
+void solver_init(Work *work){
+    long i;
+    for (i=0; i<{{ eq_dim + leq_dim }}; i++){
+        work->lower_bound[i] = 0;
+    }
+}
+
+void cg_cleanup(Work *work){}
+
+
+/* Solve the problem using ECOS. */
+void solver_solve(Work *work){
+
+    {% if include_solver %}
+    c_int solver_flag;
+    {% endif %}
+    
+    /* Set lower bound vector. */
+    long i;
+    for (i=0; i<{{ eq_dim }}; i++){
+        work->lower_bound[i] = -work->constraint_offset[i];
+        work->upper_bound[i] = -work->constraint_offset[i];
+    }
+    for ( ; i<{{ leq_dim }}; i++){
+        {% if include_solver %}
+        work->lower_bound[i] = -OSQP_INFTY;
+        {% else %}
+        work->lower_bound[i] = -INFINITY;
+        {% endif %}
+        work->upper_bound[i] = -work->constraint_offset[i];
+    }
+
+    {{ u.print_cscmat_eval('quad_coeff') }}
+    {{ u.print_cscmat_eval('constraint_coeff') }}
+    {{ u.print_vec_eval('lower_bound', eq_dim+leq_dim ) }}
+    {{ u.print_vec_eval('upper_bound', eq_dim+leq_dim ) }}
+    {{ u.print_vec_eval('obj_coeff', x_length) }}
+    printf("obj_offset = %f\n", work->obj_offset);
+
+    /*
+     * Update elements of matrix A without changing sparsity structure.
+     *
+     *
+     *  If Ax_new_idx is OSQP_NULL, Ax_new is assumed to be as long as A->x
+     *  and the whole P->x is replaced.
+     *
+     * @param  work       Workspace structure
+     * @param  Ax_new     Vector of new elements in A->x
+     * @param  Ax_new_idx Index mapping new elements to positions in A->x
+     * @param  A_new_n    Number of new elements to be changed
+     * @return            output flag:  0: OK
+     *                                  1: A_new_n > nnzA
+     *                                 <0: error in update_priv()
+     */
+
+    {% if include_solver %}
+    /* Update data. */
+    {#
+    {% if update_PA %}
+    // osqp_update_P(&workspace, work->quad_coeff.x, OSQP_NULL, 0);
+    osqp_update_A(&workspace, work->constraint_coeff.x, OSQP_NULL, 0);
+    {% endif %}
+    #}
+    osqp_update_P(&workspace, work->quad_coeff.x, OSQP_NULL, 0);
+    osqp_update_A(&workspace, work->constraint_coeff.x, OSQP_NULL, 0);
+    osqp_update_lin_cost(&workspace, work->obj_coeff);
+    osqp_update_bounds(&workspace, work->lower_bound, work->upper_bound);
+
+    /* Solve problem. */
+    osqp_solve(&workspace);
+
+    for (i=0; i<{{x_length}}; i++) printf("x[%d] = %f\n", i, workspace.x[i]);
+
+
+    // Print status
+    printf("Status:                %s\n", (&workspace)->info->status);
+    printf("Number of iterations:  %d\n", (int)((&workspace)->info->iter));
+    printf("Objective value:       %.4e\n", (&workspace)->info->obj_val);
+    printf("Primal residual:       %.4e\n", (&workspace)->info->pri_res);
+    printf("Dual residual:         %.4e\n", (&workspace)->info->dua_res);
+
+
+    work->primal_var = workspace.solution->x;
+    work->dual_eq_var = workspace.solution->y;
+    work->dual_ineq_var = workspace.solution->y + {{ eq_dim }};
+
+    switch(solver_flag){
+
+        case OSQP_SOLVED:
+        case OSQP_MAX_ITER_REACHED:
+            work->status = CG_OPTIMAL;
+            work->optval = workspace.info->obj_val;
+            break;
+
+        case OSQP_PRIMAL_INFEASIBLE:
+            work->status = CG_INFEASIBLE;
+            work->optval = INFINITY;
+            break;
+            
+
+        case OSQP_DUAL_INFEASIBLE:
+            work->status = CG_UNBOUNDED;
+            work->optval = -INFINITY;
+            break;
+
+        case OSQP_SIGINT:
+        case OSQP_UNSOLVED:
+            work->status = CG_SOLVER_ERR;
+            work->optval = NAN;
+            break;
+
+    }
+
+    {% endif %}
+} 
+
+
+
+{% macro makefile_target() -%}
+     osqplibstatic.a
+{%- endmacro %} 
+
+
+{{ u.print_cscmat_define() }}
+
+{{ u.print_vec_define() }}

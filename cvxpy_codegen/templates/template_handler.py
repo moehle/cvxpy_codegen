@@ -24,7 +24,23 @@ import numpy
 INTF_SOURCES = ['codegen.c',
                 'expr_handler.c',
                 'solver_intf.c',
+                'constants.h',
+                'atoms.h',
+                'atoms.c',
                 'codegenmodule.c', ]
+
+RENDER_TARGETS = {
+        'templates/atoms.c'                       : 'atoms.c',
+        'templates/atoms.h'                       : 'atoms.h',
+        'templates/codegen.c.jinja'               : 'codegen.c',
+        'templates/codegen.h.jinja'               : 'codegen.h',
+        'templates/codegenmodule.c.jinja'         : 'codegenmodule.c',
+        'templates/cvxpy_codegen_solver.py.jinja' : 'cvxpy_codegen_solver.py',
+        'templates/setup.py.jinja'                : 'setup.py',
+        'templates/Makefile.jinja'                : 'Makefile',
+        'templates/example_problem.c.jinja'       : 'example_problem.c',
+        'templates/constants.h.jinja'             : 'constants.h' }
+
 
 INTF_INCLUDE_DIRS = [numpy.get_include()]
 
@@ -44,10 +60,6 @@ class TemplateHandler():
         
     def render(self, target_dir, template_vars):
         template_vars.update(self.template_vars)
-        render(target_dir, template_vars, 'templates/codegen.c.jinja', 'codegen.c')
-        render(target_dir, template_vars, 'templates/codegen.h.jinja', 'codegen.h')
-        render(target_dir, template_vars, 'templates/codegenmodule.c.jinja', 'codegenmodule.c')
-        render(target_dir, template_vars, 'templates/cvxpy_codegen_solver.py.jinja', 'cvxpy_codegen_solver.py')
-        render(target_dir, template_vars, 'templates/setup.py.jinja', 'setup.py')
-        render(target_dir, template_vars, 'templates/Makefile.jinja', 'Makefile')
-        render(target_dir, template_vars, 'templates/example_problem.c.jinja', 'example_problem.c')
+        for template in RENDER_TARGETS:
+            target = RENDER_TARGETS[template]
+            render(target_dir, template_vars, template, target)

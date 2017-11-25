@@ -49,6 +49,7 @@ class ConstExprData(ExprData):
         self.var_ids = []
         self.has_offset=True
         self.coeffs = {} # TODO true
+        self.expr = expr
 
     @property
     def storage(self):
@@ -61,3 +62,11 @@ class ConstExprData(ExprData):
 
     def force_copy(self):
         self.make_copy = True
+
+
+    def codegen(self):
+        s = ""
+        if self.make_copy:
+            s += "copy(work->%s, work->%s);\n" % \
+                    (self.args[self.copy_arg].name, self.name)
+        return s + self.expr.codegen_offset(self)

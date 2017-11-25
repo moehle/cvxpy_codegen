@@ -23,8 +23,12 @@ from cvxpy_codegen.object_data.atom_data import AtomData
 
 class AbsData(AtomData):
 
-    def get_atom_data(self, expr, arg_data, arg_pos):
-        return ConstExprData(expr, arg_data,
+    def get_atom_data(self, expr, arg_data):
+        return ConstExprData(self, arg_data,
                              macro_name = "abs",
                              sparsity = arg_data[0].sparsity,
                              inplace = True)
+
+
+    def codegen_offset(self, expr):
+        return "absatom(%s);" % expr.c_name

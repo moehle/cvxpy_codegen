@@ -28,8 +28,14 @@ class SumData(AffAtomData):
 
     def get_atom_data(self, expr, arg_data, arg_pos):
             # TODO this could be wrong, for var + const_mn + param_mn
-            return ConstExprData(expr, arg_data,
+            return ConstExprData(self, arg_data,
                                  macro_name = 'sum')
+
+
+
+    def codegen_offset(self, expr):
+        return "sum(&work->%s, &work->%s);\n" % (expr.args[0].storage.name, expr.storage.name)
+        
 
 
     def get_coeff_data(self, args, var):
@@ -41,3 +47,8 @@ class SumData(AffAtomData):
                          work_float = work_float,
                          sparsity = sparsity,
                          macro_name = 'sum_coeffs')
+
+
+    def codegen_coeff(self, expr):
+        return "sum_coeffs(&work->%s, &work->%s, work->work_int, work->work_double);" \
+                    % (expr.args[0].storage.name, expr.storage.name)

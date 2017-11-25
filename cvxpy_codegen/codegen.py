@@ -33,15 +33,16 @@ def codegen(prob, target_dir,
             include_solver = True,
             inv_data = None,
             codegen_mode = 'tree',
+            debug = False,
             dump = False):
 
         # Solver defaults to ECOS.
         if solver == None:
-            solver = "ecos"
+            solver = 'ecos'
         if not solver.lower() in SOLVER_INTFS:
             raise Exception('Solver "%s" not found' % solver)
 
-        solver_intf = SOLVER_INTFS[solver.lower()](include_solver)
+        solver_intf = SOLVER_INTFS[solver.lower()](include_solver=include_solver)
         prob = solver_intf.preprocess_problem(prob)
 
         if not inv_data:
@@ -52,9 +53,9 @@ def codegen(prob, target_dir,
 
         # Create expression handler and solver interfaces.
         if codegen_mode == 'explicit':
-            expr_handler = ExplicitExprHandler(inv_data.var_offsets)
+            expr_handler = ExplicitExprHandler(inv_data.var_offsets, debug)
         elif codegen_mode == 'tree':
-            expr_handler = TreeExprHandler()
+            expr_handler = TreeExprHandler(debug)
         else:
             raise Exception('Code generation mode "%s" not recognized.' % codegen_mode)
 
@@ -68,7 +69,8 @@ def codegen(prob, target_dir,
         solver_intf.render(target_dir)
 
         # Get template vars for the expr tree processor, then render.
-        template_vars.update(expr_handler.get_template_vars(inv_data.var_offsets))
+        template_vars.update(expr_handler.get_template_vars(
+                inv_data.x_length, inv_data.var_offsets))
         expr_handler.render(target_dir)
 
         # Get template variables to render template

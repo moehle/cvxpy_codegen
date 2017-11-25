@@ -29,39 +29,48 @@ from cvxpy_codegen.object_data.atom_data import AtomData
 class AffAtomData(AtomData, object):
     def __init__(self, expr, arg_data):
         super(AffAtomData, self).__init__(expr, arg_data)
+        self._get_coeffs()
+        self._get_offset_expr()
 
 
     # Get the coefficient for each variable.
-    def get_coeffs(self):
+    def _get_coeffs(self):
         for vid in self.var_ids:
             coeff_args = []
             for arg in self.args:
                 if vid in arg.var_ids:
-                    if isinstance(arg, AtomData):
-                        coeff_args += [arg.coeffs[vid]]
-                    else:
-                        coeff_args += [arg]
+                    coeff_args += [arg.coeffs[vid]]
+                    #if isinstance(arg, AtomData):
+                    #    coeff_args += [arg.coeffs[vid]]
+                    #else:
+                    #    coeff_args += [arg]
             coeff = self.get_coeff_data(coeff_args, vid)
             self.coeffs.update({vid : coeff})
-        return self.coeffs
 
 
     # Get the expression for the offset vector.
-    def get_offset_expr(self):
+    def _get_offset_expr(self):
         arg_count = 0
         arg_pos = [] # Store the argument positions.
+        print
+        print type(self)
+        print self.has_offset
+        print self.args
+        print self.args[0].has_offset
         if self.has_offset:
             offset_args = []
             for arg in self.args:
                 if arg.has_offset:
                     arg_pos += [arg_count]
-                    if isinstance(arg, AtomData):
-                        offset_args += [arg.offset_expr]
-                    else:
-                        offset_args += [arg]
+                    offset_args += [arg.offset_expr]
+                    #arg_pos += [arg_count]
+                    #if isinstance(arg, AtomData):
+                    #    offset_args += [arg.offset_expr]
+                    #else:
+                    #    offset_args += [arg]
                 arg_count += 1
             self.offset_expr = self.get_atom_data(self.expr, offset_args, arg_pos)
-        return self.offset_expr
+        raise Exception
 
 
     def get_data(self):

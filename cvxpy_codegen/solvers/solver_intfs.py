@@ -18,5 +18,7 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from cvxpy_codegen.solvers.ecos_intf import EcosIntf
+from cvxpy_codegen.solvers.osqp_intf import OsqpIntf
 
-SOLVER_INTFS = { 'ecos' : EcosIntf }
+SOLVER_INTFS = { 'ecos' : EcosIntf,
+                 'osqp' : OsqpIntf }

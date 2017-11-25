@@ -39,12 +39,6 @@ class Counter():
         return c
 
 
-# TODO deprecate this, should be sp.csr_matrix((m,n))
-# Get a sparse zero matrix.
-def spzeros(m, n, dtype=float):
-    return sp.csr_matrix(np.zeros((m,n)), dtype=dtype)
-
-
 @contextfilter
 def call_macro(context, macro_name, *args , **kwargs):
     return context.vars[macro_name](*args, **kwargs)

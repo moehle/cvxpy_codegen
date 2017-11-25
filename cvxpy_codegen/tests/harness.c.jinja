@@ -79,59 +79,114 @@ int main(){
     fill_matrices(&params, &work);
 
 
-    printf("{");
+    {% if solver_name == 'ecos' %}
+      printf("{");
 
-      /* Objective. */
-      printf("\"obj_coeff\":");
-      json_vector_double(work.obj_coeff, {{ x_length }});
-      printf(",");
-      printf("\"obj_offset\":%9.9lf", work.obj_offset);
+        /* Objective. */
+        printf("\"obj_coeff\":");
+        json_vector_double(work.obj_coeff, {{ x_length }});
+        printf(",");
+        printf("\"obj_offset\":%9.9lf", work.obj_offset);
 
-      /* Equality constraint. */
-      printf(",");
-      printf("\"eq_shape0\":%d", work.eq_coeff.m);
-      printf(",");
-      printf("\"eq_shape1\":%d", work.eq_coeff.n);
+        /* Equality constraint. */
+        printf(",");
+        printf("\"eq_shape0\":%d", work.eq_coeff.m);
+        printf(",");
+        printf("\"eq_shape1\":%d", work.eq_coeff.n);
 
-      printf(",");
-      printf("\"eq_colptr\":");
-      json_vector_long(work.eq_coeff.p, work.eq_coeff.n+1);
+        printf(",");
+        printf("\"eq_colptr\":");
+        json_vector_long(work.eq_coeff.p, work.eq_coeff.n+1);
 
-      printf(",");
-      printf("\"eq_rowidx\":");
-      json_vector_long(work.eq_coeff.i, work.eq_coeff.nnz);
+        printf(",");
+        printf("\"eq_rowidx\":");
+        json_vector_long(work.eq_coeff.i, work.eq_coeff.nnz);
 
-      printf(",");
-      printf("\"eq_nzval\":");
-      json_vector_double(work.eq_coeff.x, work.eq_coeff.nnz);
+        printf(",");
+        printf("\"eq_nzval\":");
+        json_vector_double(work.eq_coeff.x, work.eq_coeff.nnz);
 
-      printf(",");
-      printf("\"eq_offset\":");
-      json_vector_double(work.eq_offset, work.eq_coeff.m);
+        printf(",");
+        printf("\"eq_offset\":");
+        json_vector_double(work.eq_offset, work.eq_coeff.m);
 
-      /* Inequality constraint. */
-      printf(",");
-      printf("\"leq_shape0\":%d", work.leq_coeff.m);
-      printf(",");
-      printf("\"leq_shape1\":%d", work.leq_coeff.n);
+        /* Inequality constraint. */
+        printf(",");
+        printf("\"leq_shape0\":%d", work.leq_coeff.m);
+        printf(",");
+        printf("\"leq_shape1\":%d", work.leq_coeff.n);
 
-      printf(",");
-      printf("\"leq_colptr\":");
-      json_vector_long(work.leq_coeff.p, work.leq_coeff.n+1);
+        printf(",");
+        printf("\"leq_colptr\":");
+        json_vector_long(work.leq_coeff.p, work.leq_coeff.n+1);
 
-      printf(",");
-      printf("\"leq_rowidx\":");
-      json_vector_long(work.leq_coeff.i, work.leq_coeff.nnz);
+        printf(",");
+        printf("\"leq_rowidx\":");
+        json_vector_long(work.leq_coeff.i, work.leq_coeff.nnz);
 
-      printf(",");
-      printf("\"leq_nzval\":");
-      json_vector_double(work.leq_coeff.x, work.leq_coeff.nnz);
+        printf(",");
+        printf("\"leq_nzval\":");
+        json_vector_double(work.leq_coeff.x, work.leq_coeff.nnz);
 
-      printf(",");
-      printf("\"leq_offset\":");
-      json_vector_double(work.leq_offset, work.leq_coeff.m);
+        printf(",");
+        printf("\"leq_offset\":");
+        json_vector_double(work.leq_offset, work.leq_coeff.m);
 
-    printf("}");
+      printf("}");
+
+    {% elif solver_name == 'osqp' %}
+
+      printf("{");
+
+        /* Affine part of objective. */
+        printf("\"obj_coeff\":");
+        json_vector_double(work.obj_coeff, {{ x_length }});
+        printf(",");
+        printf("\"obj_offset\":%9.9lf", work.obj_offset);
+
+        /* Quadratic coefficient. */
+        printf(",");
+        printf("\"quad_shape0\":%d", work.quad_coeff.m);
+        printf(",");
+        printf("\"quad_shape1\":%d", work.quad_coeff.n);
+
+        printf(",");
+        printf("\"quad_colptr\":");
+        json_vector_long(work.quad_coeff.p, work.quad_coeff.n+1);
+
+        printf(",");
+        printf("\"quad_rowidx\":");
+        json_vector_long(work.quad_coeff.i, work.quad_coeff.nnz);
+
+        printf(",");
+        printf("\"quad_nzval\":");
+        json_vector_double(work.quad_coeff.x, work.quad_coeff.nnz);
+
+        /* Constraint. */
+        printf(",");
+        printf("\"constraint_shape0\":%d", work.constraint_coeff.m);
+        printf(",");
+        printf("\"constraint_shape1\":%d", work.constraint_coeff.n);
+
+        printf(",");
+        printf("\"constraint_colptr\":");
+        json_vector_long(work.constraint_coeff.p, work.constraint_coeff.n+1);
+
+        printf(",");
+        printf("\"constraint_rowidx\":");
+        json_vector_long(work.constraint_coeff.i, work.constraint_coeff.nnz);
+
+        printf(",");
+        printf("\"constraint_nzval\":");
+        json_vector_double(work.constraint_coeff.x, work.constraint_coeff.nnz);
+
+        printf(",");
+        printf("\"constraint_offset\":");
+        json_vector_double(work.constraint_offset, work.constraint_coeff.m);
+
+      printf("}");
+
+    {% endif %}
 
     return(0);
 }

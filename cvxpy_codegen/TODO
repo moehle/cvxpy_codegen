@@ -1,8 +1,7 @@
 TASKS
 -write more linops
-  [ ] hstack
   [ ] rmul
-  [ ] div
+  [x] div
   [ ] diag_vec
   [ ] diag_mat
   [ ] trace
@@ -12,10 +11,9 @@ TASKS
 -rm references to u.nzval, etc.
   -convert things to LinopCoeff
   -convert things to CsrMatrix
--rm references to spzeros
--move constants to separate file
 -osqp interface
--make variable printing / parameter reading work better
+  -quadratic processor
+    -tree
+    -explicit
+  -solver interface
 -get exp cone to work
--remove -g flag from Makefile
--make harness.c.jinja match for expr_handler and ecos_intf testers

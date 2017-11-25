@@ -43,15 +43,28 @@ class CoeffData(ExprData):
         self.var_ids = [vid]
         self.shape = atom_data.shape
         self.copy_arg = copy_arg
-        has_const_or_param = any([a.type =='const' or
-                                  a.type =='param' or
-                                  a.type =='var' for a in arg_data])
+        self.atom_data = atom_data
+        has_const_or_param = True # TODO change this, wrong
+        #has_const_or_param = any([a.overwriteable for a in arg_data])
+        #has_const_or_param = any([isinstance(a, ConstData) or
+        #                          isinstance(a, ExprData) or
+        #                          isinstance(a, VarData) for a in arg_data])
         if inplace and has_const_or_param:
             self.make_copy = True
         else:
             self.make_copy = False
         self.data = data
-        self.name = self.storage.name
+        self.name = self.storage.name # TODO rm?
+        self.c_name = "&work->%s" % self.storage.name
+
+
+
+    def get_coeffs(self):
+        return dict()
+
+    def get_offset_expr(self):
+        return self
+
 
 
     @property
@@ -64,3 +77,9 @@ class CoeffData(ExprData):
     def force_copy(self):
         self.make_copy = True
 
+
+    def codegen(self):
+        s = ""
+        if self.make_copy:
+            s += "copy_linop(%s, %s);\n" % (self.args[self.copy_arg].c_name, self.c_name)
+        return s + self.atom_data.codegen_coeff(self)

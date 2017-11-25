@@ -19,11 +19,21 @@ along with CVXPY-CODEGEN.  If not, see <http://www.gnu.org/licenses/>.
 
 from cvxpy_codegen.object_data.const_expr_data import ConstExprData
 from cvxpy_codegen.object_data.coeff_data import CoeffData
-from cvxpy_codegen.object_data.atom_data import AtomData
+from cvxpy_codegen.object_data.bilin_atom_data import BilinAtomData
 
 
-class MaxData(AtomData):
+class DivData(BilinAtomData):
 
-    def get_atom_data(self, expr, arg_data):
+    def get_atom_data(self, expr, arg_data, arg_pos):
+        sparsity = arg_data[0].sparsity
         return ConstExprData(expr, arg_data,
-                             macro_name = "max")
+                             macro_name = "div",
+                             sparsity = arg_data[0].sparsity,
+                             inplace = True)
+
+
+    def get_coeff_data(self, args, var):
+        return CoeffData(self, args, var,
+                         sparsity = args[0].sparsity,
+                         inplace = True,
+                         macro_name = 'div_coeffs')

@@ -184,16 +184,16 @@ class TestExprHandler(tu.CodegenTestCase):
     ##    self._test_expr(cvx.sum(self.var_mn / self.param_11))
 
 
-    def test_hstack(self):
-        self._test_expr(cvx.hstack([self.var_n1, self.var_np, self.var_nn]))
-        self._test_expr(cvx.hstack([self.var_n1, self.const_np, self.param_nn]))
-        self._test_expr(cvx.hstack([self.var_n1, self.var_n1, self.param_nn]))
-        self._test_expr(cvx.hstack([self.param, self.var]))
-        self._test_expr(cvx.hstack([self.var, self.var]))
-        self._test_expr(cvx.hstack([self.var_n, self.var, self.const_n]))
-        self._test_const_expr(cvx.hstack([self.param_nn, self.param_n1]))
-        self._test_const_expr(cvx.hstack([self.param_np, self.const_n1, self.param_nn]))
-        self._test_const_expr(cvx.hstack([self.const_n, self.param, self.const_n]))
+    #def test_hstack(self):
+    #    self._test_expr(cvx.hstack([self.var_n1, self.var_np, self.var_nn]))
+    #    self._test_expr(cvx.hstack([self.var_n1, self.const_np, self.param_nn]))
+    #    self._test_expr(cvx.hstack([self.var_n1, self.var_n1, self.param_nn]))
+    #    self._test_expr(cvx.hstack([self.param, self.var]))
+    #    self._test_expr(cvx.hstack([self.var, self.var]))
+    #    self._test_expr(cvx.hstack([self.var_n, self.var, self.const_n]))
+    #    self._test_const_expr(cvx.hstack([self.param_nn, self.param_n1]))
+    #    self._test_const_expr(cvx.hstack([self.param_np, self.const_n1, self.param_nn]))
+    #    self._test_const_expr(cvx.hstack([self.const_n, self.param, self.const_n]))
     
 
     #def test_index(self):
@@ -263,14 +263,14 @@ class TestExprHandler(tu.CodegenTestCase):
     #    self._test_const_expr(-self.param_n1)
 
 
-    #def test_sum(self):
-    #    self._test_expr(self.var_mn)
-    #    self._test_expr(cvx.sum(self.var_mn))
-    #    self._test_expr(cvx.sum(self.var_mn + self.var_mn))
-    #    self._test_expr(cvx.sum(self.var_mn + self.const_mn))
-    #    self._test_expr(cvx.sum(self.var_mn + self.param_mn))
-    #    self._test_expr(self.var_11 + cvx.sum(self.const_mn))
-    #    self._test_expr(self.param_11 + cvx.sum(self.var_mn))
+    def test_sum(self):
+        #self._test_expr(self.var_mn)
+        #self._test_expr(cvx.sum(self.var_mn))
+        #self._test_expr(cvx.sum(self.var_mn + self.var_mn))
+        self._test_expr(cvx.sum(self.var_mn + self.const_mn))
+        self._test_expr(cvx.sum(self.var_mn + self.param_mn))
+        self._test_expr(self.var_11 + cvx.sum(self.const_mn))
+        self._test_expr(self.param_11 + cvx.sum(self.var_mn))
 
 
     #def test_reshape(self):
@@ -318,18 +318,20 @@ class TestExprHandler(tu.CodegenTestCase):
 
 
     #def test_vstack(self):
+    #    #self._test_expr(cvx.vstack(
+    #    #        [self.var_1n, self.var_mn, self.var_nn])[:,0])
+    #    #self._test_expr(cvx.vstack(
+    #    #        [self.var_1n, self.var_mn])[:,0])
+    #    #self._test_expr(cvx.vstack(
+    #    #        [self.var_1n, self.const_mn, self.param_nn])[:,0])
     #    self._test_expr(cvx.vstack(
-    #            [self.var_1n, self.var_mn, self.var_nn])[:,0])
-    #    self._test_expr(cvx.vstack(
-    #            [self.var_1n, self.var_mn])[:,0])
-    #    self._test_expr(cvx.vstack(
-    #            [self.var_1n, self.const_mn, self.param_nn])[:,0])
-    #    self._test_const_expr(cvx.vstack(
-    #            [self.param_n1, self.param_11])[:,0])
-    #    self._test_const_expr(cvx.vstack(
-    #            [self.param_n1, self.param_11, self.const_11])[:,0])
-    #    self._test_const_expr(cvx.vstack(
-    #            [self.param_mn, self.param_pn, self.const_1n])[:,0])
+    #            [self.var_1n, self.var_1n, self.var_1n])[:,0])
+    #    #self._test_const_expr(cvx.vstack(
+    #    #        [self.param_n1, self.param_11])[:,0])
+    #    #self._test_const_expr(cvx.vstack(
+    #    #        [self.param_n1, self.param_11, self.const_11])[:,0])
+    #    #self._test_const_expr(cvx.vstack(
+    #    #        [self.param_mn, self.param_pn, self.const_1n])[:,0])
 
 
 
